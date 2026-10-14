@@ -1,0 +1,38 @@
+﻿champ,type,obligatoire,definition,regle
+event_id,string,OUI,Identifiant stable de l'événement,Unique et immuable.
+title,string,OUI,Titre public,Ne pas dupliquer la date dans le titre.
+summary,string|null,NON,Résumé carte/liste,Court et factuel.
+description,string,OUI,Description détaillée,Pas de promesse non sourcée.
+event_category,enum,OUI,Catégorie principale,Taxonomie 79_EVENTS_SCHEMA_V1.
+event_tags,array<string>|null,NON,Tags recherche/IA,Contrôlés autant que possible.
+organizer_name,string,OUI,Nom organisateur,Source officielle.
+organizer_fiche_id,string|null,NON,Lien fiche organisateur,Ne pas dupliquer la fiche existante.
+venue_name,string|null,NON,Nom du lieu,Peut différer de l'organisateur.
+venue_fiche_id,string|null,NON,Lien fiche lieu,Réutiliser l'ID catalogue si disponible.
+address,string|null,NON,Adresse,NULL si inconnu/itinérant.
+commune,string|null,NON,Commune,Normalisée.
+latitude,number|null,NON,Latitude WGS84,Ne pas inventer.
+longitude,number|null,NON,Longitude WGS84,Ne pas inventer.
+precision_geo,string|null,NON,Qualité du point GPS,Même logique que la cartographie catalogue.
+start_at,datetime,OUI,Date/heure début,Avec event_timezone.
+end_at,datetime,OUI,Date/heure fin,Doit être >= start_at.
+event_timezone,iana_timezone,OUI,Fuseau horaire,V1 Martinique : America/Martinique.
+all_day,boolean,OUI,Événement journée entière,UI sans heure précise si TRUE.
+recurrence_rule,string|null,NON,Règle de récurrence,Uniquement si source documentée.
+is_free,boolean|null,NON,Gratuit ou non,NULL = inconnu.
+price_min,number|null,NON,Prix minimum EUR,Ne pas estimer.
+price_max,number|null,NON,Prix maximum EUR,Ne pas estimer.
+booking_mode,enum,OUI,NONE / IN_APP / PARTNER_SITE / DIRECT_CONTACT,Réutilise règles réservation.
+booking_url,url|null,NON,Billetterie/réservation externe,Requis pour PARTNER_SITE.
+contact_phone,string|null,NON,Contact organisateur,N'est pas une réservation.
+public_target,array<string>|null,NON,Public cible,NULL = non renseigné.
+indoor_outdoor,enum|null,NON,INTERIEUR / EXTERIEUR / MIXTE,NULL = inconnu.
+accessibility,string|null,NON,Accessibilité documentée,Absence d'info != non accessible.
+source_url,url,OUI,Source principale,Date/lieu/organisateur.
+source_last_verified_at,datetime|null,NON,Dernière vérification réelle,Ne jamais inventer.
+event_status,enum,OUI,Cycle de vie,DRAFT/PENDING_REVIEW/PUBLISHED/CANCELLED/POSTPONED/ENDED/ARCHIVED.
+moderation_status,enum,OUI,Validation ÉKO TRIP,PENDING/APPROVED/REJECTED.
+created_by_type,enum,OUI,EKOTRIP / PARTNER / IMPORT,Audit.
+created_by_id,string|null,NON,Auteur technique,Audit.
+published_at,datetime|null,NON,Date de publication,Renseignée lors de la vraie publication.
+updated_at,datetime,OUI,Dernière mise à jour,Serveur.

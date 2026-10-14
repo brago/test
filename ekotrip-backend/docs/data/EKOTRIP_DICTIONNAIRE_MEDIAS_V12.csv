@@ -1,0 +1,27 @@
+﻿champ,type,obligatoire,definition,regle
+media_id,string,OUI,Identifiant stable du média,Unique.
+target_type,enum,OUI,FICHE / CIRCUIT / EVENT,Type de contenu ciblé.
+target_id,string,OUI,Identifiant de la cible,Doit exister dans la table correspondante.
+media_role,enum,OUI,COVER / CARD / GALLERY / THUMBNAIL,Rôle d'affichage.
+source_type,enum,OUI,GOOGLE_PLACES / OPEN_LICENSE / PARTNER_UPLOAD / EKOTRIP_OWNED,Origine contrôlée.
+provider,string|null,NON,Fournisseur,"Ex. Google Places, Wikimedia Commons."
+external_asset_id,string|null,SELON SOURCE,ID externe,À privilégier pour médias dynamiques.
+source_page_url,url|null,SELON SOURCE,Page de provenance,Obligatoire pour OPEN_LICENSE lorsque disponible.
+asset_url_or_ref,string,OUI,URL ou référence technique,Ne signifie pas propriété ÉKO TRIP.
+storage_mode,enum,OUI,DYNAMIC_PROVIDER / EXTERNAL_ASSET / EKOTRIP_STORAGE,Mode de chargement.
+rights_status,enum,OUI,PROVIDER_TERMS / LICENSE_VERIFIED / PARTNER_DECLARATION / OWNED / TO_VERIFY / BLOCKED,TO_VERIFY/BLOCKED non publiable.
+license_or_permission,string|null,SELON SOURCE,Licence ou permission,Traçabilité.
+license_url,url|null,SELON SOURCE,Lien licence,Notamment OPEN_LICENSE.
+author_or_rights_holder,string|null,SELON SOURCE,Auteur/titulaire,Crédit et audit.
+attribution_text,string|null,SELON SOURCE,Crédit public,Afficher si requis.
+attribution_required,boolean,OUI,Attribution requise,Selon fournisseur/licence.
+commercial_use_allowed,boolean,OUI,Usage commercial autorisé/couvert,FALSE = bloquer.
+proof_reference,string|null,SELON SOURCE,Preuve ou déclaration,Conserver.
+permission_date,date|null,SELON SOURCE,Date permission,Ne pas inventer.
+expires_at,date|null,NON,Expiration éventuelle,Si droit temporaire.
+is_primary,boolean,OUI,Photo principale,Une principale active par cible idéalement.
+sort_order,integer|null,NON,Ordre galerie,Croissant.
+alt_text,string|null,RECOMMANDÉ,Texte alternatif,Accessibilité.
+publication_status,enum,OUI,DRAFT / READY / ACTIVE / BLOCKED / EXPIRED,Seuls ACTIVE sont rendus.
+last_checked_at,datetime|null,RECOMMANDÉ,Dernier contrôle réel,Actualiser lors d'un vrai contrôle.
+notes,string|null,NON,Notes internes,Non affichées automatiquement.

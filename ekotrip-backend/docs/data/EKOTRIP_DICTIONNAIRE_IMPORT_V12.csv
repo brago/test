@@ -1,0 +1,95 @@
+﻿champ,type,definition,usage,nullable,regle_import
+id,string|null,Identifiant stable unique,RUNTIME,NON,"Clé canonique unique et stable. Ne jamais dédupliquer sur téléphone, site ou adresse."
+nom,string|null,Nom public,RUNTIME,NON,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+adresse,string|null,Adresse ou localisation utile,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+code_postal,string|null,Code postal,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+commune,string|null,Commune/zone,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+categorie,string|null,Catégorie principale,RUNTIME,NON,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+publication,string|null,Statut éditorial/publication,RUNTIME,NON,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+is_active,boolean,TRUE = fiche disponible au catalogue,RUNTIME,NON,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+content_type,string|null,POINT / ZONE_MULTI_POI / MOBILE / autre comportement,RUNTIME,NON,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+show_on_map,boolean,TRUE uniquement si marqueur cartographique pertinent,RUNTIME,NON,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+latitude,number|null,Latitude WGS84,RUNTIME,OUI,"WGS84 ; interpréter avec precision_geo, pas comme entrée exacte par défaut."
+longitude,number|null,Longitude WGS84,RUNTIME,OUI,"WGS84 ; interpréter avec precision_geo, pas comme entrée exacte par défaut."
+precision_geo,string|null,"Nature/précision du point cartographique : exact, accès/départ, indicatif, représentatif ou non confirmé",RUNTIME / UI — détermine le libellé et le niveau de confiance du marqueur,OUI,Source de vérité pour la confiance du marqueur ; dériver geo_display_type.
+description,string|null,Description ÉKO TRIP,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+telephone,string|null,Téléphone public,RUNTIME,OUI,Information publique si renseignée ; peut être partagée entre plusieurs fiches d'un même établissement. Pas une clé.
+site_internet,string|null,Site officiel/public,RUNTIME,OUI,Site vitrine/officiel ; peut être partagé. Ne pas confondre avec url_reservation.
+google_maps,string|null,Lien Google Maps,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+instagram,string|null,Compte Instagram,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+facebook,string|null,Page Facebook,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+horaires,string|null,Horaires publics,RUNTIME,OUI,NULL/vide = inconnu ; ne pas inventer ni transformer en disponibilité temps réel.
+tarif_indicatif,string|null,Tarif indicatif,RUNTIME,OUI,NULL/vide = inconnu ; ne pas inventer un prix.
+services_equipements,string|null,Services/équipements,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+engagements_eco,string|null,Engagements responsables documentés,RUNTIME,OUI,"Ne publier que des éléments documentés ; NULL = non démontré, pas négatif."
+public_cible,string|null,Public recommandé,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+duree_recommandee,string|null,Durée conseillée,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+budget,string|null,Niveau de budget documenté. NULL/vide = non renseigné ; aucun placeholder technique ne doit être affiché.,RUNTIME — filtre uniquement lorsque la donnée est réellement documentée,OUI,"NULL/vide = inconnu ; ne pas inventer, ne pas afficher de placeholder, exclure des filtres de budget."
+ambiance,string|null,Ambiance,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+interieur_exterieur,string|null,Intérieur / extérieur uniquement si documenté ; NULL = non renseigné,RUNTIME / MÉTÉO — ne jamais déduire une valeur par défaut,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+niveau_activite,string|null,Niveau d'activité,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+accessibilite,string|null,Informations accessibilité,RUNTIME,OUI,NULL/vide = inconnu ; ne jamais interpréter comme non accessible.
+tags_ia,string|null,Tags pour recommandations IA,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+mode_reservation,string|null,Mode de réservation,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+url_reservation,string|null,Lien de réservation,RUNTIME,OUI,Tunnel de réservation externe uniquement après validation ; vide actuellement.
+reservable_ekotrip,boolean,Réservable directement via ÉKO TRIP,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+statut_partenaire,string|null,Statut partenaire,RUNTIME,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+score_ekotrip,number|null,Score ÉKO TRIP interne ou pré-évalué ; ne devient public qu'après validation documentée,INTERNE / ÉVALUATION ; PUBLIC seulement via règle de publication,OUI,Interne/pré-évaluation tant que statut non validé public.
+niveau_ekotrip,string|null,Valeur historique/interne. Les anciennes valeurs A/A+ ne sont jamais un badge public par elles-mêmes.,INTERNE / MIGRATION — ne pas afficher directement,OUI,Legacy/interne ; ne jamais afficher directement les anciennes valeurs A/A+.
+statut_evaluation,string|null,État de l'évaluation. Une pré-évaluation n'autorise aucun badge éco public.,INTERNE / CONTRÔLE PUBLICATION,OUI,Pré-évaluation = non publiable ; badge public seulement si statut explicitement validé.
+id_activites_associees,string|null,IDs relations historiques,INTERNE / TRAÇABILITÉ,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+activites_associees,string|null,Libellés relations historiques,INTERNE / TRAÇABILITÉ,OUI,NULL/vide = non renseigné ; conserver la valeur telle quelle sans invention.
+source_principale,string|null,Source de vérification,INTERNE / TRAÇABILITÉ,OUI,Traçabilité interne ; peut contenir URL/texte de source.
+source_geolocalisation,string|null,Source de la géolocalisation,INTERNE / TRAÇABILITÉ,OUI,Traçabilité interne de la localisation.
+date_derniere_verification,date|null,Date ISO de la dernière vérification réelle de la fiche ; NULL tant qu'elle n'est pas connue,INTERNE / QUALITÉ,OUI,NULL initialement ; renseigner uniquement après une vraie vérification.
+source_derniere_verification,string|null,Source utilisée lors de la dernière vérification ; NULL si non structurée,INTERNE / QUALITÉ,OUI,NULL initialement ; renseigner avec la source réellement utilisée à la dernière vérification.
+statut_verification,string|null,"État structuré de fraîcheur/contrôle ; NULL initialement, puis À_VERIFIER / VERIFIE / A_RECONTROLER selon workflow",INTERNE / QUALITÉ,OUI,NULL initialement ; gérer via workflow qualité.
+geo_display_type,string|null,Valeur dérivée de precision_geo : EXACT / ACCESS_OR_DEPARTURE / INDICATIVE / NON_NAVIGABLE,RUNTIME / UI,OUI,Dérivé de precision_geo : EXACT / ACCESS_OR_DEPARTURE / INDICATIVE / NON_NAVIGABLE.
+geo_display_label,string|null,Libellé utilisateur dérivé : Localisation précise / Point d'accès-départ / Localisation indicative / Localisation non confirmée,RUNTIME / UI,OUI,"Libellé UI dérivé, ne pas remplacer par une promesse plus précise."
+geo_navigation_allowed,boolean,Autorise ou non le CTA de navigation vers le point cartographique.,RUNTIME / IMPORT,OUI,"Dérivé ; si false, masquer/désactiver CTA navigation vers ce point."
+eco_badge_public,string|null,Badge public dérivé uniquement d'une évaluation validée et documentée ; NULL sinon,RUNTIME / PUBLIC,OUI,Dérivé ; NULL tant que l'évaluation n'est pas validée et documentée.
+budget_data_status,string|null,Indique si le budget est réellement documenté.,RUNTIME / IMPORT,OUI,"KNOWN si budget documenté, UNKNOWN sinon."
+EVENT.event_id,string,OUI,Identifiant stable de l'événement,Nouvelle table EVENT ; unique et immuable.
+EVENT.title,string,OUI,Titre public de l'événement,Affiché dans Agenda et fiche événement.
+EVENT.summary,string|null,NON,Résumé court,Pour cartes/listes.
+EVENT.description,string,OUI,Description détaillée,Pas de promesse non sourcée.
+EVENT.event_category,enum,OUI,Catégorie principale événementielle,Taxonomie de 79_EVENTS_SCHEMA_V1.
+EVENT.event_tags,array<string>|null,NON,Tags recherche et IA,Contrôlés autant que possible.
+EVENT.organizer_name,string,OUI,Nom de l'organisateur,Source officielle.
+EVENT.organizer_fiche_id,string|null,NON,Lien vers une fiche organisateur existante,FK vers 01_FICHES_APP.id ; ne pas dupliquer la fiche.
+EVENT.venue_name,string|null,NON,Nom du lieu,Peut différer de l'organisateur.
+EVENT.venue_fiche_id,string|null,NON,Lien vers une fiche lieu existante,FK vers 01_FICHES_APP.id si disponible.
+EVENT.address,string|null,NON,Adresse de l'événement,NULL si inconnue ou événement itinérant.
+EVENT.commune,string|null,NON,Commune,Normalisée comme le catalogue.
+EVENT.latitude,number|null,NON,Latitude WGS84,Ne jamais inventer.
+EVENT.longitude,number|null,NON,Longitude WGS84,Ne jamais inventer.
+EVENT.precision_geo,string|null,NON,Qualité du point GPS,Même logique que 63_CARTO_ROUTAGE_V1.
+EVENT.start_at,datetime,OUI,Date/heure de début,Avec event_timezone.
+EVENT.end_at,datetime,OUI,Date/heure de fin,Doit être >= start_at.
+EVENT.event_timezone,iana_timezone,OUI,Fuseau horaire,V1 Martinique : America/Martinique.
+EVENT.all_day,boolean,OUI,Événement journée entière,"Si TRUE, UI sans heure précise."
+EVENT.recurrence_rule,string|null,NON,Règle de récurrence,Seulement si documentée.
+EVENT.is_free,boolean|null,NON,Gratuit ou non,NULL = inconnu.
+EVENT.price_min,number|null,NON,Prix minimum EUR,Ne pas estimer.
+EVENT.price_max,number|null,NON,Prix maximum EUR,Ne pas estimer.
+EVENT.booking_mode,enum,OUI,NONE / IN_APP / PARTNER_SITE / DIRECT_CONTACT,Réutilise les règles de réservation existantes.
+EVENT.booking_url,url|null,NON,Billetterie ou réservation externe,Requis pour PARTNER_SITE.
+EVENT.contact_phone,string|null,NON,Téléphone organisateur,Un contact n'est pas une réservation.
+EVENT.public_target,array<string>|null,NON,Public cible,NULL = non renseigné.
+EVENT.indoor_outdoor,enum|null,NON,INTERIEUR / EXTERIEUR / MIXTE,NULL = inconnu.
+EVENT.accessibility,string|null,NON,Informations d'accessibilité,Absence d'info != non accessible.
+EVENT.source_url,url,OUI,Source principale,Référence date/lieu/organisateur.
+EVENT.source_last_verified_at,datetime|null,NON,Dernière vérification réelle,Ne jamais inventer.
+EVENT.event_status,enum,OUI,DRAFT / PENDING_REVIEW / PUBLISHED / CANCELLED / POSTPONED / ENDED / ARCHIVED,Cycle de vie événement.
+EVENT.moderation_status,enum,OUI,PENDING / APPROVED / REJECTED,Validation ÉKO TRIP.
+EVENT.created_by_type,enum,OUI,EKOTRIP / PARTNER / IMPORT,Audit.
+EVENT.created_by_id,string|null,NON,Auteur technique,Audit.
+EVENT.published_at,datetime|null,NON,Date de publication réelle,Renseignée à la vraie publication.
+EVENT.updated_at,datetime,OUI,Dernière mise à jour,Serveur.
+MEDIA.target_type,enum,OUI,FICHE / CIRCUIT / EVENT,Type de contenu ciblé dans 06_MEDIAS.
+MEDIA.target_id,string,OUI,Identifiant canonique de la cible média,FK vers la table correspondant à target_type.
+MON_EKOTRIP.selected_event_ids,array<event_id>,NON,Événements ajoutés/imposés par l'utilisateur,Utilisés comme ancres horaires.
+MON_EKOTRIP.event_anchor_policy,enum,SI EVENT,FIXED_TIME,Un événement n'est jamais déplacé arbitrairement.
+MON_EKOTRIP.event_conflicts,array<object>,SORTIE,Conflits horaires/routage,Signaler et proposer une alternative.
+MON_EKOTRIP.event_status_snapshot,object|null,SI EVENT,Snapshot event_id/status/start/end,Contrôle de cohérence du programme.
+MON_EKOTRIP.event_revalidation,enum,SI EVENT,VALID / CHANGED / CANCELLED / POSTPONED,Revérification avant affichage final si possible.
