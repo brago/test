@@ -29,7 +29,7 @@ it('produit un rapport sans erreur et sans écart avec le JSON et le GeoJSON', f
         ->and($run->summary['issues_by_severity']['ERROR'] ?? 0)->toBe(0)
         ->and($run->summary['counters']['json_field_mismatches'])->toBe(0)
         ->and($run->summary['counters']['geojson_features'])->toBe(361)
-        ->and($run->issues()->where('code', 'like', '%MISMATCH%')->count())->toBe(0);
+        ->and($run->issues()->whereIn('code', ['JSON_ID_MISMATCH', 'JSON_FIELD_MISMATCH', 'GEOJSON_MISMATCH'])->count())->toBe(0);
 });
 
 it('est idempotent : un second import ne modifie aucune fiche', function () {

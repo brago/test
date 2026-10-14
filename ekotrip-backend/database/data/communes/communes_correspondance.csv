@@ -1,0 +1,79 @@
+valeur_brute;type;codes_insee;communes_officielles;lieu_dit;zone;statut_validation;decision;commentaire
+Ajoupa-Bouillon;VARIANTE;97201;L'Ajoupa-Bouillon;;;VALIDE;;Variante d'écriture de « L'Ajoupa-Bouillon ».
+L’Ajoupa-Bouillon;VARIANTE;97201;L'Ajoupa-Bouillon;;;VALIDE;;Variante d'écriture de « L'Ajoupa-Bouillon ».
+À localiser;SANS_COMMUNE;;;;;VALIDE;Fiches inactives uniquement : validé tel quel.;Placeholder : localisation inconnue, aucune commune (fiches inactives).
+Les Anses-d'Arlet;EXACT;97202;Les Anses-d'Arlet;;;VALIDE;;
+Les Anses-d’Arlet;VARIANTE;97202;Les Anses-d'Arlet;;;VALIDE;;Variante d'écriture de « Les Anses-d'Arlet ».
+Anses-d'Arlet / Caravelle;MULTI;97202 | 97230;Les Anses-d'Arlet | La Trinité;Caravelle;;PROVISOIRE;ACT-064 : MULTI validé provisoirement, en attente de confirmation de la porteuse.;Caravelle rattachée à La Trinité (presqu'île) : à confirmer.
+Basse-Pointe;EXACT;97203;Basse-Pointe;;;VALIDE;;
+Bellefontaine;EXACT;97234;Bellefontaine;;;VALIDE;;
+Le Carbet;EXACT;97204;Le Carbet;;;VALIDE;;
+Le Carbet (Anse Latouche);LIEU_DIT;97204;Le Carbet;Anse Latouche;;VALIDE;;
+Le Carbet / Bellefontaine / Le Morne-Vert;MULTI;97204 | 97234 | 97233;Le Carbet | Bellefontaine | Le Morne-Vert;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Carbet / Fonds-Saint-Denis;MULTI;97204 | 97208;Le Carbet | Fonds-Saint-Denis;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Case-Pilote;EXACT;97205;Case-Pilote;;;VALIDE;;
+Centre / Sud;ZONE;;;;Centre | Sud;VALIDE;ACT-007 : zones seules.;Pratique multi-sites (yole) : zones seulement, aucune commune.
+Côte Nord-Caraïbe;ZONE;;;;Nord Caraïbe;VALIDE;Fiches inactives uniquement : validé tel quel.;Zone seulement (fiche inactive).
+Le Diamant;EXACT;97206;Le Diamant;;;VALIDE;;
+Ducos;EXACT;97207;Ducos;;;VALIDE;;
+Ducos / Les Trois-Îlets;MULTI;97207 | 97231;Ducos | Les Trois-Îlets;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Fonds-Saint-Denis;EXACT;97208;Fonds-Saint-Denis;;;VALIDE;;
+Fort-de-France;EXACT;97209;Fort-de-France;;;VALIDE;;
+Fort-de-France / Le Carbet;MULTI;97209 | 97204;Fort-de-France | Le Carbet;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Fort-de-France (Maison du Parc);LIEU_DIT;97209;Fort-de-France;Maison du Parc;;VALIDE;;
+Fort-de-France / Nord;COMMUNE_ZONE;97209;Fort-de-France;;Nord;VALIDE;PAT-080 : commune + zone Nord validées.;Commune + zone : vérifier que « Nord » désigne bien une zone d'intervention.
+Le François;EXACT;97210;Le François;;;VALIDE;;
+Grande Anse d'Arlet (Les Anses-d'Arlet);LIEU_DIT;97202;Les Anses-d'Arlet;Grande Anse d'Arlet;;VALIDE;Validé.;Ordre inversé lieu-dit / commune dans la source.
+Grand'Rivière;EXACT;97211;Grand'Rivière;;;VALIDE;;
+Grand'Rivière / Le Prêcheur;MULTI;97211 | 97219;Grand'Rivière | Le Prêcheur;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Gros-Morne;VARIANTE;97212;Gros-Morne;;;VALIDE;;Variante d'écriture de « Gros-Morne ».
+Gros-Morne;EXACT;97212;Gros-Morne;;;VALIDE;;
+Île entière;ZONE;;;;Île entière;VALIDE;Fiches inactives uniquement : validé tel quel.;Toute la Martinique : aucune commune (fiches inactives).
+Le Lamentin;EXACT;97213;Le Lamentin;;;VALIDE;;
+Le Lamentin / Fort-de-France;MULTI;97213 | 97209;Le Lamentin | Fort-de-France;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Lorrain;EXACT;97214;Le Lorrain;;;VALIDE;;
+Macouba;EXACT;97215;Macouba;;;VALIDE;;
+Le Marigot;EXACT;97216;Le Marigot;;;VALIDE;;
+Le Marin;EXACT;97217;Le Marin;;;VALIDE;;
+Le Marin (Massel);LIEU_DIT;97217;Le Marin;Massel;;VALIDE;;
+Le Marin (Morne Gommier);LIEU_DIT;97217;Le Marin;Morne Gommier;;VALIDE;;
+Martinique – activité mobile;ZONE;;;;Activité mobile;VALIDE;PRO-028 : zone seule (activité mobile).;Professionnel mobile : aucune commune ni point.
+Morne-Rouge;VARIANTE;97218;Le Morne-Rouge;;;VALIDE;;Variante d'écriture de « Le Morne-Rouge ».
+Le Morne-Rouge;EXACT;97218;Le Morne-Rouge;;;VALIDE;;
+Morne-Rouge / Gros-Morne / Fonds-Saint-Denis;MULTI;97218 | 97212 | 97208;Le Morne-Rouge | Gros-Morne | Fonds-Saint-Denis;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Morne-Vert;EXACT;97233;Le Morne-Vert;;;VALIDE;;
+Nord Caraïbe;ZONE;;;;Nord Caraïbe;VALIDE;NAT-020 : zone seule, sans commune.;Zone seulement. Code postal 97226 (Le Morne-Vert) : faut-il aussi rattacher cette commune ?
+Nord de l'île;COMMUNE_ZONE;97218;Le Morne-Rouge;;Nord;VALIDE;NAT-021 : Le Morne-Rouge rattaché (code postal 97260, accès route de l'Aileron) + zone Nord.;Zone seulement. Code postal 97260 (Le Morne-Rouge) : faut-il aussi rattacher cette commune ?
+Pitons du Carbet;LIEU_DIT;;;Pitons du Carbet;;VALIDE;Fiches inactives uniquement : validé tel quel.;Massif à cheval sur plusieurs communes : communes non déduites, à préciser si utile (fiches inactives).
+Le Prêcheur;EXACT;97219;Le Prêcheur;;;VALIDE;;
+Le Prêcheur / Grand’Rivière;MULTI;97219 | 97211;Le Prêcheur | Grand'Rivière;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Rivière-Pilote;EXACT;97220;Rivière-Pilote;;;VALIDE;;
+Rivière-Pilote (Anse Figuier);LIEU_DIT;97220;Rivière-Pilote;Anse Figuier;;VALIDE;;
+Rivière-Pilote (Josseaud);LIEU_DIT;97220;Rivière-Pilote;Josseaud;;VALIDE;;
+Rivière-Salée;EXACT;97221;Rivière-Salée;;;VALIDE;;
+Le Robert;EXACT;97222;Le Robert;;;VALIDE;;
+Sainte-Anne;EXACT;97226;Sainte-Anne;;;VALIDE;;
+Sainte-Anne / Le Marin;MULTI;97226 | 97217;Sainte-Anne | Le Marin;;;VALIDE;;Activité / site sur plusieurs communes : filtre sur chacune.
+Sainte-Luce;EXACT;97227;Sainte-Luce;;;VALIDE;;
+Sainte-Luce (Monésie);LIEU_DIT;97227;Sainte-Luce;Monésie;;VALIDE;;
+Sainte-Luce (Quartier Jacques);LIEU_DIT;97227;Sainte-Luce;Quartier Jacques;;VALIDE;;
+Sainte-Marie;EXACT;97228;Sainte-Marie;;;VALIDE;;
+Saint-Joseph;EXACT;97224;Saint-Joseph;;;VALIDE;;
+Saint-Pierre;EXACT;97225;Saint-Pierre;;;VALIDE;;
+Schœlcher;EXACT;97229;Schœlcher;;;VALIDE;;
+Schœlcher (Fond Lahaye);LIEU_DIT;97229;Schœlcher;Fond Lahaye;;VALIDE;;
+Sud Caraïbe;ZONE;;;;Sud Caraïbe;VALIDE;Fiches inactives uniquement : validé tel quel.;Zone seulement (fiche inactive).
+Tartane (La Trinité);LIEU_DIT;97230;La Trinité;Tartane;;VALIDE;Validé.;Ordre inversé lieu-dit / commune dans la source.
+La Trinité;EXACT;97230;La Trinité;;;VALIDE;;
+La Trinité (Caravelle);LIEU_DIT;97230;La Trinité;Caravelle;;VALIDE;;
+La Trinité (Fond Gaoulé);LIEU_DIT;97230;La Trinité;Fond Gaoulé;;VALIDE;;
+La Trinité (quartier Bassignac);LIEU_DIT;97230;La Trinité;quartier Bassignac;;VALIDE;;
+La Trinité (Tartane);LIEU_DIT;97230;La Trinité;Tartane;;VALIDE;;
+Les Trois-Îlets;EXACT;97231;Les Trois-Îlets;;;VALIDE;;
+Trois-Îlets;VARIANTE;97231;Les Trois-Îlets;;;VALIDE;;Variante d'écriture de « Les Trois-Îlets ».
+Les Trois-Îlets (Anse Mitan);LIEU_DIT;97231;Les Trois-Îlets;Anse Mitan;;VALIDE;;
+Les Trois-Îlets (Village de la Poterie);LIEU_DIT;97231;Les Trois-Îlets;Village de la Poterie;;VALIDE;;
+Le Vauclin;EXACT;97232;Le Vauclin;;;VALIDE;;
+Le Vauclin (Petite Grenade);LIEU_DIT;97232;Le Vauclin;Petite Grenade;;VALIDE;;
+Le Vauclin (Pointe Faula);LIEU_DIT;97232;Le Vauclin;Pointe Faula;;VALIDE;;
+(vide);SANS_COMMUNE;;;;;VALIDE;Fiches inactives uniquement : validé tel quel.;Valeur vide (fiche inactive) : aucune commune déduite.

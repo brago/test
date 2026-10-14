@@ -4,6 +4,7 @@ namespace App\Services\Search;
 
 use App\Models\Fiche;
 use App\Services\Catalogue\CatalogueCache;
+use App\Services\Catalogue\CommuneDirectory;
 use App\Services\Catalogue\Text;
 
 /**
@@ -18,7 +19,7 @@ class SuggestionIndex
      */
     public function suggest(string $term, int $limit): array
     {
-        $needle = Text::fold($term);
+        $needle = Text::searchKey($term);
         if (mb_strlen($needle) < (int) config('ekotrip.search.suggest_min_chars')) {
             return [];
         }
@@ -52,7 +53,7 @@ class SuggestionIndex
         if (str_starts_with($haystack, $needle)) {
             return 3.0;
         }
-        $words = preg_split('/[^a-z0-9]+/', $haystack, -1, PREG_SPLIT_NO_EMPTY);
+        $words = explode(' ', $haystack);
         foreach ($words as $word) {
             if (str_starts_with($word, $needle)) {
                 return 2.0;
@@ -94,12 +95,16 @@ class SuggestionIndex
                 'label' => $f->nom,
                 'commune' => $f->commune,
                 'categorie' => $f->categorie,
-                'folded' => Text::fold($f->nom),
+                'folded' => Text::searchKey($f->nom),
             ])->all();
 
-            $communes = $fiches->pluck('commune')->filter()->unique(fn ($c) => Text::fold($c));
+            // Communes officielles ayant au moins une fiche publique ; id = code INSEE (filtre communes[]).
+            $directory = app(CommuneDirectory::class);
+            $communes = $fiches->pluck('commune')->filter()->unique()
+                ->flatMap(fn ($raw) => $directory->forRaw($raw)['communes'] ?? [])
+                ->unique('code_insee')->sortBy('nom');
             foreach ($communes as $commune) {
-                $entries[] = ['type' => 'commune', 'id' => null, 'label' => $commune, 'commune' => $commune, 'categorie' => null, 'folded' => Text::fold($commune)];
+                $entries[] = ['type' => 'commune', 'id' => $commune['code_insee'], 'label' => $commune['nom'], 'commune' => $commune['nom'], 'categorie' => null, 'folded' => Text::searchKey($commune['nom'])];
             }
 
             return array_values($entries);

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Fiches;
 use App\Filament\Resources\Fiches\Pages\EditFiche;
 use App\Filament\Resources\Fiches\Pages\ListFiches;
 use App\Models\Fiche;
+use App\Services\Catalogue\CommuneDirectory;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -70,7 +71,16 @@ class FicheResource extends Resource
             Section::make('Identité')->columns(2)->schema([
                 TextEntry::make('id')->label('ID (stable)'),
                 TextInput::make('nom')->required()->maxLength(255),
-                TextInput::make('commune')->maxLength(100),
+                TextInput::make('commune')->label('Commune (libellé source)')->maxLength(100),
+                TextEntry::make('rattachement')->label('Rattachement officiel')
+                    ->state(function (?Fiche $record) {
+                        $r = app(CommuneDirectory::class)->forRaw($record?->commune);
+                        if (! $r) {
+                            return $record?->commune ? 'Aucune correspondance — à compléter (menu Correspondance des communes)' : null;
+                        }
+
+                        return collect([implode(', ', array_column($r['communes'], 'nom')), $r['lieu_dit'], $r['zone'] ? 'zone '.$r['zone'] : null])->filter()->implode(' · ');
+                    })->placeholder('—'),
                 TextInput::make('code_postal')->maxLength(10),
                 Textarea::make('adresse')->columnSpanFull(),
                 Select::make('categories')

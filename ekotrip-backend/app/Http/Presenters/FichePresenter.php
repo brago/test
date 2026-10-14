@@ -8,6 +8,7 @@ use App\Models\Fiche;
 use App\Models\FichePoi;
 use App\Models\Media;
 use App\Models\ProActivityLink;
+use App\Services\Catalogue\CommuneDirectory;
 use App\Services\Catalogue\MediaResolver;
 use Illuminate\Support\Collection;
 
@@ -27,7 +28,9 @@ class FichePresenter
         $data = [
             'id' => $fiche->id,
             'nom' => $fiche->nom,
+            // Libellé d'origine affiché tel quel ; rattachement officiel pour filtres et regroupements.
             'commune' => $fiche->commune,
+            'rattachement' => app(CommuneDirectory::class)->forRaw($fiche->commune),
             'accroche_courte' => $fiche->accroche_courte,
             'categorie' => $primary ? self::category($primary) : null,
             'categories' => $fiche->categories->sortByDesc('pivot.is_primary')->map(fn (Category $c) => self::category($c))->values()->all(),

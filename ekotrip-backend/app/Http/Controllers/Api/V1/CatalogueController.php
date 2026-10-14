@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Commune;
 use App\Models\Fiche;
 use App\Models\MapGroup;
 use App\Models\Setting;
 use App\Services\Catalogue\CatalogueCache;
+use App\Services\Catalogue\CommuneDirectory;
 use Illuminate\Http\JsonResponse;
 
 class CatalogueController extends Controller
@@ -49,15 +51,27 @@ class CatalogueController extends Controller
             ])->values()->all())]);
     }
 
-    public function communes(): JsonResponse
+    /**
+     * Les 34 communes officielles et le nombre de fiches publiques rattachées
+     * (une fiche multi-communes compte dans chacune).
+     */
+    public function communes(CommuneDirectory $directory): JsonResponse
     {
-        return response()->json(['data' => CatalogueCache::remember('communes', fn () => Fiche::query()->public()
-            ->whereNotNull('commune')
-            ->selectRaw('commune, COUNT(*) AS fiches_count')
-            ->groupBy('commune')
-            ->orderBy('commune')
-            ->get()
-            ->map(fn ($row) => ['nom' => $row->commune, 'fiches_count' => (int) $row->fiches_count])
-            ->values()->all())]);
+        return response()->json(['data' => CatalogueCache::remember('communes', function () use ($directory) {
+            $counts = [];
+            $rows = Fiche::query()->public()->whereNotNull('commune')
+                ->selectRaw('commune, COUNT(*) AS n')->groupBy('commune')->get();
+            foreach ($rows as $row) {
+                foreach ($directory->forRaw($row->commune)['communes'] ?? [] as $commune) {
+                    $counts[$commune['code_insee']] = ($counts[$commune['code_insee']] ?? 0) + (int) $row->n;
+                }
+            }
+
+            return Commune::query()->orderBy('nom')->get()->map(fn (Commune $c) => [
+                'code_insee' => $c->code_insee,
+                'nom' => $c->nom,
+                'fiches_count' => $counts[$c->code_insee] ?? 0,
+            ])->values()->all();
+        })]);
     }
 }

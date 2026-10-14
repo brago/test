@@ -36,8 +36,8 @@ la version et la collation `utf8mb4_0900_ai_ci` du serveur de test.
 | Endpoint | Rôle |
 |---|---|
 | `GET /api/v1/config` | Groupes carte, classes géo, rayon par défaut |
-| `GET /api/v1/categories`, `/communes` | Référentiels et comptes |
-| `GET /api/v1/fiches` | Liste ; filtres `q`, `categories[]`, `groups[]`, `communes[]`, `near=lat,lng`, `radius`, `bbox=minLng,minLat,maxLng,maxLat`, `eco_validated`, `per_page` |
+| `GET /api/v1/categories`, `/communes` | Référentiels et comptes (`/communes` : 34 communes officielles, code INSEE) |
+| `GET /api/v1/fiches` | Liste ; filtres `q`, `categories[]`, `groups[]`, `communes[]` (codes INSEE), `near=lat,lng`, `radius`, `bbox=minLng,minLat,maxLng,maxLat`, `eco_validated`, `per_page` |
 | `GET /api/v1/fiches/{id}` | Fiche détaillée (404 si non publique) |
 | `GET /api/v1/map/fiches` | GeoJSON des marqueurs (mêmes filtres) |
 | `GET /api/v1/search/suggest?q=` | Suggestions tolérantes aux fautes |

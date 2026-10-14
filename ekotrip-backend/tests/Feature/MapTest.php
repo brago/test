@@ -50,7 +50,7 @@ it('respecte les quatre classes de précision géographique', function (string $
 ]);
 
 it('donne les mêmes fiches sur la carte et dans la liste pour les mêmes filtres', function () {
-    $query = 'categories[]=nature&communes[]='.urlencode("Les Anses-d'Arlet");
+    $query = 'categories[]=nature&communes[]=97202'; // Les Anses-d'Arlet
 
     $list = collect($this->getJson("/api/v1/fiches?per_page=100&{$query}")->json('data'));
     $map = collect($this->getJson("/api/v1/map/fiches?{$query}")->json('features'))->pluck('id')->sort()->values();

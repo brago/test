@@ -14,6 +14,9 @@ return [
         'workbook' => env('EKOTRIP_WORKBOOK', base_path('docs/data/EKOTRIP_FINAL.xlsx')),
         'catalogue_json' => env('EKOTRIP_CATALOGUE_JSON', base_path('docs/data/EKOTRIP_CATALOGUE.json')),
         'carte_geojson' => env('EKOTRIP_CARTE_GEOJSON', base_path('docs/data/EKOTRIP_CARTE.geojson')),
+        // Décision 9 : référentiel officiel (geo.api.gouv.fr) et correspondance validée des communes.
+        'communes_officielles' => env('EKOTRIP_COMMUNES_OFFICIELLES', database_path('data/communes/communes_officielles.csv')),
+        'communes_correspondance' => env('EKOTRIP_COMMUNES_CORRESPONDANCE', database_path('data/communes/communes_correspondance.csv')),
     ],
 
     /*

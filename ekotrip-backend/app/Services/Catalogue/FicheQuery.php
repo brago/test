@@ -13,7 +13,10 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class FicheQuery
 {
-    public function __construct(private readonly SearchEngine $search) {}
+    public function __construct(
+        private readonly SearchEngine $search,
+        private readonly CommuneDirectory $communes,
+    ) {}
 
     public function build(FicheFilters $filters, bool $mapOnly = false): Builder
     {
@@ -29,7 +32,9 @@ class FicheQuery
         }
 
         if ($filters->communes) {
-            $query->whereIn('fiches.commune', $filters->communes);
+            // Communes officielles (codes INSEE) → valeurs brutes rattachées (décision 9).
+            $raw = $this->communes->rawValuesFor($filters->communes);
+            $raw === [] ? $query->whereRaw('1 = 0') : $query->whereIn('fiches.commune', $raw);
         }
 
         if ($filters->ecoValidated) {

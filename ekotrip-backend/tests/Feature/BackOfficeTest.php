@@ -43,6 +43,8 @@ it('affiche chaque écran du back-office à un administrateur', function (string
     '/admin/import-runs',
     fn () => '/admin/import-runs/'.ImportRun::query()->value('id'),
     '/admin/settings',
+    '/admin/communes',
+    '/admin/commune-mappings',
 ]);
 
 it('ne permet ni de créer ni de supprimer une fiche maître', function () {

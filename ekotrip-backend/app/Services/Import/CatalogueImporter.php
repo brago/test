@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Models\Circuit;
 use App\Models\CircuitNote;
 use App\Models\CircuitStep;
+use App\Models\Commune;
+use App\Models\CommuneMapping;
 use App\Models\Fiche;
 use App\Models\FichePoi;
 use App\Models\ImportRun;
@@ -71,6 +73,7 @@ class CatalogueImporter
             DB::beginTransaction();
 
             Setting::ensureDefaults();
+            $this->importCommunes();
             $categories = $this->importCategories(WorkbookReader::associate($sheets['CATEGORIES']));
             $this->seedPrecisionRules($json);
             $this->importFiches(WorkbookReader::associate($sheets['01_FICHES_APP']), $categories);
@@ -80,6 +83,7 @@ class CatalogueImporter
             $circuits = $this->importCircuits(WorkbookReader::associate($sheets['05A_CIRCUITS_META']));
             $this->importCircuitSteps(WorkbookReader::associate($sheets['05_CIRCUITS']), $circuits);
             $this->importCircuitNotes(WorkbookReader::associate($sheets['05D_NOTES_CIRCUITS']), $circuits);
+            $this->checkCommunes();
             $this->crossCheck($json, $geojson);
 
             if ($dryRun) {
@@ -98,6 +102,118 @@ class CatalogueImporter
 
             return $this->report->finish('FAILED');
         }
+    }
+
+    // ------------------------------------------------------------------ communes (décision 9)
+
+    /**
+     * Référentiel officiel (34 communes) et correspondance validée valeur brute → communes + lieu-dit + zone.
+     * Les correspondances modifiées en back-office (origin ADMIN) ne sont jamais écrasées.
+     */
+    private function importCommunes(): void
+    {
+        $officielles = $this->readCsv(config('ekotrip.import.communes_officielles'));
+        foreach ($officielles as $row) {
+            Commune::query()->updateOrCreate(['code_insee' => $row['code_insee']], [
+                'nom' => $row['nom'],
+                'slug' => Str::slug($row['nom']),
+                'codes_postaux' => array_values(array_filter(array_map('trim', explode('|', $row['codes_postaux'])))),
+            ]);
+        }
+        $this->report->count('communes_officielles', count($officielles));
+
+        $codes = Commune::query()->pluck('code_insee')->all();
+        $count = 0;
+        foreach ($this->readCsv(config('ekotrip.import.communes_correspondance')) as $i => $row) {
+            if ($row['valeur_brute'] === '(vide)') {
+                continue; // commune absente dans la source : rien à rattacher
+            }
+            $mapping = CommuneMapping::query()->firstOrNew(['raw_value' => $row['valeur_brute']]);
+            if ($mapping->exists && $mapping->origin === 'ADMIN') {
+                $count++;
+
+                continue;
+            }
+            $linked = array_values(array_filter(array_map('trim', explode('|', $row['codes_insee']))));
+            if ($unknown = array_diff($linked, $codes)) {
+                $this->report->error('COMMUNE_CODE_UNKNOWN', "Correspondance « {$row['valeur_brute']} » : code(s) INSEE inconnu(s) ".implode(', ', $unknown).' ; ignorée.', 'communes_correspondance.csv', 'ligne '.($i + 2));
+
+                continue;
+            }
+            $mapping->fill([
+                'type' => $row['type'],
+                'lieu_dit' => Text::clean($row['lieu_dit']),
+                'zone' => Text::clean($row['zone']),
+                'statut_validation' => $row['statut_validation'],
+                'decision' => Text::clean($row['decision']),
+                'commentaire' => Text::clean($row['commentaire']),
+                'origin' => 'IMPORT',
+            ])->save();
+            $mapping->communes()->sync($linked);
+            $count++;
+            if ($row['statut_validation'] === 'PROVISOIRE') {
+                $this->report->info('COMMUNE_MAPPING_PROVISIONAL', "Correspondance provisoire : « {$row['valeur_brute']} » → ".($row['communes_officielles'] ?: 'aucune commune').". {$row['decision']}", 'communes_correspondance.csv', 'ligne '.($i + 2));
+            }
+        }
+        $this->report->count('communes_correspondances', $count);
+    }
+
+    /**
+     * Contrôles après import des fiches : valeur de commune sans correspondance,
+     * code postal incompatible avec la ou les communes rattachées (signalé, jamais corrigé).
+     */
+    private function checkCommunes(): void
+    {
+        $mappings = CommuneMapping::query()->with('communes')->get()->keyBy('raw_value');
+        $mismatches = 0;
+
+        foreach ($this->fiches as $id => ['fiche' => $fiche]) {
+            if ($fiche->commune === null) {
+                continue;
+            }
+            $state = $fiche->is_active ? 'active' : 'inactive';
+            $mapping = $mappings[$fiche->commune] ?? null;
+            if (! $mapping) {
+                $this->report->warning('COMMUNE_UNMAPPED', "Fiche {$id} ({$state}) : commune « {$fiche->commune} » sans correspondance officielle ; absente du filtre par commune.", '01_FICHES_APP', $id);
+
+                continue;
+            }
+            if ($fiche->code_postal === null || $mapping->communes->isEmpty()) {
+                continue;
+            }
+            $allowed = $mapping->communes->flatMap(fn (Commune $c) => $c->codes_postaux)->unique()->values();
+            if (! $allowed->contains($fiche->code_postal)) {
+                $mismatches++;
+                $holders = Commune::query()->whereJsonContains('codes_postaux', $fiche->code_postal)->pluck('nom')->implode(', ') ?: 'aucune commune';
+                $this->report->warning('POSTAL_CODE_MISMATCH', "Fiche {$id} ({$fiche->nom}, {$state}) : code postal {$fiche->code_postal} ({$holders}) incompatible avec la commune « {$fiche->commune} » → ".$mapping->communes->pluck('nom')->implode(', ')." (codes attendus : {$allowed->implode(', ')}). Adresse : « ".($fiche->adresse ?? '—').' ». Valeur source conservée, à vérifier.', '01_FICHES_APP', $id);
+            }
+        }
+        $this->report->count('postal_code_mismatches', $mismatches);
+    }
+
+    /** @return list<array<string,string>> */
+    private function readCsv(string $path): array
+    {
+        if (! is_file($path)) {
+            throw new \RuntimeException("Fichier introuvable : {$path}");
+        }
+        $handle = fopen($path, 'r');
+        $header = null;
+        $rows = [];
+        while (($line = fgetcsv($handle, 0, ';', '"', '')) !== false) {
+            if ($header === null) {
+                $header = array_map(fn ($h) => trim(preg_replace('/^\xEF\xBB\xBF/', '', $h)), $line);
+
+                continue;
+            }
+            if ($line === [null]) {
+                continue;
+            }
+            $rows[] = array_combine($header, array_pad($line, count($header), ''));
+        }
+        fclose($handle);
+
+        return $rows;
     }
 
     // ------------------------------------------------------------------ catégories

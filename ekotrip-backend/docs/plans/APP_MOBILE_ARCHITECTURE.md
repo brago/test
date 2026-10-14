@@ -166,7 +166,7 @@ Exemples d'adresse de l'API (sans `/api/v1`, ajouté par le client) :
 1. **Couleurs des groupes carte** : elles sont vides en base. Il faut les renseigner dans le back-office (Groupes carte) d'après la charte : vert sauge / eucalyptus, bleu lagon, beige sable, corail… Je peux vous proposer une palette accessible, à valider.
 2. **API accessible depuis le Wi-Fi** : `php artisan serve --host=0.0.0.0 --port=8000`, ou Sail (port 80), plus une règle du pare-feu Windows (§9).
 3. **Médias** : aucun pour l'instant, donc l'app affichera partout les visuels de remplacement. C'est le comportement attendu.
-4. **Communes** : après validation de la correspondance (décision 9), le filtre passera aux codes INSEE. L'app passe par un `CommuneRepository` qui absorbera ce changement sans toucher aux écrans.
+4. **Communes** : correspondance appliquée. Le filtre `communes[]` attend des codes INSEE, `/communes` renvoie les 34 communes officielles et chaque fiche expose `rattachement`. L'app affiche toujours le libellé `commune` d'origine.
 
 ---
 

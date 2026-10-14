@@ -69,7 +69,7 @@ it("n'expose que les liens pro ↔ activité affichables entre fiches publiques"
 
 it('valide les paramètres de filtre', function (string $query) {
     $this->getJson("/api/v1/fiches?{$query}")->assertUnprocessable();
-})->with(['near=abc', 'bbox=1,2,3', 'radius=1000&near=14.6,-61', 'per_page=1000']);
+})->with(['near=abc', 'bbox=1,2,3', 'radius=1000&near=14.6,-61', 'per_page=1000', 'communes[]=Sainte-Anne']);
 
 it('expose la configuration, les catégories et les communes', function () {
     $this->getJson('/api/v1/config')->assertOk()
@@ -81,6 +81,7 @@ it('expose la configuration, les catégories et les communes', function () {
         ->and($categories->sum('fiches_count'))->toBe(383)
         ->and($categories->every(fn ($c) => $c['groupe'] !== null))->toBeTrue();
 
-    expect(collect($this->getJson('/api/v1/communes')->assertOk()->json('data'))->sum('fiches_count'))
-        ->toBe(Fiche::query()->public()->whereNotNull('commune')->count());
+    $communes = collect($this->getJson('/api/v1/communes')->assertOk()->json('data'));
+    expect($communes)->toHaveCount(34)
+        ->and($communes->firstWhere('code_insee', '97231')['nom'])->toBe('Les Trois-Îlets');
 });

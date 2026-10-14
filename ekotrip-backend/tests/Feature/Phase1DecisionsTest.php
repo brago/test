@@ -2,6 +2,7 @@
 
 use App\Filament\Resources\Fiches\Pages\ListFiches;
 use App\Models\Fiche;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\Import\CatalogueImporter;
 use Livewire\Livewire;
@@ -80,6 +81,6 @@ it('décision 5 — « Professionnels » est dans le groupe des Activités', fun
 it('décision 8 — le rayon « Autour de moi » vaut 10 km par défaut et reste administrable', function () {
     $this->getJson('/api/v1/config')->assertJsonPath('nearby_radius_km', 10);
 
-    \App\Models\Setting::find('nearby_radius_km')->update(['value' => 5]);
+    Setting::find('nearby_radius_km')->update(['value' => 5]);
     $this->getJson('/api/v1/config')->assertJsonPath('nearby_radius_km', 5);
 });

@@ -1,6 +1,6 @@
 # Phase 1 — Socle : plan et suivi
 
-> Statut : **IMPLÉMENTÉ — recette technique passée** (voir `RECETTE_PHASE_1.md`). MySQL 8 retenu (14/10/2026). Décisions de recette du 15/10/2026 appliquées (§11), sauf la correspondance des communes, en relecture (§12). Mon Ékotrip non commencé.
+> Statut : **IMPLÉMENTÉ — recette technique passée** (voir `RECETTE_PHASE_1.md`). MySQL 8 retenu (14/10/2026). Décisions de recette du 15/10/2026 appliquées (§11), y compris la correspondance des communes (§12), validée le 15/10/2026. Mon Ékotrip non commencé.
 > Périmètre (`CLAUDE.md`, `60_ROADMAP_DEV`) : schéma, import du catalogue avec rapport, API catalogue / carte / recherche, back-office de contrôle.
 > Sources lues : classeur (`00`, `01`, `CATEGORIES`, `02`–`06`, `08`, `30`, `62`, `63`, `77`), dictionnaires CSV, JSON/GeoJSON, Spécifications V1.2, START HERE, Addendum, Lots 1.1 / 1.4 / 1.5 / 1.6, consigne carte Explorer, Recette globale, Données avant production.
 
@@ -182,11 +182,14 @@ Un test par règle non négociable touchée par la phase 1, plus les recettes de
 | 9 | Communes : table de correspondance, sources inchangées | Proposition CSV à relire (§12) — **non appliquée** | — |
 | 10 | `composer install` depuis zéro sans contournement | Voir §13 | — |
 
-## 12. Communes — correspondance proposée (en relecture)
+## 12. Communes — correspondance validée et appliquée (15/10/2026)
 
-Fichiers : `docs/plans/communes/` (`LISEZ-MOI.md`, proposition CSV, référentiel INSEE 2026). 78 valeurs brutes : 32 exactes, 6 variantes, 20 lieux-dits, 10 multi-communes, 7 zones, 1 commune + zone, 2 sans commune ; 14 lignes à valider.
-
-Mise en œuvre prévue après validation : table `communes` (34, code INSEE), table `commune_mappings` (valeur brute → communes + lieu-dit + zone, administrable) ; le filtre `communes[]` portera sur les codes INSEE, l'affichage gardera `fiches.commune`.
+- Référentiel : 34 communes officielles avec code INSEE et codes postaux (`database/data/communes/communes_officielles.csv`, source geo.api.gouv.fr).
+- Correspondance validée : `database/data/communes/communes_correspondance.csv`, soit 77 valeurs brutes. 1 ligne reste **provisoire** : ACT-064, en attente de confirmation de la porteuse. Elle est produite par `docs/plans/communes/appliquer_decisions.py` à partir de la proposition relue.
+- Décisions : fiches inactives validées telles quelles ; PAT-080 Fort-de-France + zone Nord ; NAT-021 Le Morne-Rouge + zone Nord ; NAT-020, ACT-007 et PRO-028 en zone seule ; Tartane et Grande Anse d'Arlet validées.
+- Tables `communes`, `commune_mappings` et pivot. L'import ne touche jamais aux correspondances modifiées en back-office (menu *Carte → Correspondance des communes*).
+- API : le filtre `communes[]` attend des **codes INSEE** ; `/communes` renvoie les 34 communes officielles avec leur nombre de fiches publiques ; chaque fiche expose `rattachement` (communes, lieu-dit, zone). L'affichage garde le libellé d'origine (`commune`).
+- Contrôles du rapport d'import : `COMMUNE_UNMAPPED` (valeur sans correspondance) et `POSTAL_CODE_MISMATCH` (code postal incompatible avec la commune rattachée). Sur le catalogue actuel, un seul cas : **ACT-078 Mangofil**, commune « Les Trois-Îlets », code postal 97228 (Sainte-Luce), adresse « Forêt de Montravail ». La valeur source est conservée en attendant la vérification.
 
 ## 13. Installation depuis zéro (`composer install`)
 

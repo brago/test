@@ -88,6 +88,6 @@ Correction associée : dans le back-office, les filtres « Visibles du public »
 
 ## 6. Points ouverts avant de clore la phase 1
 
-1. **Correspondance des communes** : relecture du CSV (`docs/plans/communes/`), puis application.
+1. **Communes** : correspondance appliquée (tests `CommuneMappingTest`). Reste à confirmer ACT-064 (provisoire) et à vérifier ACT-078 Mangofil (code postal 97228 / Les Trois-Îlets).
 2. **Version MySQL de l'hébergeur** : à reporter dans `MYSQL_VERSION` et `EKOTRIP_MYSQL_MIN_VERSION`.
 3. **Recette sur téléphone** des critères marqués « App ».

@@ -1,6 +1,10 @@
-# Correspondance des communes — proposition à relire (décision 9)
+# Correspondance des communes (décision 9)
 
-**Rien n'est appliqué.** Les données sources ne sont pas modifiées. Après votre relecture, ce fichier
+> **Mise à jour du 15/10/2026 : relue, validée et appliquée.** La version validée est dans
+> `database/data/communes/` ; elle est produite par `appliquer_decisions.py` à partir de la proposition ci-dessous,
+> qui reste comme trace de la relecture.
+
+**Historique — proposition initiale.** Les données sources ne sont pas modifiées. Après votre relecture, ce fichier
 alimentera une table administrable ; le filtre de l'API utilisera alors les communes officielles,
 et l'affichage gardera le libellé d'origine.
 

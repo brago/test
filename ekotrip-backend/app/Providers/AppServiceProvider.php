@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\Circuit;
+use App\Models\Commune;
+use App\Models\CommuneMapping;
 use App\Models\EcoEvaluation;
 use App\Models\Fiche;
 use App\Models\FicheReport;
@@ -42,10 +44,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Fiche::class, FichePolicy::class);
         Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(FicheReport::class, FicheReportPolicy::class);
-        foreach ([ImportRun::class, Circuit::class] as $model) {
+        foreach ([ImportRun::class, Circuit::class, Commune::class] as $model) {
             Gate::policy($model, ReadOnlyAdminPolicy::class);
         }
-        foreach ([MapGroup::class, PrecisionGeoRule::class, Media::class, EcoEvaluation::class, Setting::class] as $model) {
+        foreach ([CommuneMapping::class, MapGroup::class, PrecisionGeoRule::class, Media::class, EcoEvaluation::class, Setting::class] as $model) {
             Gate::policy($model, GenericAdminPolicy::class);
         }
 

@@ -21,6 +21,12 @@ class Text
         return strtolower(self::normalize($value));
     }
 
+    /** Clé de comparaison souple : minuscules sans accents, ponctuation → espace (« Trois-Îlets » = « trois ilets »). */
+    public static function searchKey(?string $value): string
+    {
+        return trim(preg_replace('/[^a-z0-9]+/', ' ', self::fold($value)));
+    }
+
     /** Valeur de cellule vide / espaces → null ; sinon chaîne nettoyée. */
     public static function clean(mixed $value): ?string
     {

@@ -15,7 +15,7 @@ class FicheFilterRequest extends FormRequest
             'groups' => ['nullable', 'array', 'max:20'],
             'groups.*' => ['string', 'max:50'],
             'communes' => ['nullable', 'array', 'max:40'],
-            'communes.*' => ['string', 'max:100'],
+            'communes.*' => ['string', 'regex:/^972\d{2}$/'],
             'near' => ['nullable', 'string', 'regex:/^-?\d{1,2}(\.\d+)?,-?\d{1,3}(\.\d+)?$/'],
             'radius' => ['nullable', 'numeric', 'min:0.1', 'max:100'],
             'bbox' => ['nullable', 'string', 'regex:/^-?\d{1,3}(\.\d+)?(,-?\d{1,3}(\.\d+)?){3}$/'],
@@ -28,6 +28,7 @@ class FicheFilterRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'communes.*.regex' => 'communes[] attend des codes INSEE de Martinique (972xx).',
             'near.regex' => 'near doit être au format « latitude,longitude ».',
             'bbox.regex' => 'bbox doit être au format « minLng,minLat,maxLng,maxLat ».',
         ];

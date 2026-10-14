@@ -12,7 +12,7 @@ final class FicheFilters
     /**
      * @param  list<string>  $categories  slugs de catégories
      * @param  list<string>  $groups  slugs de groupes carte
-     * @param  list<string>  $communes
+     * @param  list<string>  $communes  codes INSEE des communes officielles
      * @param  array{0:float,1:float}|null  $near  [lat, lng]
      * @param  array{0:float,1:float,2:float,3:float}|null  $bbox  [minLng, minLat, maxLng, maxLat]
      */
