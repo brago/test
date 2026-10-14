@@ -9,3 +9,8 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Documents de référence livrés : stockés à l'identique (pas de normalisation des fins de ligne).
+docs/data/** -text
+docs/specs/** -text
+docs/lots/** -text
