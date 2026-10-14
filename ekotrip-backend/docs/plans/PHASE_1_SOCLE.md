@@ -1,6 +1,6 @@
-# Phase 1 — Socle : plan proposé (à valider)
+# Phase 1 — Socle : plan et suivi
 
-> Statut : **EN COURS** — décision du 14/10/2026 : **MySQL 8** retenu à la place de PostgreSQL (maintenance). Questions 2 à 8 (§10) toujours ouvertes : les choix provisoires sont isolés en configuration / tables pour être modifiés sans refonte.
+> Statut : **IMPLÉMENTÉ — recette technique passée** (voir `RECETTE_PHASE_1.md`). Décision du 14/10/2026 : **MySQL 8** retenu à la place de PostgreSQL. Les questions 2 à 8 (§10) restent à confirmer : les choix provisoires appliqués sont isolés dans `config/ekotrip.php` ou en back-office et se modifient sans refonte.
 > Périmètre (`CLAUDE.md`, `60_ROADMAP_DEV`) : schéma, import du catalogue avec rapport, API catalogue / carte / recherche, back-office de contrôle.
 > Sources lues : classeur (`00`, `01`, `CATEGORIES`, `02`–`06`, `08`, `30`, `62`, `63`, `77`), dictionnaires CSV, JSON/GeoJSON, Spécifications V1.2, START HERE, Addendum, Lots 1.1 / 1.4 / 1.5 / 1.6, consigne carte Explorer, Recette globale, Données avant production.
 
@@ -149,6 +149,8 @@ Un test par règle non négociable touchée par la phase 1, plus les recettes de
 5. **Statuts de publication** : le Lot 1.1 parle de `published / pending_review / unpublished / archived`, alors que la donnée utilise `PUBLIABLE`, `CONTENU ÉDITORIAL`, `À CONTRÔLER`, `À RESTRUCTURER`, `À RECLASSER`, `NE PAS PUBLIER`, `ARCHIVÉ`…
 6. **Version** : `EKOTRIP_CATALOGUE.json` porte `version: V1.1` alors que le classeur est V1.2 (mêmes 383 fiches, donc sans impact constaté).
 7. **Groupes carte** : la catégorie « Professionnels » (29 fiches) n'a pas de groupe dans la liste du Lot 1.4.
+8. **Communes écrites de plusieurs façons** (constaté à l'import, non corrigé) : « Gros-Morne » / « Le Gros-Morne », « Morne-Rouge » / « Le Morne-Rouge », « Trois-Îlets » / « Les Trois-Îlets », « Les Anses-d'Arlet » avec apostrophe droite ou courbe. 11 valeurs combinent plusieurs communes ou une zone (« Sainte-Anne / Le Marin », « Centre / Sud »…). Le filtre par commune les traite comme des valeurs distinctes.
+9. **Même libellé `precision_geo`, classes différentes** : « Point du site naturel nommé publié — accès non certifié » donne ACCESS_OR_DEPARTURE pour un POINT et NON_NAVIGABLE pour une ZONE_MULTI_POI. C'est cohérent avec la règle « pas de point unique » ; la classe dépend donc aussi de `content_type`.
 
 ---
 
@@ -162,3 +164,18 @@ Un test par règle non négociable touchée par la phase 1, plus les recettes de
 6. **« Professionnels »** (incohérence 7) : quel groupe carte, ou un groupe dédié ?
 7. **Signalements** : à inclure dès la phase 1 (prévu « MVP » dans `62`) ou à reporter ?
 8. **Hébergement cible** (S3, Redis, serveur) : connu dès maintenant, ou on reste en local et en test pour la phase 1 ?
+
+---
+
+## 11. Choix provisoires appliqués (en attente de vos réponses)
+
+| Question | Choix appliqué | Où le modifier |
+|---|---|---|
+| 2 — Statuts | PUBLIABLE / CONTENU ÉDITORIAL → `published` ; À CONTRÔLER → `pending_review` ; À RESTRUCTURER / À RECLASSER → `unpublished` ; NE PAS PUBLIER / ARCHIVÉ / ARCHIVER… → `archived` | `config/ekotrip.php` → `publication_map` |
+| 3 — « À déterminer » | retirées de la carte, fiche consultable sans itinéraire | `EKOTRIP_MAP_INCLUDE_NON_NAVIGABLE` |
+| 4 — « À CONFIRMER » | exposé `null`, valeur brute dans `raw_placeholders` | `config/ekotrip.php` → `placeholders` |
+| 5 — HEB-019 | étape importée, jamais servie, signalée au rapport | — |
+| 6 — « Professionnels » | groupe carte dédié « Professionnels » | back-office → Catégories / Groupes carte |
+| 7 — Signalements | inclus (API + file en back-office) | — |
+| 8 — Hébergement | local / Sail uniquement | — |
+| — Rayon « Autour de moi » | 10 km par défaut (aucune valeur dans la documentation) | back-office → Paramètres |
