@@ -1,6 +1,6 @@
 # Phase 1 — Socle : plan et suivi
 
-> Statut : **IMPLÉMENTÉ — recette technique passée** (voir `RECETTE_PHASE_1.md`). Décision du 14/10/2026 : **MySQL 8** retenu à la place de PostgreSQL. Les questions 2 à 8 (§10) restent à confirmer : les choix provisoires appliqués sont isolés dans `config/ekotrip.php` ou en back-office et se modifient sans refonte.
+> Statut : **IMPLÉMENTÉ — recette technique passée** (voir `RECETTE_PHASE_1.md`). MySQL 8 retenu (14/10/2026). Décisions de recette du 15/10/2026 appliquées (§11), sauf la correspondance des communes, en relecture (§12). Mon Ékotrip non commencé.
 > Périmètre (`CLAUDE.md`, `60_ROADMAP_DEV`) : schéma, import du catalogue avec rapport, API catalogue / carte / recherche, back-office de contrôle.
 > Sources lues : classeur (`00`, `01`, `CATEGORIES`, `02`–`06`, `08`, `30`, `62`, `63`, `77`), dictionnaires CSV, JSON/GeoJSON, Spécifications V1.2, START HERE, Addendum, Lots 1.1 / 1.4 / 1.5 / 1.6, consigne carte Explorer, Recette globale, Données avant production.
 
@@ -167,15 +167,30 @@ Un test par règle non négociable touchée par la phase 1, plus les recettes de
 
 ---
 
-## 11. Choix provisoires appliqués (en attente de vos réponses)
+## 11. Décisions de recette du 15/10/2026 (appliquées)
 
-| Question | Choix appliqué | Où le modifier |
-|---|---|---|
-| 2 — Statuts | PUBLIABLE / CONTENU ÉDITORIAL → `published` ; À CONTRÔLER → `pending_review` ; À RESTRUCTURER / À RECLASSER → `unpublished` ; NE PAS PUBLIER / ARCHIVÉ / ARCHIVER… → `archived` | `config/ekotrip.php` → `publication_map` |
-| 3 — « À déterminer » | retirées de la carte, fiche consultable sans itinéraire | `EKOTRIP_MAP_INCLUDE_NON_NAVIGABLE` |
-| 4 — « À CONFIRMER » | exposé `null`, valeur brute dans `raw_placeholders` | `config/ekotrip.php` → `placeholders` |
-| 5 — HEB-019 | étape importée, jamais servie, signalée au rapport | — |
-| 6 — « Professionnels » | groupe carte dédié « Professionnels » | back-office → Catégories / Groupes carte |
-| 7 — Signalements | inclus (API + file en back-office) | — |
-| 8 — Hébergement | local / Sail uniquement | — |
-| — Rayon « Autour de moi » | 10 km par défaut (aucune valeur dans la documentation) | back-office → Paramètres |
+| # | Décision | Mise en œuvre | Où la modifier |
+|---|---|---|---|
+| 1 | Statuts : correspondance validée ; À RECLASSER → `pending_review` ; « ARCHIVER / établissement Trois-Îlets fermé-transféré » → `archived` ; CONTENU ÉDITORIAL → public (Découvrir, liste, recherche) mais jamais sur la carte ; statut inconnu → non publique + signalé | `publication_map`, colonne `is_editorial` (ACT-007, ACT-063), code `UNKNOWN_PUBLICATION` | `config/ekotrip.php` |
+| 2 | GAS-003, 009, 013, 016 hors carte, visibles en liste et recherche, « à géocoder » | Portée `toGeocode()`, filtre et badge « À géocoder » dans Fiches, code `TO_GEOCODE` au rapport | `EKOTRIP_MAP_INCLUDE_NON_NAVIGABLE` |
+| 3 | « À CONFIRMER » → `null` dans l'API, valeur d'origine en interne | `raw_placeholders` | `config/ekotrip.php` → `placeholders` |
+| 4 | HEB-019 importée, jamais affichée, circuit 4 cohérent, « à remplacer » au rapport | `is_retained = false`, numérotation continue, code `STEP_TO_REPLACE` | — |
+| 5 | « Professionnels » → groupe des Activités (« Bouger »), administrable | Configuration + migration retirant le groupe provisoire | Back-office → Catégories |
+| 6 | Signalements : version minimale | API `POST /fiches/{id}/reports`, file en back-office, 5 envois/min/IP | `config/ekotrip.php` → `reports` |
+| 7 | Hébergement local ; aligner MySQL sur l'hébergeur dès que connu | Image Sail `mysql:${MYSQL_VERSION}` ; test de garde sur la version et la collation (`EKOTRIP_MYSQL_MIN_VERSION`) | `.env` |
+| 8 | Rayon « Autour de moi » 10 km, administrable | Table `settings` | Back-office → Paramètres |
+| 9 | Communes : table de correspondance, sources inchangées | Proposition CSV à relire (§12) — **non appliquée** | — |
+| 10 | `composer install` depuis zéro sans contournement | Voir §13 | — |
+
+## 12. Communes — correspondance proposée (en relecture)
+
+Fichiers : `docs/plans/communes/` (`LISEZ-MOI.md`, proposition CSV, référentiel INSEE 2026). 78 valeurs brutes : 32 exactes, 6 variantes, 20 lieux-dits, 10 multi-communes, 7 zones, 1 commune + zone, 2 sans commune ; 14 lignes à valider.
+
+Mise en œuvre prévue après validation : table `communes` (34, code INSEE), table `commune_mappings` (valeur brute → communes + lieu-dit + zone, administrable) ; le filtre `communes[]` portera sur les codes INSEE, l'affichage gardera `fiches.commune`.
+
+## 13. Installation depuis zéro (`composer install`)
+
+- Le projet ne contient aucun contournement : `composer.json` est standard, `composer.lock` référence les archives dist de GitHub pour les 165 paquets.
+- Le contournement d'installation (`preferred-install = source`) était dans la configuration **globale** de Composer de l'environnement de développement ; il a été retiré.
+- Dans cet environnement cloud, le proxy refuse le téléchargement des archives depuis l'API GitHub (`Could not authenticate against github.com`), quel que soit le projet. Un `composer install` standard y échoue donc pour une raison d'infrastructure ; sur un poste ou un serveur avec un accès GitHub normal (ou dans Sail), il fonctionne sans option.
+- Vérification faite ici : `vendor/` supprimé puis réinstallé depuis le seul `composer.lock` (transport git en ligne de commande, `--prefer-source`), scripts post-installation (découverte des paquets, ressources Filament) exécutés, suite de tests au vert.

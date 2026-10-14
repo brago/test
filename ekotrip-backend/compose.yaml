@@ -25,7 +25,8 @@ services:
             - mysql
             - redis
     mysql:
-        image: 'mysql:8.4'
+        # Aligner MYSQL_VERSION sur la version de l'hébergeur dès qu'elle est connue.
+        image: 'mysql:${MYSQL_VERSION:-8.4}'
         command:
             - '--character-set-server=utf8mb4'
             - '--collation-server=utf8mb4_0900_ai_ci'

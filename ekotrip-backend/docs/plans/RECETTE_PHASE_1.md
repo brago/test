@@ -15,13 +15,13 @@ Rapport de `php artisan ekotrip:import` sur `EKOTRIP_FINAL.xlsx` :
 |---|---|---|
 | Fiches lues / importées | 458 / 458 | 458 IDs uniques, conservés |
 | Fiches actives = publiques | 383 | 383 (= JSON) |
-| Statuts non publics | 37 à valider · 23 dépubliées · 15 archivées | 75 inactives, jamais exposées |
-| Fiches sur la carte | **357** | 361 `show_on_map` − 4 « À déterminer » (choix provisoire Q3) |
+| Statuts non publics | 39 à valider · 21 dépubliées · 15 archivées | 75 inactives, jamais exposées |
+| Fiches sur la carte | **357** | 361 `show_on_map` − 4 « à géocoder » (décision 2) |
 | Fiches publiques sans coordonnées | 19 | aucune coordonnée inventée |
 | Écarts JSON (8 champs × 383 fiches) | **0** | 0 |
 | Écarts GeoJSON (361 points) | **0** | 0 |
 | Placeholders neutralisés | 35 valeurs / 21 fiches | jamais exposés |
-| Circuits / étapes / notes | 4 / 84 (83 servies) / 21 | HEB-019 écartée |
+| Circuits / étapes / notes | 4 / 84 (83 servies) / 21 | HEB-019 « à remplacer », jamais affichée |
 | POI / liens pro ↔ activité | 25 / 65 | — |
 | Ré-import | 458 fiches inchangées | idempotent |
 
@@ -80,8 +80,14 @@ Rapport de `php artisan ekotrip:import` sur `EKOTRIP_FINAL.xlsx` :
 | Contrôler les fiches sans coordonnées (filtre) | OK |
 | Accès réservé aux administrateurs | OK |
 
-## 5. Points ouverts avant de clore la phase 1
+## 5. Décisions de recette du 15/10/2026
 
-1. **Arbitrages provisoires à confirmer** (questions 2 à 8 de `PHASE_1_SOCLE.md` §10) : statuts, 4 fiches « À déterminer » hors carte, « À CONFIRMER » → non renseigné, HEB-019, groupe « Professionnels », signalements inclus, hébergement cible.
-2. **Communes à harmoniser dans la donnée** (non corrigé, cf. `PHASE_1_SOCLE.md` §9, point 8) : le filtre par commune est exact, donc les variantes se séparent.
-3. **Recette sur téléphone** des critères marqués « App » une fois l'application branchée sur l'API.
+Toutes testées dans `tests/Feature/Phase1DecisionsTest.php` (statuts, contenu éditorial hors carte, statut inconnu non public, fiches « à géocoder », HEB-019, groupe des Professionnels, rayon) et `tests/Feature/DatabaseServerTest.php` (version MySQL, collation).
+
+Correction associée : dans le back-office, les filtres « Visibles du public » et « Sans coordonnées » n'agissaient pas (paramètre de fonction mal nommé pour Filament) ; corrigé et couvert par un test.
+
+## 6. Points ouverts avant de clore la phase 1
+
+1. **Correspondance des communes** : relecture du CSV (`docs/plans/communes/`), puis application.
+2. **Version MySQL de l'hébergeur** : à reporter dans `MYSQL_VERSION` et `EKOTRIP_MYSQL_MIN_VERSION`.
+3. **Recette sur téléphone** des critères marqués « App ».

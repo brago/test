@@ -260,6 +260,7 @@ class CatalogueImporter
             }
 
             $data['publication_status'] = $this->publicationStatus($id, $data['publication'], $data['is_active']);
+            $data['is_editorial'] = in_array(Text::normalize($data['publication']), config('ekotrip.editorial_publications'), true);
             $data['budget_data_status'] = $data['budget'] === null ? 'UNKNOWN' : 'KNOWN';
 
             $g = $geo->classify($data['precision_geo'], $data['content_type'], $lat, $lng);
@@ -309,7 +310,7 @@ class CatalogueImporter
         } elseif (str_starts_with($key, config('ekotrip.publication_archive_prefix'))) {
             $status = Fiche::STATUS_ARCHIVED;
         } else {
-            $this->report->warning('UNKNOWN_PUBLICATION', "Fiche {$id} : publication « {$publication} » inconnue → unpublished.", '01_FICHES_APP', $id);
+            $this->report->warning('UNKNOWN_PUBLICATION', "Fiche {$id} : publication « {$publication} » inconnue → non publique.", '01_FICHES_APP', $id);
             $status = Fiche::STATUS_UNPUBLISHED;
         }
 
@@ -335,11 +336,14 @@ class CatalogueImporter
         if ($fiche->latitude === null) {
             $this->report->increment('public_without_coordinates');
         }
-        if ($fiche->show_on_map && $fiche->latitude === null) {
-            $this->report->warning('SHOW_ON_MAP_WITHOUT_COORDS', "Fiche {$id} : show_on_map = TRUE sans coordonnées ; aucun marqueur.", '01_FICHES_APP', $id);
+        if ($fiche->show_on_map && $fiche->latitude === null && ! $fiche->is_editorial) {
+            $this->report->warning('TO_GEOCODE', "Fiche {$id} ({$fiche->nom}) : à géocoder — show_on_map = TRUE sans coordonnées ; aucun marqueur.", '01_FICHES_APP', $id);
         }
-        if ($fiche->show_on_map && $fiche->latitude !== null && $fiche->geo_display_type === 'NON_NAVIGABLE') {
-            $this->report->warning('MAP_NON_NAVIGABLE', "Fiche {$id} ({$fiche->nom}) : show_on_map = TRUE mais NON_NAVIGABLE (« {$fiche->precision_geo} ») ; ".(config('ekotrip.map.include_non_navigable') ? 'affichée sans itinéraire.' : 'retirée de la carte.'), '01_FICHES_APP', $id);
+        if ($fiche->show_on_map && $fiche->latitude !== null && $fiche->geo_display_type === 'NON_NAVIGABLE' && ! $fiche->is_editorial) {
+            $this->report->warning('TO_GEOCODE', "Fiche {$id} ({$fiche->nom}) : à géocoder — show_on_map = TRUE mais NON_NAVIGABLE (« {$fiche->precision_geo} ») ; ".(config('ekotrip.map.include_non_navigable') ? 'affichée sans itinéraire.' : 'retirée de la carte, visible en liste et recherche.'), '01_FICHES_APP', $id);
+        }
+        if ($fiche->is_editorial && $fiche->show_on_map) {
+            $this->report->warning('EDITORIAL_ON_MAP', "Fiche {$id} : contenu éditorial marqué show_on_map = TRUE ; jamais affiché sur la carte.", '01_FICHES_APP', $id);
         }
         if ($fiche->isOnMap()) {
             $this->report->increment('fiches_on_map');
@@ -485,7 +489,7 @@ class CatalogueImporter
             $decision = Text::clean($row['Décision circuit'] ?? null);
             $retained = ! preg_match('/REMPLACER|RETIRER/', Text::normalize($decision));
             if (! $retained) {
-                $this->report->warning('STEP_NOT_RETAINED', "Circuit {$circuitId} J{$day} « {$label} » ({$ficheId}) : décision « {$decision} » → étape non servie.", '05_CIRCUITS', $ref);
+                $this->report->warning('STEP_TO_REPLACE', "Circuit {$circuitId} J{$day} « {$label} » ({$ficheId}) : à remplacer — décision « {$decision} » ; étape importée mais jamais affichée.", '05_CIRCUITS', $ref);
             }
             if ($retained && $ficheId && ! $this->fiches[$ficheId]['public']) {
                 $this->report->warning('REFERENCE_NOT_PUBLIC', "Circuit {$circuitId} J{$day} « {$label} » : fiche {$ficheId} non publique → étape non servie.", '05_CIRCUITS', $ref);

@@ -32,6 +32,7 @@ class Fiche extends Model
         return [
             'is_active' => 'boolean',
             'show_on_map' => 'boolean',
+            'is_editorial' => 'boolean',
             'geo_navigation_allowed' => 'boolean',
             'reservable_ekotrip' => 'boolean',
             'latitude' => 'float',
@@ -107,6 +108,7 @@ class Fiche extends Model
     public function scopeOnMap(Builder $query): Builder
     {
         $query->public()
+            ->where('fiches.is_editorial', false)
             ->where('fiches.show_on_map', true)
             ->whereNotNull('fiches.latitude')
             ->whereNotNull('fiches.longitude');
@@ -118,6 +120,26 @@ class Fiche extends Model
         return $query;
     }
 
+    /**
+     * Fiches publiques prévues sur la carte (show_on_map) mais sans point fiable :
+     * coordonnées absentes ou classe NON_NAVIGABLE. Signalées « à géocoder » en back-office.
+     */
+    public function scopeToGeocode(Builder $query): Builder
+    {
+        return $query->public()
+            ->where('fiches.is_editorial', false)
+            ->where('fiches.show_on_map', true)
+            ->where(fn (Builder $q) => $q->whereNull('fiches.latitude')
+                ->orWhereNull('fiches.longitude')
+                ->orWhere('fiches.geo_display_type', 'NON_NAVIGABLE'));
+    }
+
+    public function needsGeocoding(): bool
+    {
+        return $this->isPublic() && ! $this->is_editorial && $this->show_on_map
+            && ($this->latitude === null || $this->longitude === null || $this->geo_display_type === 'NON_NAVIGABLE');
+    }
+
     public function isPublic(): bool
     {
         return $this->is_active && $this->publication_status === self::STATUS_PUBLISHED;
@@ -126,6 +148,7 @@ class Fiche extends Model
     public function isOnMap(): bool
     {
         return $this->isPublic()
+            && ! $this->is_editorial
             && $this->show_on_map
             && $this->latitude !== null
             && $this->longitude !== null

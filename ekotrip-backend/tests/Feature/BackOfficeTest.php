@@ -138,3 +138,16 @@ it('horodate la clôture d’un signalement', function () {
 
     expect($report->refresh()->resolved_at)->not->toBeNull();
 });
+
+it('filtre réellement les fiches publiques et celles sans coordonnées', function () {
+    $this->actingAs(admin());
+
+    Livewire::test(ListFiches::class)
+        ->filterTable('public')
+        ->assertCountTableRecords(383)
+        ->assertCanNotSeeTableRecords([Fiche::find('HEB-019')]);
+
+    Livewire::test(ListFiches::class)
+        ->filterTable('sans_coordonnees')
+        ->assertCountTableRecords(Fiche::whereNull('latitude')->count());
+});

@@ -50,6 +50,18 @@ class FicheResource extends Resource
         'archived' => 'Archivée',
     ];
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = Fiche::query()->toGeocode()->count();
+
+        return $count ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Fiches publiques à géocoder';
+    }
+
     public static function form(Schema $schema): Schema
     {
         $bbox = config('ekotrip.geo.bbox');
@@ -82,7 +94,14 @@ class FicheResource extends Resource
                 Toggle::make('show_on_map')->label('Afficher sur la carte')
                     ->helperText('Désactiver retire immédiatement la fiche de la carte sans la supprimer.'),
                 TextEntry::make('map_eligibility')->label('Éligible à la carte')
-                    ->state(fn (?Fiche $record) => $record?->isOnMap() ? 'Oui' : 'Non'),
+                    ->state(fn (?Fiche $record) => match (true) {
+                        $record === null => null,
+                        $record->isOnMap() => 'Oui',
+                        $record->needsGeocoding() => 'Non — à géocoder',
+                        $record->is_editorial => 'Non — contenu éditorial (jamais sur la carte)',
+                        default => 'Non',
+                    })
+                    ->color(fn (?Fiche $record) => $record?->needsGeocoding() ? 'warning' : null),
                 TextInput::make('latitude')->numeric()->minValue($bbox['min_lat'])->maxValue($bbox['max_lat'])
                     ->requiredWith('longitude')
                     ->helperText('Vide = non renseigné. Ne jamais saisir une position approximative.'),
@@ -154,6 +173,8 @@ class FicheResource extends Resource
                     }),
                 IconColumn::make('is_active')->label('Active')->boolean(),
                 IconColumn::make('show_on_map')->label('Carte')->boolean(),
+                TextColumn::make('a_geocoder')->label('À géocoder')->badge()->color('warning')
+                    ->state(fn (Fiche $record) => $record->needsGeocoding() ? 'À géocoder' : null),
                 TextColumn::make('geo_display_type')->label('Classe géo')->badge()->toggleable(),
                 TextColumn::make('latitude')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('longitude')->toggleable(isToggledHiddenByDefault: true),
@@ -163,8 +184,9 @@ class FicheResource extends Resource
                 SelectFilter::make('publication_status')->label('Publication')->options(self::PUBLICATION_STATUSES),
                 TernaryFilter::make('is_active')->label('Active'),
                 TernaryFilter::make('show_on_map')->label('Sur la carte (source)'),
-                Filter::make('public')->label('Visibles du public')->query(fn (Builder $q) => $q->public()),
-                Filter::make('sans_coordonnees')->label('Sans coordonnées')->query(fn (Builder $q) => $q->whereNull('latitude')),
+                Filter::make('public')->label('Visibles du public')->query(fn (Builder $query) => $query->public()),
+                Filter::make('a_geocoder')->label('À géocoder')->query(fn (Builder $query) => $query->toGeocode()),
+                Filter::make('sans_coordonnees')->label('Sans coordonnées')->query(fn (Builder $query) => $query->whereNull('latitude')),
                 SelectFilter::make('geo_display_type')->label('Classe géo')
                     ->options(array_combine(Fiche::GEO_TYPES, Fiche::GEO_TYPES)),
                 SelectFilter::make('categories')->label('Catégorie')->relationship('categories', 'name')->multiple(),

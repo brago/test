@@ -17,6 +17,12 @@ composer install
 
 Back-office : `http://localhost/admin` · API : `http://localhost/api/v1/...`
 
+**Version de MySQL** : l'image Sail suit `MYSQL_VERSION` (défaut 8.4). Dès que la version de l'hébergeur est connue,
+la reporter dans `MYSQL_VERSION` et `EKOTRIP_MYSQL_MIN_VERSION` : `tests/Feature/DatabaseServerTest.php` vérifie
+la version et la collation `utf8mb4_0900_ai_ci` du serveur de test.
+
+**Installation des dépendances** : `composer install` sans option. Il suffit d'un accès normal à GitHub (archives des paquets).
+
 ## Commandes
 
 | Commande | Rôle |

@@ -1,0 +1,79 @@
+﻿valeur_brute;type;communes_officielles;codes_insee;lieu_dit;zone;a_valider;nb_fiches;nb_fiches_actives;codes_postaux_observes;exemples_ids;commentaire
+Ajoupa-Bouillon;VARIANTE;L'Ajoupa-Bouillon;97201;;;NON;3;2;97216;HEB-018 NAT-007 NAT-008;Variante d'écriture de « L'Ajoupa-Bouillon ».
+L’Ajoupa-Bouillon;VARIANTE;L'Ajoupa-Bouillon;97201;;;NON;1;1;97216;NAT-009;Variante d'écriture de « L'Ajoupa-Bouillon ».
+À localiser;SANS_COMMUNE;;;;;OUI;2;0;;ACT-066 ACT-077;Placeholder : localisation inconnue, aucune commune (fiches inactives).
+Les Anses-d'Arlet;EXACT;Les Anses-d'Arlet;97202;;;NON;20;19;97217;HEB-052 HEB-053 GAS-034 NAT-053 NAT-054;
+Les Anses-d’Arlet;VARIANTE;Les Anses-d'Arlet;97202;;;NON;1;1;97217;SPA-019;Variante d'écriture de « Les Anses-d'Arlet ».
+Anses-d'Arlet / Caravelle;MULTI;Les Anses-d'Arlet | La Trinité;97202 | 97230;Caravelle;;OUI;1;1;;ACT-064;Caravelle rattachée à La Trinité (presqu'île) : à confirmer.
+Basse-Pointe;EXACT;Basse-Pointe;97203;;;NON;5;5;97218;PAT-031 PAT-032 NAT-091 ACT-008 ACT-081;
+Bellefontaine;EXACT;Bellefontaine;97234;;;NON;4;2;97222;HEB-001 NAT-084 ACT-025 ACT-058;
+Le Carbet;EXACT;Le Carbet;97204;;;NON;22;18;97221;HEB-005 HEB-006 HEB-007 HEB-008 HEB-009;
+Le Carbet (Anse Latouche);LIEU_DIT;Le Carbet;97204;Anse Latouche;;NON;1;1;97221;HEB-010;
+Le Carbet / Bellefontaine / Le Morne-Vert;MULTI;Le Carbet | Bellefontaine | Le Morne-Vert;97204 | 97234 | 97233;;;NON;1;0;;NAT-093;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Carbet / Fonds-Saint-Denis;MULTI;Le Carbet | Fonds-Saint-Denis;97204 | 97208;;;NON;1;1;97221;ACT-055;Activité / site sur plusieurs communes : filtre sur chacune.
+Case-Pilote;EXACT;Case-Pilote;97205;;;NON;5;3;97222;HEB-002 HEB-003 PAT-067 NAT-086 ACT-022;
+Centre / Sud;ZONE;;;;Centre | Sud;OUI;1;1;;ACT-007;Pratique multi-sites (yole) : zones seulement, aucune commune.
+Côte Nord-Caraïbe;ZONE;;;;Nord Caraïbe;OUI;1;0;;ACT-023;Zone seulement (fiche inactive).
+Le Diamant;EXACT;Le Diamant;97206;;;NON;17;17;97223;HEB-047 HEB-048 HEB-049 HEB-050 HEB-051;
+Ducos;EXACT;Ducos;97207;;;NON;6;6;97224;HEB-024 GAS-019 PAT-076 ART-007 PRO-004;
+Ducos / Les Trois-Îlets;MULTI;Ducos | Les Trois-Îlets;97207 | 97231;;;NON;2;2;97229;NAT-028 ACT-032;Activité / site sur plusieurs communes : filtre sur chacune.
+Fonds-Saint-Denis;EXACT;Fonds-Saint-Denis;97208;;;NON;6;4;97250;HEB-004 GAS-001 NAT-001 NAT-002 NAT-087;
+Fort-de-France;EXACT;Fort-de-France;97209;;;NON;36;27;97200;HEB-025 HEB-026 HEB-027 HEB-028 HEB-029;
+Fort-de-France / Le Carbet;MULTI;Fort-de-France | Le Carbet;97209 | 97204;;;NON;1;1;;ACT-063;Activité / site sur plusieurs communes : filtre sur chacune.
+Fort-de-France (Maison du Parc);LIEU_DIT;Fort-de-France;97209;Maison du Parc;;NON;1;1;97200;PRO-010;
+Fort-de-France / Nord;COMMUNE_ZONE;Fort-de-France;97209;;Nord;OUI;1;1;;PAT-080;Commune + zone : vérifier que « Nord » désigne bien une zone d'intervention.
+Le François;EXACT;Le François;97210;;;NON;24;23;97240;HEB-065 HEB-066 HEB-067 GAS-047 GAS-048;
+Grande Anse d'Arlet (Les Anses-d'Arlet);LIEU_DIT;Les Anses-d'Arlet;97202;Grande Anse d'Arlet;;OUI;1;1;97217;PRO-011;Ordre inversé lieu-dit / commune dans la source.
+Grand'Rivière;EXACT;Grand'Rivière;97211;;;NON;7;5;97218;HEB-019 HEB-020 GAS-014 PAT-075 NAT-011;
+Grand'Rivière / Le Prêcheur;MULTI;Grand'Rivière | Le Prêcheur;97211 | 97219;;;NON;1;1;97218;ACT-059;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Gros-Morne;VARIANTE;Gros-Morne;97212;;;NON;2;2;97213;PAT-019 PAT-050;Variante d'écriture de « Gros-Morne ».
+Gros-Morne;EXACT;Gros-Morne;97212;;;NON;1;1;97213;ART-014;
+Île entière;ZONE;;;;Île entière;OUI;5;0;;SPA-007 SPA-008 SPA-009 SPA-010 SPA-011;Toute la Martinique : aucune commune (fiches inactives).
+Le Lamentin;EXACT;Le Lamentin;97213;;;NON;15;12;97232;HEB-034 HEB-035 HEB-036 HEB-037 HEB-038;
+Le Lamentin / Fort-de-France;MULTI;Le Lamentin | Fort-de-France;97213 | 97209;;;NON;1;1;;NAT-029;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Lorrain;EXACT;Le Lorrain;97214;;;NON;2;1;97214;PAT-005 NAT-094;
+Macouba;EXACT;Macouba;97215;;;NON;2;1;97218;PAT-020 NAT-095;
+Le Marigot;EXACT;Le Marigot;97216;;;NON;1;0;;GAS-015;
+Le Marin;EXACT;Le Marin;97217;;;NON;15;14;97290;HEB-068 HEB-069 HEB-070 HEB-071 GAS-049;
+Le Marin (Massel);LIEU_DIT;Le Marin;97217;Massel;;NON;1;1;97290;HEB-072;
+Le Marin (Morne Gommier);LIEU_DIT;Le Marin;97217;Morne Gommier;;NON;1;0;;HEB-073;
+Martinique – activité mobile;ZONE;;;;Activité mobile;OUI;1;1;;PRO-028;Professionnel mobile : aucune commune ni point.
+Morne-Rouge;VARIANTE;Le Morne-Rouge;97218;;;NON;4;3;97260;HEB-013 HEB-014 GAS-007 GAS-008;Variante d'écriture de « Le Morne-Rouge ».
+Le Morne-Rouge;EXACT;Le Morne-Rouge;97218;;;NON;7;4;97260;GAS-009 GAS-010 PAT-002 PAT-048 NAT-089;
+Morne-Rouge / Gros-Morne / Fonds-Saint-Denis;MULTI;Le Morne-Rouge | Gros-Morne | Fonds-Saint-Denis;97218 | 97212 | 97208;;;NON;1;1;97250;ACT-049;Activité / site sur plusieurs communes : filtre sur chacune.
+Le Morne-Vert;EXACT;Le Morne-Vert;97233;;;NON;2;1;97226;NAT-005 PRO-002;
+Nord Caraïbe;ZONE;;;;Nord Caraïbe;OUI;1;1;97226;NAT-020;Zone seulement. Code postal 97226 (Le Morne-Vert) : faut-il aussi rattacher cette commune ?
+Nord de l'île;ZONE;;;;Nord;OUI;1;1;97260;NAT-021;Zone seulement. Code postal 97260 (Le Morne-Rouge) : faut-il aussi rattacher cette commune ?
+Pitons du Carbet;LIEU_DIT;;;Pitons du Carbet;;OUI;2;0;;ACT-051 ACT-052;Massif à cheval sur plusieurs communes : communes non déduites, à préciser si utile (fiches inactives).
+Le Prêcheur;EXACT;Le Prêcheur;97219;;;NON;12;12;97250;HEB-011 HEB-012 PAT-028 PAT-049 NAT-006;
+Le Prêcheur / Grand’Rivière;MULTI;Le Prêcheur | Grand'Rivière;97219 | 97211;;;NON;1;1;;NAT-010;Activité / site sur plusieurs communes : filtre sur chacune.
+Rivière-Pilote;EXACT;Rivière-Pilote;97220;;;NON;5;4;97211;HEB-075 PAT-015 PAT-027 PAT-045 NAT-073;
+Rivière-Pilote (Anse Figuier);LIEU_DIT;Rivière-Pilote;97220;Anse Figuier;;NON;1;1;97211;PRO-023;
+Rivière-Pilote (Josseaud);LIEU_DIT;Rivière-Pilote;97220;Josseaud;;NON;1;0;;HEB-076;
+Rivière-Salée;EXACT;Rivière-Salée;97221;;;NON;2;1;97215;HEB-041 HEB-042;
+Le Robert;EXACT;Le Robert;97222;;;NON;11;10;97231;NAT-016 NAT-047 NAT-066 NAT-067 ACT-004;
+Sainte-Anne;EXACT;Sainte-Anne;97226;;;NON;28;24;97227;HEB-077 HEB-078 GAS-053 PAT-046 PAT-083;
+Sainte-Anne / Le Marin;MULTI;Sainte-Anne | Le Marin;97226 | 97217;;;NON;1;1;97227;ACT-057;Activité / site sur plusieurs communes : filtre sur chacune.
+Sainte-Luce;EXACT;Sainte-Luce;97227;;;NON;15;15;97228;HEB-060 HEB-061 GAS-042 GAS-043 GAS-044;
+Sainte-Luce (Monésie);LIEU_DIT;Sainte-Luce;97227;Monésie;;NON;1;1;97228;HEB-062;
+Sainte-Luce (Quartier Jacques);LIEU_DIT;Sainte-Luce;97227;Quartier Jacques;;NON;1;0;;HEB-063;
+Sainte-Marie;EXACT;Sainte-Marie;97228;;;NON;16;15;97230;HEB-023 GAS-016 PAT-006 PAT-021 PAT-035;
+Saint-Joseph;EXACT;Saint-Joseph;97224;;;NON;7;6;97212;HEB-043 GAS-030 GAS-031 GAS-032 NAT-017;
+Saint-Pierre;EXACT;Saint-Pierre;97225;;;NON;20;17;97250;HEB-015 HEB-016 HEB-017 GAS-011 GAS-012;
+Schœlcher;EXACT;Schœlcher;97229;;;NON;14;11;97233;HEB-044 HEB-045 HEB-046 GAS-033 PAT-039;
+Schœlcher (Fond Lahaye);LIEU_DIT;Schœlcher;97229;Fond Lahaye;;NON;1;1;97233;NAT-019;
+Sud Caraïbe;ZONE;;;;Sud Caraïbe;OUI;1;0;;SPA-006;Zone seulement (fiche inactive).
+Tartane (La Trinité);LIEU_DIT;La Trinité;97230;Tartane;;OUI;2;2;97220;GAS-017 GAS-018;Ordre inversé lieu-dit / commune dans la source.
+La Trinité;EXACT;La Trinité;97230;;;NON;13;12;97220;HEB-021 HEB-022 PAT-033 PAT-034 PAT-053;
+La Trinité (Caravelle);LIEU_DIT;La Trinité;97230;Caravelle;;NON;4;3;97220;NAT-041 NAT-042 NAT-043 ACT-009;
+La Trinité (Fond Gaoulé);LIEU_DIT;La Trinité;97230;Fond Gaoulé;;NON;1;0;;NAT-012;
+La Trinité (quartier Bassignac);LIEU_DIT;La Trinité;97230;quartier Bassignac;;NON;1;1;97220;PAT-004;
+La Trinité (Tartane);LIEU_DIT;La Trinité;97230;Tartane;;NON;1;1;97220;ACT-010;
+Les Trois-Îlets;EXACT;Les Trois-Îlets;97231;;;NON;37;33;97228 | 97229;HEB-054 HEB-055 HEB-056 HEB-057 HEB-058;
+Trois-Îlets;VARIANTE;Les Trois-Îlets;97231;;;NON;1;1;97229;HEB-064;Variante d'écriture de « Les Trois-Îlets ».
+Les Trois-Îlets (Anse Mitan);LIEU_DIT;Les Trois-Îlets;97231;Anse Mitan;;NON;1;1;97229;GAS-039;
+Les Trois-Îlets (Village de la Poterie);LIEU_DIT;Les Trois-Îlets;97231;Village de la Poterie;;NON;1;1;97229;GAS-041;
+Le Vauclin;EXACT;Le Vauclin;97232;;;NON;17;16;97280;GAS-052 PAT-014 NAT-070 NAT-071 NAT-072;
+Le Vauclin (Petite Grenade);LIEU_DIT;Le Vauclin;97232;Petite Grenade;;NON;1;1;97280;HEB-074;
+Le Vauclin (Pointe Faula);LIEU_DIT;Le Vauclin;97232;Pointe Faula;;NON;2;2;97280;PRO-019 PRO-029;
+(vide);SANS_COMMUNE;;;;;OUI;1;0;;PRO-018;Valeur vide (fiche inactive) : aucune commune déduite.
