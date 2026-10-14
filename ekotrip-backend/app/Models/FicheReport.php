@@ -19,6 +19,15 @@ class FicheReport extends Model
         return ['resolved_at' => 'datetime'];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (FicheReport $report) {
+            if ($report->isDirty('statut')) {
+                $report->resolved_at = in_array($report->statut, ['TRAITE', 'REJETE'], true) ? now() : null;
+            }
+        });
+    }
+
     public function fiche(): BelongsTo
     {
         return $this->belongsTo(Fiche::class);

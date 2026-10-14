@@ -2,10 +2,26 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
+use App\Models\Circuit;
+use App\Models\EcoEvaluation;
+use App\Models\Fiche;
+use App\Models\FicheReport;
+use App\Models\ImportRun;
+use App\Models\MapGroup;
+use App\Models\Media;
+use App\Models\PrecisionGeoRule;
+use App\Models\Setting;
+use App\Policies\CategoryPolicy;
+use App\Policies\FichePolicy;
+use App\Policies\FicheReportPolicy;
+use App\Policies\GenericAdminPolicy;
+use App\Policies\ReadOnlyAdminPolicy;
 use App\Services\Search\MysqlSearchEngine;
 use App\Services\Search\SearchEngine;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
@@ -23,6 +39,16 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::policy(Fiche::class, FichePolicy::class);
+        Gate::policy(Category::class, CategoryPolicy::class);
+        Gate::policy(FicheReport::class, FicheReportPolicy::class);
+        foreach ([ImportRun::class, Circuit::class] as $model) {
+            Gate::policy($model, ReadOnlyAdminPolicy::class);
+        }
+        foreach ([MapGroup::class, PrecisionGeoRule::class, Media::class, EcoEvaluation::class, Setting::class] as $model) {
+            Gate::policy($model, GenericAdminPolicy::class);
+        }
+
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
 
         // Anti-spam des signalements (62_EXTENSIONS_SCHEMA : « Limiter et journaliser »).

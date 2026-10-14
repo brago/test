@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\Catalogue\CatalogueCache;
+use App\Services\Catalogue\GeoClassifier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -43,6 +44,14 @@ class Fiche extends Model
 
     protected static function booted(): void
     {
+        // Toute modification de position (back-office) recalcule la classe géo :
+        // jamais de navigation vers un point sans coordonnées ou non navigable.
+        static::saving(function (Fiche $fiche) {
+            if ($fiche->isDirty(['latitude', 'longitude', 'precision_geo', 'content_type'])) {
+                $fiche->applyGeoClassification();
+            }
+            $fiche->budget_data_status = $fiche->budget === null ? 'UNKNOWN' : 'KNOWN';
+        });
         static::saved(fn () => CatalogueCache::flush());
         static::deleted(fn () => CatalogueCache::flush());
     }
@@ -121,6 +130,23 @@ class Fiche extends Model
             && $this->latitude !== null
             && $this->longitude !== null
             && (config('ekotrip.map.include_non_navigable') || $this->geo_display_type !== 'NON_NAVIGABLE');
+    }
+
+    public function applyGeoClassification(?GeoClassifier $classifier = null): void
+    {
+        $geo = ($classifier ?? new GeoClassifier)->classify($this->precision_geo, $this->content_type, $this->latitude, $this->longitude);
+        $this->geo_display_type = $geo['type'];
+        $this->geo_display_label = $geo['label'];
+        $this->geo_navigation_allowed = $geo['navigation_allowed'];
+    }
+
+    /** Rafraîchit les libellés de catégories indexés par la recherche FULLTEXT. */
+    public function refreshSearchCategories(): void
+    {
+        $names = $this->categories()->orderByDesc('category_fiche.is_primary')->pluck('name')->implode(' ');
+        if ($names !== $this->search_categories) {
+            $this->forceFill(['search_categories' => $names])->save();
+        }
     }
 
     public function primaryCategory(): ?Category

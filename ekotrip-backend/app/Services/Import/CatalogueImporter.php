@@ -12,6 +12,7 @@ use App\Models\ImportRun;
 use App\Models\MapGroup;
 use App\Models\PrecisionGeoRule;
 use App\Models\ProActivityLink;
+use App\Models\Setting;
 use App\Services\Catalogue\CatalogueCache;
 use App\Services\Catalogue\EcoBadgeResolver;
 use App\Services\Catalogue\GeoClassifier;
@@ -69,6 +70,7 @@ class CatalogueImporter
 
             DB::beginTransaction();
 
+            Setting::ensureDefaults();
             $categories = $this->importCategories(WorkbookReader::associate($sheets['CATEGORIES']));
             $this->seedPrecisionRules($json);
             $this->importFiches(WorkbookReader::associate($sheets['01_FICHES_APP']), $categories);
@@ -272,7 +274,6 @@ class CatalogueImporter
             if (! $category) {
                 $this->report->error('UNKNOWN_CATEGORY', "Fiche {$id} : catégorie « {$data['categorie']} » absente de CATEGORIES ; aucune association créée.", '01_FICHES_APP', $id);
             }
-            $data['search_categories'] = $data['categorie'];
 
             $fiche = Fiche::query()->find($id) ?? new Fiche(['id' => $id]);
             $isNew = ! $fiche->exists;
@@ -284,10 +285,7 @@ class CatalogueImporter
                 // La catégorie source devient la principale ; les catégories secondaires saisies en back-office sont conservées.
                 DB::table('category_fiche')->where('fiche_id', $id)->update(['is_primary' => false]);
                 $fiche->categories()->syncWithoutDetaching([$category->id => ['is_primary' => true]]);
-                $names = $fiche->categories()->pluck('name')->implode(' ');
-                if ($names !== $fiche->search_categories) {
-                    $fiche->forceFill(['search_categories' => $names])->saveQuietly();
-                }
+                $fiche->refreshSearchCategories();
             }
 
             // Le badge n'est jamais lu depuis niveau_ekotrip / score_ekotrip : seulement depuis une évaluation validée.

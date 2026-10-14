@@ -25,6 +25,14 @@ class Setting extends Model
         static::saved(fn () => CatalogueCache::flush());
     }
 
+    /** Crée les paramètres manquants avec leur valeur par défaut (jamais d'écrasement). */
+    public static function ensureDefaults(): void
+    {
+        foreach (config('ekotrip.settings_defaults') as $key => $value) {
+            static::query()->firstOrCreate(['key' => $key], ['value' => $value]);
+        }
+    }
+
     /** Valeur administrable, sinon valeur par défaut de config/ekotrip.php. */
     public static function get(string $key): mixed
     {
