@@ -1,6 +1,6 @@
 # Phase 1 — Socle : plan proposé (à valider)
 
-> Statut : **PROPOSITION — en attente de validation**. Aucun code n'est écrit avant votre accord.
+> Statut : **EN COURS** — décision du 14/10/2026 : **MySQL 8** retenu à la place de PostgreSQL (maintenance). Questions 2 à 8 (§10) toujours ouvertes : les choix provisoires sont isolés en configuration / tables pour être modifiés sans refonte.
 > Périmètre (`CLAUDE.md`, `60_ROADMAP_DEV`) : schéma, import du catalogue avec rapport, API catalogue / carte / recherche, back-office de contrôle.
 > Sources lues : classeur (`00`, `01`, `CATEGORIES`, `02`–`06`, `08`, `30`, `62`, `63`, `77`), dictionnaires CSV, JSON/GeoJSON, Spécifications V1.2, START HERE, Addendum, Lots 1.1 / 1.4 / 1.5 / 1.6, consigne carte Explorer, Recette globale, Données avant production.
 
@@ -27,10 +27,12 @@
 ## 2. Stack et choix techniques
 
 - **Laravel 11, PHP 8.3** (disponible dans l'environnement), projet créé à la racine de `ekotrip-backend/`.
-- **PostgreSQL 16** (recommandé plutôt que MySQL) : extensions `unaccent` + `pg_trgm` pour une recherche insensible aux accents et tolérante aux fautes, comme l'exige le Lot 1.5, sans moteur externe en V1. Les requêtes de proximité / bbox restent simples (383 points) : pas besoin de PostGIS en phase 1.
+- **MySQL 8** (décision projet) : jeu de caractères `utf8mb4`, collation **`utf8mb4_0900_ai_ci`** (insensible aux accents et à la casse) pour toutes les tables ; **index FULLTEXT** (InnoDB, parser par défaut) sur les champs de recherche. Proximité / bbox en SQL simple (383 points, distance haversine calculée en requête) : pas de type spatial en phase 1.
+- **Tolérance aux fautes** (suggestions) : la liste des noms et communes publics est mise en cache **Redis** ; la comparaison de proximité (normalisation sans accents + distance de Levenshtein / similarité) est faite **en PHP**, ce qui suffit pour 383 fiches. Toute la recherche passe par une interface `SearchEngine` (implémentation `MysqlSearchEngine`) : un futur `MeilisearchEngine` la remplacera sans toucher à l'API.
+- **Laravel Sail** pour le développement local : services `mysql` (8.0) et `redis`.
 - **Redis** : cache des réponses carte et catalogue, invalidé à chaque import ou modification en back-office.
 - **Filament 3** pour le back-office (comptes admin uniquement en phase 1).
-- **Pest** pour les tests ; base PostgreSQL de test.
+- **Pest** pour les tests, sur une vraie base MySQL 8 (`testing`) afin de couvrir FULLTEXT et la collation ; Redis réel pour le cache.
 - Lecture du `.xlsx` via **OpenSpout** (streaming, léger).
 - Pas d'appel Mapbox côté backend en phase 1 : le rendu de carte est côté mobile. Matrix et Directions viendront avec Mon Ékotrip.
 
@@ -94,7 +96,9 @@ Règle commune à tous les endpoints : uniquement les fiches **publiques** (`is_
 
 **Cohérence carte / liste** (Lot 1.5) : `/fiches` et `/map/fiches` partagent le même service de filtrage ; la liste contient en plus les fiches non cartographiables.
 
-**Recherche** : `unaccent` + trigrammes sur nom, commune, catégories, `tags_ia` et description, avec le classement du Lot 1.5 §8. Aucun boost lié à un partenaire.
+**Recherche** (`SearchEngine`) : index FULLTEXT sur `nom`, `commune`, `tags_ia`, `description` (+ libellé de catégorie dénormalisé `search_categories`) ; comparaisons `LIKE` sur colonnes en `utf8mb4_0900_ai_ci` pour les correspondances partielles de nom / commune ; score calculé selon le classement du Lot 1.5 §8 (nom exact > nom partiel > commune > catégorie / tags > description). Aucun boost lié à un partenaire.
+
+**Suggestions** (`/search/suggest`) : préfixe / sous-chaîne d'abord, puis, si peu de résultats, tolérance aux fautes en PHP sur la liste noms + communes du cache Redis (invalidée à chaque import ou modification).
 
 ---
 
@@ -127,7 +131,7 @@ Un test par règle non négociable touchée par la phase 1, plus les recettes de
 
 ## 8. Découpage en commits
 
-1. Squelette Laravel + PostgreSQL + Pest + CI locale (`composer test`).
+1. Squelette Laravel + Sail (MySQL 8, Redis) + Pest (`composer test`).
 2. Migrations et modèles (§3).
 3. Commande d'import + rapport + tests d'import.
 4. Services de filtrage / recherche + API v1 + tests.
@@ -150,7 +154,7 @@ Un test par règle non négociable touchée par la phase 1, plus les recettes de
 
 ## 10. Questions à valider avant de coder
 
-1. **Base de données** : PostgreSQL (recommandé, pour la recherche) ou MySQL 8 ?
+1. ~~Base de données~~ — **tranché : MySQL 8** (`utf8mb4_0900_ai_ci`, FULLTEXT, suggestions tolérantes en PHP + Redis, moteur remplaçable par Meilisearch).
 2. **Statuts de publication** (incohérence 5) : je propose `PUBLIABLE` et `CONTENU ÉDITORIAL` (si actives) → `published` ; `À CONTRÔLER` → `pending_review` ; `À RESTRUCTURER` et `À RECLASSER` → `unpublished` ; `NE PAS PUBLIER`, `ARCHIVÉ` et `ARCHIVER…` → `archived`. D'accord ?
 3. **Les 4 fiches « À déterminer »** (incohérence 1) : retirées de la carte (recommandé : pas de point fiable) ou affichées avec le libellé « Localisation non confirmée », sans bouton itinéraire ?
 4. **Placeholders « À CONFIRMER »** (incohérence 2) : publiés comme `null` (« non renseigné »), avec la valeur brute conservée en interne ?
