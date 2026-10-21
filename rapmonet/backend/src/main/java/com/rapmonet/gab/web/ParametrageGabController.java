@@ -4,16 +4,22 @@ import com.rapmonet.gab.internal.ParametrageGabService;
 import com.rapmonet.gab.internal.ParametrageGabService.Bin;
 import com.rapmonet.gab.internal.ParametrageGabService.Gab;
 import com.rapmonet.gab.internal.ParametrageGabService.Profil;
+import com.rapmonet.gab.internal.TableBinsGim;
 import com.rapmonet.securite.Securite;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import java.util.List;
 
@@ -23,9 +29,11 @@ import java.util.List;
 class ParametrageGabController {
 
     private final ParametrageGabService service;
+    private final TableBinsGim tableGim;
 
-    ParametrageGabController(ParametrageGabService service) {
+    ParametrageGabController(ParametrageGabService service, TableBinsGim tableGim) {
         this.service = service;
+        this.tableGim = tableGim;
     }
 
     @GetMapping("/terminaux")
@@ -75,5 +83,33 @@ class ParametrageGabController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void supprimerBin(@PathVariable String bin) {
         service.supprimerBin(bin, Securite.login());
+    }
+
+    // Table des BIN GIM (fichier LIS_IN_BIN)
+
+    @GetMapping("/bins/table-gim")
+    TableBinsGim.EtatTable etatTableGim() {
+        return tableGim.etat();
+    }
+
+    @PostMapping("/bins/table-gim")
+    TableBinsGim.RapportImport importerTableGim(@RequestParam("fichier") MultipartFile fichier) throws IOException {
+        return tableGim.importer(fichier.getOriginalFilename() == null ? "table-bin" : fichier.getOriginalFilename(), fichier.getInputStream(), Securite.login());
+    }
+
+    @GetMapping("/bins/table-gim/plages")
+    List<TableBinsGim.Plage> plages(@RequestParam(defaultValue = "") String recherche,
+                                    @RequestParam(defaultValue = "") String pays) {
+        return tableGim.rechercher(recherche, pays);
+    }
+
+    @GetMapping("/bins/controles")
+    List<TableBinsGim.ControleBin> controles() {
+        return tableGim.controles();
+    }
+
+    @GetMapping("/bins/propositions")
+    List<TableBinsGim.Proposition> propositions() {
+        return tableGim.propositions();
     }
 }

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -14,7 +14,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable } from 'rxjs';
 import { AuthService } from '../core/auth.service';
 import { messageErreur } from '../core/erreurs';
-import { BinCarte, Cassette, Gab, GabService, ProfilGab } from './gab.service';
+import { BinCarte, Cassette, ControleBin, EtatTableGim, Gab, GabService, PlageGim, ProfilGab, PropositionBin,
+  RapportImportGim } from './gab.service';
 
 type Edition =
   | { objet: 'gab'; nouveau: boolean; valeur: Gab }
@@ -26,7 +27,7 @@ const LETTRES = ['A', 'B', 'C', 'D'];
 /** Paramétrage GAB (déclaration des GAB, profils de cassettes, BIN cartes). */
 @Component({
   selector: 'app-parametrage-gab',
-  imports: [DecimalPipe, FormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule,
+  imports: [DatePipe, DecimalPipe, FormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule,
     MatSelectModule, MatSlideToggleModule, MatTableModule, MatTabsModule, MatTooltipModule],
   templateUrl: './parametrage-gab.html',
   styleUrl: './gab.scss',
@@ -45,7 +46,17 @@ export class ParametrageGab {
   protected readonly marques = ['NCR', 'WINCOR', 'HYOSUNG', 'GRG', 'DIEBOLD'];
   protected readonly colonnesGab = ['terminalId', 'libelle', 'agence', 'marque', 'profil', 'compteCaisse', 'actif', 'actions'];
   protected readonly colonnesProfil = ['code', 'libelle', 'A', 'B', 'C', 'D', 'actions'];
-  protected readonly colonnesBin = ['bin', 'libelle', 'typeCarte', 'actions'];
+  protected readonly colonnesBin = ['bin', 'libelle', 'typeCarte', 'gim', 'actions'];
+  protected readonly colonnesPlage = ['prefixe', 'debut', 'fin', 'pays', 'actions'];
+
+  // Table des BIN GIM
+  protected readonly tableGim = signal<EtatTableGim | null>(null);
+  protected readonly rapportGim = signal<RapportImportGim | null>(null);
+  protected readonly controles = signal<Record<string, ControleBin>>({});
+  protected readonly propositions = signal<PropositionBin[]>([]);
+  protected readonly plages = signal<PlageGim[] | null>(null);
+  protected rechercheGim = '';
+  protected paysGim = '';
 
   constructor() {
     this.recharger();
@@ -70,8 +81,46 @@ export class ParametrageGab {
       { cassette: 'C', coupure: 5000, type: 2 }, { cassette: 'D', coupure: 2000, type: 3 }] } });
   }
 
-  protected nouveauBin(): void {
-    this.ouvrir({ objet: 'bin', nouveau: true, valeur: { bin: '', libelle: '', typeCarte: 'DEBIT' } });
+  protected nouveauBin(bin = '', libelle = ''): void {
+    this.ouvrir({ objet: 'bin', nouveau: true, valeur: { bin, libelle, typeCarte: 'DEBIT' } });
+  }
+
+  /** BIN à proposer pour une plage GIM : les chiffres communs au début et à la fin de la plage (8 au plus). */
+  protected binDePlage(p: PlageGim): string {
+    let i = 0;
+    while (i < p.debut.length && p.debut[i] === p.fin[i]) i++;
+    return p.debut.substring(0, Math.max(6, Math.min(i, 8)));
+  }
+
+  protected importerTableGim(e: Event): void {
+    const input = e.target as HTMLInputElement;
+    const f = input.files?.[0];
+    input.value = '';
+    if (!f) return;
+    this.erreur.set(null);
+    this.message.set(null);
+    this.service.importerTableGim(f).subscribe({
+      next: (r) => { this.rapportGim.set(r); this.recharger(); },
+      error: (x) => this.erreur.set(messageErreur(x)),
+    });
+  }
+
+  /** Préfixe partagé : afficher ses plages pour choisir la sous-plage ; sinon déclarer le BIN. */
+  protected traiterProposition(p: PropositionBin): void {
+    if (p.prefixePartage) {
+      this.rechercheGim = p.bin;
+      this.paysGim = '';
+      this.chercherPlages();
+    } else {
+      this.nouveauBin(p.bin);
+    }
+  }
+
+  protected chercherPlages(): void {
+    this.service.plagesGim(this.rechercheGim.trim(), this.paysGim).subscribe({
+      next: (p) => this.plages.set(p),
+      error: (x) => this.erreur.set(messageErreur(x)),
+    });
   }
 
   protected modifier(e: Edition): void {
@@ -122,5 +171,8 @@ export class ParametrageGab {
     this.service.gabs().subscribe((g) => this.gabs.set(g));
     this.service.profils().subscribe((p) => this.profils.set(p));
     this.service.bins().subscribe((b) => this.bins.set(b));
+    this.service.etatTableGim().subscribe((t) => this.tableGim.set(t));
+    this.service.controlesBins().subscribe((c) => this.controles.set(Object.fromEntries(c.map((x) => [x.bin, x]))));
+    this.service.propositionsBins().subscribe((p) => this.propositions.set(p));
   }
 }

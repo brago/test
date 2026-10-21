@@ -11,6 +11,25 @@ Source : guide utilisateur MONETICA V2, § V (écrans « Paramétrage GAB », «
 | Profils GAB | Cassettes A à D : coupure (XOF) et **type de billet NCR** (1 à 4) |
 | BIN cartes | BIN (6 à 11 chiffres), libellé produit, type débit / crédit / prépayée |
 
+### Table des BIN GIM (fichier `LIS_IN_BIN`)
+
+Fichier texte du GIM, une plage par ligne : `BIN;début de plage;fin de plage;code pays;00;INT;;;;;`
+(plages de 16 ou 19 chiffres, code pays ISO numérique : 204 Bénin, 384 Côte d'Ivoire, 466 Mali, 562 Niger,
+624 Guinée-Bissau, 686 Sénégal, 768 Togo, 854 Burkina Faso). Il couvre **toutes les banques membres** et ne
+contient pas de code banque : il ne dit pas lesquels sont les BIN de la banque.
+
+- Import dans l'onglet « BIN cartes » (`TableBinsGim`, tables `bin_gim` et `bin_gim_import`) : remplace la table ;
+  les lignes invalides sont ignorées et listées. La plage (début, fin) fait foi, pas la première zone.
+- Contrôle de chaque BIN déclaré : plages GIM couvertes, pays, et **préfixe partagé** quand d'autres plages du même
+  préfixe à 6 chiffres n'appartiennent pas à la banque (ex. 639560, découpé en sous-plages de 8 chiffres entre
+  banques de plusieurs pays).
+- Propositions : BIN vus dans les présentations des fichiers LIS émission (SW, TC 05 à 07, usage 1), c'est-à-dire
+  les cartes de la banque utilisées ailleurs (`ingestion.BinsEmission`), non encore déclarés.
+
+**Limite** : les cartes sont stockées masquées (6 premiers + 4 derniers chiffres), et les journaux NCR n'impriment
+que 6 chiffres. Un BIN de 8 chiffres est donc comparé sur ses 6 premiers : les cartes d'autres banques du même
+préfixe partagé sont comptées comme des cartes de la banque. L'écran le signale (« Préfixe partagé »).
+
 Les compteurs du journal NCR (`NOTES PRESENTED`, `CASH TOTAL`, `ADD CASH`) sont donnés **par type de billet**,
 pas par cassette (colonne TYPE du bloc `CASSETTE INFORMATION`). Plusieurs cassettes peuvent partager un type ;
 un type a alors une seule coupure (contrôlé). Profil livré :

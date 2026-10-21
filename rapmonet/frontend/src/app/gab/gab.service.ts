@@ -10,6 +10,14 @@ export interface Gab {
   compteCaisse: string | null; compteManquant: string | null; compteExcedent: string | null; actif: boolean;
 }
 export interface BinCarte { bin: string; libelle: string; typeCarte: 'DEBIT' | 'CREDIT' | 'PREPAYEE'; }
+export interface PlageGim { prefixe: string; debut: string; fin: string; pays: string; libellePays: string; }
+export interface EtatTableGim {
+  fichier: string | null; importeLe: string | null; importePar: string | null; plages: number;
+  parPays: { pays: string; libellePays: string; plages: number }[];
+}
+export interface RapportImportGim { fichier: string; plages: number; lignesIgnorees: number; anomalies: string[]; }
+export interface ControleBin { bin: string; plagesCouvertes: number; pays: string[]; autresPlagesDuPrefixe: number; paysAutresPlages: string[]; }
+export interface PropositionBin { bin: string; operations: number; plagesGim: number; pays: string[]; prefixePartage: boolean; }
 
 export type StatutGab = 'SAISI' | 'VALIDE' | 'ANNULE';
 export const LIBELLES_STATUT_GAB: Record<string, string> = { SAISI: 'À valider', VALIDE: 'Validé', ANNULE: 'Annulé' };
@@ -88,6 +96,17 @@ export class GabService {
   bins(): Observable<BinCarte[]> { return this.http.get<BinCarte[]>(`${this.p}/bins`); }
   enregistrerBin(b: BinCarte): Observable<BinCarte> { return this.http.put<BinCarte>(`${this.p}/bins/${b.bin}`, b); }
   supprimerBin(bin: string): Observable<void> { return this.http.delete<void>(`${this.p}/bins/${bin}`); }
+  etatTableGim(): Observable<EtatTableGim> { return this.http.get<EtatTableGim>(`${this.p}/bins/table-gim`); }
+  importerTableGim(f: File): Observable<RapportImportGim> {
+    const d = new FormData();
+    d.append('fichier', f, f.name);
+    return this.http.post<RapportImportGim>(`${this.p}/bins/table-gim`, d);
+  }
+  plagesGim(recherche: string, pays: string): Observable<PlageGim[]> {
+    return this.http.get<PlageGim[]>(`${this.p}/bins/table-gim/plages`, { params: { recherche, pays } });
+  }
+  controlesBins(): Observable<ControleBin[]> { return this.http.get<ControleBin[]>(`${this.p}/bins/controles`); }
+  propositionsBins(): Observable<PropositionBin[]> { return this.http.get<PropositionBin[]>(`${this.p}/bins/propositions`); }
 
   appros(c: CritereGab, page: number, taille: number): Observable<PageResultat<Appro>> {
     return this.http.get<PageResultat<Appro>>('/api/gab/appros', { params: params({ ...c, page, taille }) });
