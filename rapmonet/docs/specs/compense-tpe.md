@@ -57,7 +57,7 @@ Libellés repris de la macro : « Paiement Transactions du 07 Mai Jeudi TPE <com
   récapitulatif daté de J+1 comme dans la macro.
 - Plus de date d'expiration (la macro se fermait après le 31/10/2026).
 
-## À confirmer
+## Confirmé par la banque
 
-1. Le compte COMM GIM n'est utilisé par aucune écriture de la macro : est-ce voulu ?
-2. Toutes les commissions (y compris VISA / Mastercard) sont transférées vers CMPNSE GIM, comme dans la macro.
+1. Le compte COMM GIM n'est utilisé par aucune écriture : c'est voulu (conservé pour mémoire dans les paramètres).
+2. Toutes les commissions, y compris VISA / Mastercard, sont transférées vers CMPNSE GIM, comme dans la macro.
