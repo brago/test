@@ -56,6 +56,7 @@
     <mat-label>Compte</mat-label>
     <input matInput [(ngModel)]="compte" name="compte" />
   </mat-form-field>
+  <mat-checkbox [(ngModel)]="ecartBillets" name="ecartBillets">Écart billets / ticket</mat-checkbox>
   <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
 </form>
 
@@ -101,7 +102,14 @@
             </ng-container>
             <ng-container matColumnDef="billets">
               <th mat-header-cell *matHeaderCellDef>Billets</th>
-              <td mat-cell *matCellDef="let o" class="mono">@if (o.type === 'RETRAIT' && o.billetsPresentes) { {{ o.billetsPresentes.join(' · ') }} }</td>
+              <td mat-cell *matCellDef="let o" class="mono">
+                @if (o.type === 'RETRAIT' && o.billetsPresentes) {
+                  <span [matTooltip]="o.montantBillets !== null ? 'Valeur présentée : ' + (o.montantBillets | number) + ' ' + (o.devise ?? '') : ''">{{ o.billetsPresentes.join(' · ') }}</span>
+                  @if (o.ecartBillets) {
+                    <mat-icon class="alerte" [matTooltip]="'Billets présentés ' + (o.montantBillets | number) + ', ticket ' + (o.montant | number) + ' : écart de ' + (o.ecartBillets | number)">error</mat-icon>
+                  }
+                }
+              </td>
             </ng-container>
             <ng-container matColumnDef="incidents">
               <th mat-header-cell *matHeaderCellDef>Incidents</th>
@@ -131,11 +139,21 @@
           @if (s.compteurs; as c) {
             <table class="compteurs">
               <tr><th></th>@for (t of types; track t) { <th>{{ t }}</th> }</tr>
-              <tr><td>Coupure</td>@for (v of c.coupures; track $index) { <td>{{ v }}</td> }</tr>
-              @if (s.billetsPresentes) { <tr class="fort"><td>Présentés</td>@for (v of s.billetsPresentes; track $index) { <td>{{ v }}</td> }</tr> }
+              @if (s.coupures) { <tr><td>Coupure (XOF)</td>@for (t of types; track $index) { <td>{{ s.coupures[$index] | number }}</td> }</tr> }
+              @if (s.billetsPresentes) {
+                <tr class="fort"><td>Présentés</td>@for (v of s.billetsPresentes; track $index) { <td>{{ v }}</td> }</tr>
+                @if (s.coupures) {
+                  <tr><td>Valeur présentée</td>@for (v of valeurs(s.billetsPresentes, s); track $index) { <td>{{ v | number }}</td> }
+                    <td class="fort">= {{ somme(valeurs(s.billetsPresentes, s)) | number }}</td></tr>
+                }
+              }
               <tr><td>Distribués (cumul)</td>@for (v of c.distribues; track $index) { <td>{{ v }}</td> }</tr>
               <tr><td>Rejetés (cumul)</td>@for (v of c.rejetes; track $index) { <td>{{ v }}</td> }</tr>
               <tr><td>Restants</td>@for (v of c.restants; track $index) { <td>{{ v }}</td> }</tr>
+              @if (s.coupures) {
+                <tr><td>Valeur restante</td>@for (v of valeurs(c.restants, s); track $index) { <td>{{ v | number }}</td> }
+                  <td class="fort">= {{ somme(valeurs(c.restants, s)) | number }}</td></tr>
+              }
             </table>
           }
           <pre class="journal">{{ s.texte }}</pre>

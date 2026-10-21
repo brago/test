@@ -88,6 +88,9 @@ class ConsultationJournauxService implements ConsultationJournaux {
             w.append(" and o.carte like ?");
             params.add("%" + c.carte().strip());
         }
+        if (c.ecartBillets()) {
+            w.append(" and o.montant_billets is distinct from o.montant and o.montant_billets is not null");
+        }
         if (c.compte() != null && !c.compte().isBlank()) {
             w.append(" and o.compte like ?");
             params.add("%" + c.compte().strip() + "%");
@@ -111,7 +114,12 @@ class ConsultationJournauxService implements ConsultationJournaux {
                 rs.getString("libelle_reponse"), rs.getString("compte"), rs.getString("reference"),
                 billets == null ? null : json.readValue(billets, new TypeReference<List<Integer>>() { }),
                 rs.getBoolean("billets_pris"),
-                json.readValue(rs.getString("incidents"), new TypeReference<List<String>>() { }));
+                json.readValue(rs.getString("incidents"), new TypeReference<List<String>>() { }),
+                (Long) rs.getObject("montant_billets"), ecart((Long) rs.getObject("montant_billets"), (Long) rs.getObject("montant")));
+    }
+
+    private static Long ecart(Long montantBillets, Long montant) {
+        return montantBillets == null || montant == null ? null : montantBillets - montant;
     }
 
     @Override
@@ -130,8 +138,14 @@ class ConsultationJournauxService implements ConsultationJournaux {
                             json.readValue(rs.getString("incidents"), new TypeReference<List<String>>() { }),
                             rs.getBoolean("complete"), rs.getString("texte"),
                             jdbc.sql(SELECT + " where o.session_id = ? order by o.numero_ligne").param(id)
-                                    .query((r, k) -> operation(r)).list());
+                                    .query((r, k) -> operation(r)).list(),
+                            coupures());
                 }).optional();
+    }
+
+    private List<Long> coupures() {
+        return jdbc.sql("select valeur from parametre_application where cle = 'ejournal.coupures'").query(String.class)
+                .optional().map(IntegrationJournauxService::lireCoupures).orElse(null);
     }
 
     @Override

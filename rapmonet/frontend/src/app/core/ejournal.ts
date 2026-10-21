@@ -19,19 +19,21 @@ export interface OperationGab {
   id: number; sessionId: number; terminal: string; type: 'RETRAIT' | 'SOLDE'; statut: StatutOperation; dateHeure: string | null;
   carte: string | null; montant: number | null; devise: string | null; codeReponse: string | null; libelleReponse: string | null;
   compte: string | null; reference: string | null; billetsPresentes: number[] | null; billetsPris: boolean; incidents: string[];
+  montantBillets: number | null; ecartBillets: number | null;
 }
 export interface SessionGab {
   id: number; nomFichier: string; terminal: string; date: string | null; heureDebut: string | null; carte: string | null;
   billetsPresentes: number[] | null; billetsPris: boolean;
   compteurs: { coupures: number[]; distribues: number[]; rejetes: number[]; restants: number[] } | null;
   incidents: string[]; complete: boolean; texte: string; operations: OperationGab[];
+  coupures: number[] | null;
 }
 export interface EvenementGab {
   id: number; terminal: string; dateHeure: string | null; actions: string[];
   releves: Record<string, number[]>[]; especesAjoutees: Record<string, number>; texte: string;
 }
 export interface CritereJournal {
-  du?: string; au?: string; terminal?: string; type?: string; statut?: string; codeReponse?: string; carte?: string; compte?: string;
+  du?: string; au?: string; terminal?: string; type?: string; statut?: string; codeReponse?: string; carte?: string; compte?: string; ecartBillets?: string;
 }
 
 export interface ConfigurationBatch {

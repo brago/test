@@ -3,6 +3,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,7 +25,7 @@ import {
 @Component({
   selector: 'app-exploration-ejournal',
   imports: [
-    DatePipe, DecimalPipe, FormsModule, MatButtonModule, MatCardModule, MatDatepickerModule, MatFormFieldModule,
+    DatePipe, DecimalPipe, FormsModule, MatButtonModule, MatCheckboxModule, MatCardModule, MatDatepickerModule, MatFormFieldModule,
     MatIconModule, MatInputModule, MatPaginatorModule, MatProgressBarModule, MatSelectModule, MatTableModule,
     MatTabsModule, MatTooltipModule,
   ],
@@ -43,6 +44,7 @@ export class ExplorationEjournal {
   protected codeReponse = '';
   protected carte = '';
   protected compte = '';
+  protected ecartBillets = false;
 
   protected readonly terminaux = signal<string[]>([]);
   protected readonly lignes = signal<OperationGab[]>([]);
@@ -73,6 +75,7 @@ export class ExplorationEjournal {
     return {
       du: dateIso(this.du), au: dateIso(this.au), terminal: this.terminal, type: this.type, statut: this.statut,
       codeReponse: this.codeReponse.trim(), carte: this.carte.trim(), compte: this.compte.trim(),
+      ecartBillets: this.ecartBillets ? 'true' : undefined,
     };
   }
 
@@ -99,6 +102,15 @@ export class ExplorationEjournal {
   protected ouvrir(o: OperationGab): void {
     this.selection.set(o.id);
     this.service.session(o.sessionId).subscribe((s) => this.session.set(s));
+  }
+
+  /** Valeur de billets, par type de cassette (nombre × coupure paramétrée). */
+  protected valeurs(nombres: number[] | null, s: SessionGab): number[] {
+    return (nombres ?? []).map((n, i) => n * (s.coupures?.[i] ?? 0));
+  }
+
+  protected somme(v: number[]): number {
+    return v.reduce((a, b) => a + b, 0);
   }
 
   protected exporter(format: 'xlsx' | 'pdf'): void {

@@ -48,6 +48,8 @@ class ExplorationJournauxController {
             new Colonne("Compte", Type.TEXTE, 10),
             new Colonne("Référence", Type.TEXTE, 5),
             new Colonne("Billets présentés", Type.TEXTE, 6),
+            new Colonne("Montant billets", Type.MONTANT, 7),
+            new Colonne("Écart billets", Type.MONTANT, 6),
             new Colonne("Incidents", Type.TEXTE, 16));
 
     private final ConsultationJournaux consultation;
@@ -65,8 +67,9 @@ class ExplorationJournauxController {
             @RequestParam(required = false) String terminal, @RequestParam(required = false) String type,
             @RequestParam(required = false) String statut, @RequestParam(required = false) String codeReponse,
             @RequestParam(required = false) String carte, @RequestParam(required = false) String compte,
+            @RequestParam(defaultValue = "false") boolean ecartBillets,
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int taille) {
-        return consultation.rechercher(new Critere(du, au, terminal, type, statut, codeReponse, carte, compte),
+        return consultation.rechercher(new Critere(du, au, terminal, type, statut, codeReponse, carte, compte, ecartBillets),
                 Math.max(page, 0), Math.clamp(taille, 1, 500));
     }
 
@@ -77,9 +80,10 @@ class ExplorationJournauxController {
                   @RequestParam(required = false) String terminal, @RequestParam(required = false) String type,
                   @RequestParam(required = false) String statut, @RequestParam(required = false) String codeReponse,
                   @RequestParam(required = false) String carte, @RequestParam(required = false) String compte,
+                  @RequestParam(defaultValue = "false") boolean ecartBillets,
                   HttpServletResponse reponse) throws IOException {
         FormatExport f = ExplorationLisController.formatExport(format);
-        Critere critere = new Critere(du, au, terminal, type, statut, codeReponse, carte, compte);
+        Critere critere = new Critere(du, au, terminal, type, statut, codeReponse, carte, compte, ecartBillets);
         long nombre = consultation.compter(critere);
         int max = f == FormatExport.PDF ? MAX_PDF : MAX_EXCEL;
         if (nombre > max) {
@@ -91,7 +95,8 @@ class ExplorationJournauxController {
                 "Période : " + (du == null ? "début" : jj.format(du)) + " au " + (au == null ? "aujourd'hui" : jj.format(au))
                         + " · GAB : " + (terminal == null || terminal.isBlank() ? "tous" : terminal),
                 "Opération : " + valeur(type, "toutes") + " · Statut : " + valeur(statut, "tous")
-                        + " · Réponse : " + valeur(codeReponse, "toutes"),
+                        + " · Réponse : " + valeur(codeReponse, "toutes")
+                        + (ecartBillets ? " · Écart billets / ticket uniquement" : ""),
                 nombre + " opération(s)");
         audit.enregistrer(ActionsAudit.EXPORT, "Opérations des journaux GAB (" + f.extension() + ")", String.join(" ; ", criteres));
         Tableau tableau = new Tableau("Opérations des journaux GAB", criteres, Securite.login(), COLONNES,
@@ -100,6 +105,7 @@ class ExplorationJournauxController {
                         o.montant(), o.devise(), o.codeReponse(), o.libelleReponse(), o.statut(), o.compte(), o.reference(),
                         o.billetsPresentes() == null ? null
                                 : o.billetsPresentes().stream().map(String::valueOf).collect(Collectors.joining(", ")),
+                        o.montantBillets(), o.ecartBillets(),
                         String.join(" ; ", o.incidents())))));
         ReponseExport.envoyer(reponse, tableau, f, "operations_gab");
     }

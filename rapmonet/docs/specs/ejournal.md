@@ -83,9 +83,18 @@ Règles :
   (utilisateur `BATCH` pour l'exécution planifiée).
 - Désactiver la planification sur un serveur (ex. second nœud) : `rapmonet.batch.planification-active: false`.
 
-## Point ouvert
+## Valeur des billets (coupures)
 
-Sur les journaux reçus, `NOTES PRESENTED` × coupures (`DENOMINATION 5 10 20 50`) ne correspond au montant
-du ticket que pour 4 retraits sur 308 (ex. 300 000 XOF pour 23,12,5,0 billets). La configuration des
-cassettes du GAB (`CASSETTE INFORMATION` : deux cassettes de type 1, devise GBP) laisse penser à un GAB
-de test. Ce contrôle n'est donc pas activé ; à confirmer sur un journal de production.
+La ligne `DENOMINATION 5 10 20 50` du journal (bloc CASH TOTAL) **n'est pas fiable** : elle est imprimée
+telle quelle quelle que soit la monnaie chargée. Les journaux de production (confirmés par l'utilisateur)
+montrent que les cassettes de type 1 à 4 contiennent des billets de **10 000, 5 000, 2 000 et 1 000 XOF** :
+avec ces valeurs, billets présentés × coupures = montant du ticket pour 308 retraits sur 308.
+
+- Paramètre `ejournal.coupures` = `10000,5000,2000,1000` (une valeur par type de cassette).
+  Un paramétrage par GAB viendra avec le module GAB (lot 5) si certains GAB sont chargés autrement.
+- `ej_operation.montant_billets` : valeur des billets présentés pour le retrait approuvé de la session.
+- **Contrôle** : si cette valeur diffère du montant du ticket → avertissement sur le fichier
+  (« montant du ticket 75 000, billets présentés 70 000 (5 × 10 000 + …) – écart de -5 000 »).
+- Exploration : filtre « Écart billets / ticket », icône sur les lignes en écart, valeur présentée et
+  valeur restante dans les cassettes affichées dans l'extrait ; colonnes « Montant billets » et
+  « Écart billets » dans les exports.

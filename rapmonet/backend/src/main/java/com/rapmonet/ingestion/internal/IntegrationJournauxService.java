@@ -29,11 +29,13 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 class IntegrationJournauxService implements IntegrationJournaux {
@@ -61,6 +63,7 @@ class IntegrationJournauxService implements IntegrationJournaux {
         ResultatLectureJournal lecture = new LecteurJournalNcr(format)
                 .lire(LecteurJournalNcr.lignes(new String(contenu, StandardCharsets.ISO_8859_1)));
         List<Anomalie> anomalies = new ArrayList<>(lecture.anomalies());
+        List<Long> coupures = coupures(anomalies);
 
         jdbc.sql("select nom, integre_le from ej_fichier where empreinte_sha256 = ?").param(empreinte)
                 .query((rs, n) -> "Fichier déjà intégré (« %s », le %s).".formatted(
@@ -86,7 +89,7 @@ class IntegrationJournauxService implements IntegrationJournaux {
         Long id = null;
         if (integre) {
             id = enregistrerFichier(nom, empreinte, terminal, debut, fin, lecture, utilisateur);
-            enregistrerContenu(id, terminal, lecture, compte, montant);
+            enregistrerContenu(id, terminal, lecture, compte, montant, coupures, anomalies);
             enregistrerAnomalies(id, anomalies);
             int nbAvertissements = (int) anomalies.stream().filter(a -> a.gravite() == Gravite.AVERTISSEMENT).count();
             jdbc.sql("""
@@ -131,7 +134,8 @@ class IntegrationJournauxService implements IntegrationJournaux {
         return cle.getKeyAs(Long.class);
     }
 
-    private void enregistrerContenu(long id, String terminal, ResultatLectureJournal lecture, int[] compte, long[] montant) {
+    private void enregistrerContenu(long id, String terminal, ResultatLectureJournal lecture, int[] compte, long[] montant,
+                                    List<Long> coupures, List<Anomalie> anomalies) {
         List<SessionGab> sessions = lecture.sessions();
         LocalDate dateConnue = null;
         for (int i = 0; i < sessions.size(); i++) {
@@ -157,6 +161,19 @@ class IntegrationJournauxService implements IntegrationJournaux {
                             json.writeValueAsString(s.incidents()), s.complete(), s.texte())
                     .update(cle, "id");
             long sessionId = cle.getKeyAs(Long.class);
+            // Billets présentés : rattachés au retrait approuvé de la session (s'il est seul).
+            List<OperationGab> retraitsApprouves = s.operations().stream()
+                    .filter(o -> o.type() == TypeOperationGab.RETRAIT && "00".equals(o.codeReponse())).toList();
+            Long montantBillets = retraitsApprouves.size() == 1 ? valeur(s.billetsPresentes(), coupures) : null;
+            if (montantBillets != null && retraitsApprouves.getFirst().montant() != null
+                    && !montantBillets.equals(retraitsApprouves.getFirst().montant())) {
+                OperationGab r = retraitsApprouves.getFirst();
+                anomalies.add(Anomalie.avertissement(r.numeroLigne(), ("Retrait du %s : montant du ticket %s, billets présentés %s "
+                        + "(%s) – écart de %s. Vérifiez la valeur des coupures paramétrée (%s).").formatted(
+                        r.dateHeure(), montantTexte(r.montant()), montantTexte(montantBillets),
+                        detailBillets(s.billetsPresentes(), coupures), montantTexte(montantBillets - r.montant()),
+                        coupures.stream().map(String::valueOf).collect(Collectors.joining(", ")))));
+            }
             for (OperationGab o : s.operations()) {
                 String statut = statut(o, s);
                 String term = o.terminal() != null ? o.terminal() : terminal;
@@ -165,11 +182,12 @@ class IntegrationJournauxService implements IntegrationJournaux {
                         Objects.toString(o.montant(), ""), Objects.toString(o.codeReponse(), ""));
                 int insere = jdbc.sql("""
                                 insert into ej_operation (fichier_id, session_id, terminal_id, type, statut, date_heure, carte,
-                                    reference, montant, devise, code_reponse, compte, numero_ligne, cle_unicite)
-                                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (cle_unicite) do nothing""")
+                                    reference, montant, devise, code_reponse, compte, numero_ligne, cle_unicite, montant_billets)
+                                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (cle_unicite) do nothing""")
                         .params(id, sessionId, term, o.type().name(), statut,
                                 o.dateHeure() == null ? null : Timestamp.valueOf(o.dateHeure()), o.carte(), o.reference(),
-                                o.montant(), o.devise(), o.codeReponse(), o.compte(), o.numeroLigne(), unicite)
+                                o.montant(), o.devise(), o.codeReponse(), o.compte(), o.numeroLigne(), unicite,
+                                retraitsApprouves.size() == 1 && retraitsApprouves.getFirst() == o ? montantBillets : null)
                         .update();
                 if (insere == 0) {
                     compte[1]++;
@@ -209,6 +227,53 @@ class IntegrationJournauxService implements IntegrationJournaux {
             return "APPROUVE";
         }
         return s.billetsPris() ? "DISTRIBUE" : "NON_PRIS";
+    }
+
+    /** Valeur des billets des cassettes de type 1 à 4 (paramètre ejournal.coupures). */
+    private List<Long> coupures(List<Anomalie> anomalies) {
+        String valeur = jdbc.sql("select valeur from parametre_application where cle = 'ejournal.coupures'")
+                .query(String.class).optional().orElse("");
+        List<Long> coupures = lireCoupures(valeur);
+        if (coupures == null) {
+            anomalies.add(Anomalie.avertissement(null, "Paramètre « ejournal.coupures » invalide (« " + valeur
+                    + " ») : montant des billets présentés non contrôlé."));
+        }
+        return coupures;
+    }
+
+    static List<Long> lireCoupures(String valeur) {
+        try {
+            List<Long> l = Arrays.stream(valeur.split(",")).map(String::strip).map(Long::valueOf).toList();
+            return l.isEmpty() || l.stream().anyMatch(v -> v < 0) ? null : l;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** Billets présentés × coupures ; null si non calculable. */
+    static Long valeur(List<Integer> billets, List<Long> coupures) {
+        if (billets == null || coupures == null || billets.size() > coupures.size()) {
+            return null;
+        }
+        long total = 0;
+        for (int i = 0; i < billets.size(); i++) {
+            total += billets.get(i) * coupures.get(i);
+        }
+        return total;
+    }
+
+    private static String detailBillets(List<Integer> billets, List<Long> coupures) {
+        List<String> l = new ArrayList<>();
+        for (int i = 0; i < billets.size(); i++) {
+            if (billets.get(i) > 0) {
+                l.add(billets.get(i) + " × " + montantTexte(coupures.get(i)));
+            }
+        }
+        return l.isEmpty() ? "aucun billet" : String.join(" + ", l);
+    }
+
+    private static String montantTexte(long v) {
+        return String.format(java.util.Locale.FRANCE, "%,d", v).replace('\u202f', ' ').replace('\u00a0', ' ');
     }
 
     private void enregistrerAnomalies(long id, List<Anomalie> anomalies) {
