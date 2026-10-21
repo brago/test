@@ -1,0 +1,3 @@
+spring:
+  datasource:
+    url: ${RAPMONET_TEST_DB_URL:jdbc:postgresql://localhost:5432/rapmonet_test}

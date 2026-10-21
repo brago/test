@@ -1,0 +1,25 @@
+<h1>Bienvenue dans RAPMONET</h1>
+<p>Chargement des fichiers monétiques, rapprochements et reporting réglementaire.</p>
+
+<mat-card appearance="outlined" class="etat">
+  <mat-card-header>
+    <mat-card-title>État du système</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @switch (etat().statut) {
+      @case ('chargement') { <p>Connexion au serveur…</p> }
+      @case ('erreur') {
+        <p class="ko"><mat-icon>error</mat-icon> Serveur injoignable. Vérifiez que le backend est démarré.</p>
+      }
+      @case ('ok') {
+        @let e = $any(etat());
+        <p class="ok"><mat-icon>check_circle</mat-icon> Serveur connecté</p>
+        <dl>
+          <dt>Version</dt><dd>{{ e.info.version }}</dd>
+          <dt>Base de données</dt><dd>{{ e.info.baseDeDonnees.produit }} {{ e.info.baseDeDonnees.version }}</dd>
+          <dt>Version du schéma</dt><dd>{{ e.info.baseDeDonnees.schemaVersion }}</dd>
+        </dl>
+      }
+    }
+  </mat-card-content>
+</mat-card>

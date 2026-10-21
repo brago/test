@@ -1,0 +1,12 @@
+:host { display: flex; flex-direction: column; height: 100vh; }
+.barre {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  gap: 12px;
+  button { color: inherit; }
+  .titre { font-weight: 700; letter-spacing: 1px; }
+  .sous-titre { font-size: 14px; opacity: .8; }
+}
+.conteneur { flex: 1; }
+.menu { width: 270px; }
+.contenu { padding: 24px; }

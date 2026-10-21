@@ -1,0 +1,7 @@
+.etat { max-width: 520px; margin-top: 16px; }
+.ok, .ko { display: flex; align-items: center; gap: 8px; }
+.ok { color: #1b7f3b; }
+.ko { color: var(--mat-sys-error); }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
+dt { font-weight: 500; }
+dd { margin: 0; }

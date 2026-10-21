@@ -1,0 +1,21 @@
+# RAPMONET – consignes pour Claude
+
+Back-office monétique web (remplace MONETICA V2). Lire `docs/architecture.md` avant toute tâche.
+
+## Commandes
+
+- Backend : `cd backend && ./mvnw verify` (nécessite PostgreSQL local avec la base `rapmonet_test`, voir `scripts/db/01-creer-base.sql`)
+- Lancer le backend : `cd backend && ./mvnw spring-boot:run`
+- Frontend : `cd frontend && npx ng test --watch=false && npx ng build`
+- Lancer le frontend : `cd frontend && npm start` (proxy `/api` → `localhost:8080`)
+
+## Règles
+
+- Code métier, tables, API et messages en **français**.
+- Un package par module sous `com.rapmonet` ; ne jamais appeler les sous-packages d'un autre module. `ArchitectureModulaireTest` doit rester vert.
+- Schéma de base : **uniquement** via une nouvelle migration Flyway `V<n>__<sujet>.sql`. Ne jamais modifier une migration existante.
+- Toute règle de lecture de fichier ou de rapprochement s'accompagne d'un test basé sur un fichier d'exemple anonymisé dans `backend/src/test/resources/fichiers/`.
+- Ne jamais versionner de données bancaires réelles non anonymisées. Masquer les numéros de carte (6 premiers + 4 derniers chiffres) dans l'affichage et les journaux.
+- Les spécifications fournies par l'utilisateur sont rangées dans `docs/specs/`.
+- Frontend : composants autonomes (standalone), signaux, Angular Material ; un dossier par module sous `src/app/<module>/`, chargé en différé depuis `app.routes.ts`. Retirer l'entrée « À venir » du module quand il est réalisé.
+- Mettre à jour le tableau « Feuille de route » de `docs/architecture.md` à la fin de chaque lot.

@@ -1,0 +1,33 @@
+rapmonet:
+  version: '@project.version@'
+
+spring:
+  application:
+    name: rapmonet
+  datasource:
+    url: ${RAPMONET_DB_URL:jdbc:postgresql://localhost:5432/rapmonet}
+    username: ${RAPMONET_DB_USER:rapmonet}
+    password: ${RAPMONET_DB_PASSWORD:rapmonet}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # le schéma est géré uniquement par Flyway
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

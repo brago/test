@@ -1,0 +1,23 @@
+<mat-toolbar class="barre">
+  <button mat-icon-button (click)="nav.toggle()" aria-label="Afficher ou masquer le menu">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span class="titre">RAPMONET</span>
+  <span class="sous-titre">Back-office monétique</span>
+</mat-toolbar>
+
+<mat-sidenav-container class="conteneur">
+  <mat-sidenav #nav mode="side" opened class="menu">
+    <mat-nav-list>
+      @for (entree of menu; track entree.chemin) {
+        <a mat-list-item [routerLink]="entree.chemin" routerLinkActive #rla="routerLinkActive" [activated]="rla.isActive">
+          <mat-icon matListItemIcon>{{ entree.icone }}</mat-icon>
+          <span matListItemTitle>{{ entree.libelle }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content class="contenu">
+    <router-outlet />
+  </mat-sidenav-content>
+</mat-sidenav-container>
