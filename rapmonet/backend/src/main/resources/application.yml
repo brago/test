@@ -6,6 +6,13 @@ rapmonet:
     admin:
       # Mot de passe du compte « admin » créé au premier démarrage ; à changer à la première connexion.
       mot-de-passe-initial: ${RAPMONET_ADMIN_MOT_DE_PASSE:admin}
+  batch:
+    # Intégration automatique des journaux GAB (heure et dossiers : écran « Journaux GAB », table parametre_application).
+    planification-active: true
+    # Un fichier modifié depuis moins de ce délai est en cours de copie : il sera pris au passage suivant.
+    delai-stabilite-secondes: 120
+    # Fuseau de l'heure d'exécution (vide = fuseau du serveur), ex. Africa/Abidjan
+    fuseau-horaire: ${RAPMONET_FUSEAU_HORAIRE:}
 
 spring:
   application:

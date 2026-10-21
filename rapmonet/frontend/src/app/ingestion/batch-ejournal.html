@@ -1,0 +1,99 @@
+<mat-card appearance="outlined" class="batch">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>schedule</mat-icon>
+    <mat-card-title>Traitement automatique</mat-card-title>
+    @if (etat(); as e) {
+      <mat-card-subtitle>
+        @if (e.configuration.actif) {
+          Chaque jour à <strong>{{ e.configuration.heure }}</strong>, intégration des journaux déposés dans le dossier d'entrée.
+          @if (e.prochaineExecution) { Prochaine exécution : {{ e.prochaineExecution | date: 'EEEE dd/MM à HH:mm' }}. }
+        } @else {
+          <span class="ko">Désactivé</span> : les journaux déposés ne sont intégrés que sur demande.
+        }
+      </mat-card-subtitle>
+    }
+  </mat-card-header>
+
+  @if (etat(); as e) {
+    <mat-card-content>
+      @if (edition(); as c) {
+        <form class="edition" (ngSubmit)="enregistrer()">
+          <mat-slide-toggle name="actif" [(ngModel)]="c.actif">Exécution quotidienne activée</mat-slide-toggle>
+          <mat-form-field class="heure">
+            <mat-label>Heure (HH:mm)</mat-label>
+            <input matInput name="heure" [(ngModel)]="c.heure" required pattern="([01]\d|2[0-3]):[0-5]\d" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Dossier d'entrée (dépôt des GAB)</mat-label>
+            <input matInput name="entree" [(ngModel)]="c.repertoireEntree" required />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Dossier d'archive</mat-label>
+            <input matInput name="archive" [(ngModel)]="c.repertoireArchive" required />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Dossier de rejet</mat-label>
+            <input matInput name="rejet" [(ngModel)]="c.repertoireRejet" required />
+          </mat-form-field>
+          <div class="boutons">
+            <button mat-flat-button type="submit"><mat-icon>save</mat-icon> Enregistrer</button>
+            <button mat-button type="button" (click)="edition.set(null)">Annuler</button>
+          </div>
+        </form>
+      } @else {
+        <dl class="dossiers">
+          <dt>Entrée</dt><dd><code>{{ e.configuration.repertoireEntree }}</code>
+            · {{ e.nbFichiersEnAttente < 0 ? 'dossier inaccessible' : e.nbFichiersEnAttente + ' fichier(s) en attente' }}</dd>
+          <dt>Archive</dt><dd><code>{{ e.configuration.repertoireArchive }}</code> <span class="discret">· classés par GAB et par mois</span></dd>
+          <dt>Rejet</dt><dd><code>{{ e.configuration.repertoireRejet }}</code> <span class="discret">· motif du refus dans un fichier .erreur.txt</span></dd>
+        </dl>
+      }
+
+      @if (erreur(); as m) { <p class="ko"><mat-icon>error</mat-icon> {{ m }}</p> }
+
+      <h3>Dernières exécutions</h3>
+      @if (e.dernieresExecutions.length === 0) {
+        <p class="discret">Aucune exécution.</p>
+      }
+      @for (ex of e.dernieresExecutions; track ex.id) {
+        <div class="execution">
+          <button mat-icon-button (click)="basculer(ex)" [disabled]="!ex.detail.length" matTooltip="Détail par fichier">
+            <mat-icon>{{ ouverte() === ex.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+          <span class="date">{{ ex.debut | date: 'dd/MM/yyyy HH:mm' }}</span>
+          <span class="puce">{{ ex.declencheur === 'PLANIFIE' ? 'Planifié' : 'Manuel' + (ex.lancePar ? ' – ' + ex.lancePar : '') }}</span>
+          <span [class]="classeStatut(ex.statut)">{{ statuts[ex.statut] }}</span>
+          <span class="discret">
+            {{ ex.nbFichiers }} fichier(s) · {{ ex.nbIntegres }} intégré(s)
+            @if (ex.nbDejaIntegres) { · {{ ex.nbDejaIntegres }} déjà intégré(s) }
+            @if (ex.nbRejetes) { · <span class="ko-texte">{{ ex.nbRejetes }} rejeté(s)</span> }
+            · {{ ex.nbOperations }} opération(s)
+            @if (ex.message) { · {{ ex.message }} }
+          </span>
+        </div>
+        @if (ex.statut === 'EN_COURS') { <mat-progress-bar mode="indeterminate" /> }
+        @if (ouverte() === ex.id && ex.detail.length) {
+          <table class="detail">
+            <tr><th>Fichier</th><th>Résultat</th><th>GAB</th><th class="nombre">Opérations</th><th class="nombre">Doublons</th><th>Motif / destination</th></tr>
+            @for (f of ex.detail; track $index) {
+              <tr>
+                <td><code>{{ f.fichier }}</code></td>
+                <td [class.ko-texte]="f.resultat === 'REJETE'">{{ resultats[f.resultat] }}</td>
+                <td>{{ f.terminal }}</td>
+                <td class="nombre">{{ f.nbOperations }}</td>
+                <td class="nombre">{{ f.nbDoublons }}</td>
+                <td class="discret">{{ f.message ?? f.destination }}</td>
+              </tr>
+            }
+          </table>
+        }
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button (click)="lancer()" [disabled]="e.enCours"><mat-icon>play_arrow</mat-icon> Lancer maintenant</button>
+      @if (!edition()) {
+        <button mat-button (click)="modifier()"><mat-icon>settings</mat-icon> Paramétrer</button>
+      }
+    </mat-card-actions>
+  }
+</mat-card>

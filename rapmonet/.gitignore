@@ -10,3 +10,6 @@ frontend/.angular/
 .vscode/
 # Données réelles : ne jamais versionner de fichiers bancaires non anonymisés
 donnees-reelles/
+# Dossiers de dépôt / archive du batch des journaux GAB (données réelles)
+donnees/
+backend/donnees/

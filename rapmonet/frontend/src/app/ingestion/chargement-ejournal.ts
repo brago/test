@@ -10,11 +10,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { EjournalService, FichierJournal, ResultatJournal } from '../core/ejournal';
 import { messageErreur } from '../core/erreurs';
 import { AnomalieLis } from './lis.service';
+import { BatchEjournal } from './batch-ejournal';
 
 /** Chargement des journaux électroniques des GAB (plusieurs fichiers à la fois). */
 @Component({
   selector: 'app-chargement-ejournal',
-  imports: [DatePipe, DecimalPipe, RouterLink, MatButtonModule, MatCardModule, MatIconModule, MatProgressBarModule, MatTableModule, MatTooltipModule],
+  imports: [BatchEjournal, DatePipe, DecimalPipe, RouterLink, MatButtonModule, MatCardModule, MatIconModule, MatProgressBarModule, MatTableModule, MatTooltipModule],
   templateUrl: './chargement-ejournal.html',
   styleUrl: './chargement-lis.scss',
 })
@@ -70,7 +71,7 @@ export class ChargementEjournal {
     });
   }
 
-  private recharger(): void {
+  protected recharger(): void {
     this.service.fichiers().subscribe((f) => this.fichiers.set(f));
   }
 }

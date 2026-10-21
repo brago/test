@@ -34,6 +34,30 @@ export interface CritereJournal {
   du?: string; au?: string; terminal?: string; type?: string; statut?: string; codeReponse?: string; carte?: string; compte?: string;
 }
 
+export interface ConfigurationBatch {
+  actif: boolean; heure: string; repertoireEntree: string; repertoireArchive: string; repertoireRejet: string;
+}
+export interface FichierTraiteBatch {
+  fichier: string; resultat: 'INTEGRE' | 'DEJA_INTEGRE' | 'REJETE'; terminal: string | null; nbOperations: number;
+  nbDoublons: number; message: string | null; destination: string;
+}
+export interface ExecutionBatch {
+  id: number; declencheur: 'PLANIFIE' | 'MANUEL'; lancePar: string | null; debut: string; fin: string | null;
+  statut: 'EN_COURS' | 'TERMINE' | 'TERMINE_AVEC_REJETS' | 'ERREUR' | 'INTERROMPU';
+  nbFichiers: number; nbIntegres: number; nbDejaIntegres: number; nbRejetes: number; nbOperations: number;
+  message: string | null; detail: FichierTraiteBatch[];
+}
+export interface EtatBatch {
+  configuration: ConfigurationBatch; prochaineExecution: string | null; enCours: boolean; nbFichiersEnAttente: number;
+  dernieresExecutions: ExecutionBatch[];
+}
+export const LIBELLES_STATUT_BATCH: Record<string, string> = {
+  EN_COURS: 'En cours', TERMINE: 'Terminé', TERMINE_AVEC_REJETS: 'Terminé avec rejets', ERREUR: 'Erreur', INTERROMPU: 'Interrompu',
+};
+export const LIBELLES_RESULTAT_BATCH: Record<string, string> = {
+  INTEGRE: 'Intégré', DEJA_INTEGRE: 'Déjà intégré', REJETE: 'Rejeté',
+};
+
 export const LIBELLES_STATUT: Record<string, string> = {
   DISTRIBUE: 'Billets distribués', APPROUVE: 'Approuvée', NON_PRIS: 'Billets non pris', REFUSE: 'Refusée', INCONNU: 'Inconnu',
 };
@@ -80,6 +104,18 @@ export class EjournalService {
 
   evenements(c: { du?: string; au?: string; terminal?: string }): Observable<EvenementGab[]> {
     return this.http.get<EvenementGab[]>('/api/exploration/ejournal/evenements', { params: params(c) });
+  }
+
+  etatBatch(): Observable<EtatBatch> {
+    return this.http.get<EtatBatch>('/api/ingestion/ejournal/batch');
+  }
+
+  modifierBatch(c: ConfigurationBatch): Observable<ConfigurationBatch> {
+    return this.http.put<ConfigurationBatch>('/api/ingestion/ejournal/batch/configuration', c);
+  }
+
+  lancerBatch(): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>('/api/ingestion/ejournal/batch/executions', null);
   }
 
   terminaux(): Observable<string[]> {

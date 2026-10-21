@@ -62,15 +62,15 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 1 | Sécurité : connexion, blocage après 3 échecs, utilisateurs, profils, audit ; exports Excel / PDF | ✅ Fait (voir ADR 0002) |
 | 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`) ; écrans de modification du paramétrage à venir |
 | 3 | Rapports VSS de VISA (fichiers VX / EP-747) : chargement, consultation, export, paramétrage | ✅ Fait (voir `docs/specs/vss.md`) |
-| 4 | E-journaux NCR ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
+| 4 | E-journaux NCR ✅, intégration automatique quotidienne à 04:00 ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
 | 5 | GAB : paramétrage, appros, arrêtés, validation, rapports | À faire |
-| 6 | Rapprochements + gestion des écarts | Attente règles |
+| 6 | Rapprochements + gestion des écarts (E-journal / Amplitude en premier) | Attente des données Amplitude |
 | 7 | Chargebacks | À faire |
 | 8 | KPI, BCEAO, VISA | Attente modèles d'états |
 
 ## Améliorations prévues par rapport à MONETICA V2
 
-1. Chargement automatique depuis un dossier surveillé ou SFTP, refus des doublons (empreinte du fichier).
+1. Chargement automatique depuis un dossier surveillé (✅ journaux GAB, batch quotidien) ou SFTP, refus des doublons (empreinte du fichier).
 2. Lecture directe de BKHIS dans Amplitude si l'accès est possible (sinon import Excel).
 3. Règles de rapprochement paramétrables, avec tolérances.
 4. Gestion des écarts : statut, responsable, commentaires, justificatifs.

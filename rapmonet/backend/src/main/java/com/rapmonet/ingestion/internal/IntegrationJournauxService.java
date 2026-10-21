@@ -94,7 +94,7 @@ class IntegrationJournauxService implements IntegrationJournaux {
                                 montant_retraits = ?, nb_avertissements = ? where id = ?""")
                     .params(compte[0], compte[1], compte[2], montant[0], nbAvertissements, id).update();
         }
-        audit.enregistrer(ActionsAudit.EJOURNAL_INTEGRATION, nom, integre
+        audit.enregistrerPour(utilisateur, ActionsAudit.EJOURNAL_INTEGRATION, nom, integre
                 ? "GAB %s du %s au %s : %d opération(s), %d doublon(s)".formatted(terminal, debut, fin, compte[0], compte[1])
                 : "Rejeté : " + anomalies.stream().filter(a -> a.gravite() == Gravite.BLOQUANTE).count() + " anomalie(s) bloquante(s)",
                 integre);

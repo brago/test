@@ -54,6 +54,35 @@ Chaque fichier est intégré indépendamment. Une opération déjà présente (m
 date/heure, référence, montant, réponse) n'est pas enregistrée deux fois : les journaux qui se
 chevauchent sont acceptés et le nombre de doublons est affiché.
 
+## Intégration automatique (batch)
+
+Chaque jour à **04:00** (paramétrable), RAPMONET intègre tous les journaux déposés dans le dossier
+d'entrée (sous-dossiers acceptés, par exemple un par GAB). Écran : *Chargement des données › Journaux GAB*,
+carte « Traitement automatique » (paramétrage, lancement immédiat, historique avec le détail par fichier).
+
+| Paramètre (`parametre_application`) | Défaut | Rôle |
+|---|---|---|
+| `ejournal.batch.actif` | `true` | Exécution quotidienne activée |
+| `ejournal.batch.heure` | `04:00` | Heure d'exécution (fuseau du serveur, ou `rapmonet.batch.fuseau-horaire`) |
+| `ejournal.batch.repertoire_entree` | `donnees/ejournal/entree` | Dépôt des journaux par les GAB |
+| `ejournal.batch.repertoire_archive` | `donnees/ejournal/archive` | Journaux intégrés ou déjà intégrés, rangés `<GAB>/<AAAA-MM>/` |
+| `ejournal.batch.repertoire_rejet` | `donnees/ejournal/rejet` | Journaux refusés, rangés `<date>/`, avec `<fichier>.erreur.txt` |
+
+Règles :
+
+- **Fichier en cours de copie** : un fichier modifié depuis moins de 2 minutes
+  (`rapmonet.batch.delai-stabilite-secondes`) est laissé pour le passage suivant. Les fichiers cachés (`.xxx`) sont ignorés.
+- **Rattrapage** : si le serveur était arrêté à l'heure prévue, le traitement part à son redémarrage
+  (jusqu'à 6 heures après). Une exécution manuelle ne remplace pas celle du jour.
+- **Une seule exécution à la fois**, même avec plusieurs serveurs (index unique sur les exécutions « EN_COURS ») ;
+  une exécution restée « EN_COURS » plus de 6 heures (arrêt brutal) est marquée « INTERROMPU ».
+- Un fichier déjà intégré est archivé sans rien enregistrer ; un fichier du même nom déjà présent
+  dans l'archive n'est jamais écrasé (suffixe `.1`, `.2`…).
+- En cas d'erreur technique sur un fichier (droits, disque…), il reste dans le dossier d'entrée et sera repris.
+- Historique : table `batch_execution` (compteurs + détail par fichier) ; piste d'audit `BATCH_EJOURNAL`
+  (utilisateur `BATCH` pour l'exécution planifiée).
+- Désactiver la planification sur un serveur (ex. second nœud) : `rapmonet.batch.planification-active: false`.
+
 ## Point ouvert
 
 Sur les journaux reçus, `NOTES PRESENTED` × coupures (`DENOMINATION 5 10 20 50`) ne correspond au montant

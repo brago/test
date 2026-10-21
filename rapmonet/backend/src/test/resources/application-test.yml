@@ -1,3 +1,8 @@
 spring:
   datasource:
     url: ${RAPMONET_TEST_DB_URL:jdbc:postgresql://localhost:5432/rapmonet_test}
+rapmonet:
+  batch:
+    # Pas de déclenchement automatique pendant les tests ; fichiers pris immédiatement.
+    planification-active: false
+    delai-stabilite-secondes: 0
