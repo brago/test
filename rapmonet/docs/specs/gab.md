@@ -71,11 +71,14 @@ le solde théorique n'est fiable que si tous les journaux de la période sont in
   validation, cadres de signature (gabiste, saisie, validation).
 - Historiques des appros et des arrêtés : filtres (période, GAB, statut), export Excel / PDF.
 
-## Points à confirmer avec la banque
+## Réponses de la banque et points en attente
 
-1. Formule de l'écart physique / comptable : (6) + (7) − (8) retenue (transactions en attente = retraits
-   distribués non encore comptabilisés).
-2. Contenu exact de « Transactions en attente (7) ».
-3. Le solde comptable (8) sera lu dans Amplitude (BKHIS / solde du compte caisse) dès réception des données.
-4. Écrans MONETICA V2 non repris à ce stade : « Arrêté GAB périodique », « Analyse compte GAB »,
-   « Consultation encaisse GAB » (attente de leur description).
+- **Origine de l'écart** (réponse utilisateur) : l'écart se constate entre le **solde de l'approvisionnement**
+  et le **solde de l'arrêté** ; il peut provenir de la différence entre le montant trouvé à l'arrêté et le
+  **solde du compte bancaire** (compte caisse du GAB). Cohérent avec les rubriques actuelles :
+  appro (0) − retraits = solde attendu, comparé au montant trouvé (6) et au solde du compte (8).
+- **Écran « Arrêté GAB » de référence : sera fourni par la banque.** Les formules provisoires ci-dessus
+  ((6) − (5) et (6) + (7) − (8)) seront alignées sur cet écran ; ne pas les modifier avant de l'avoir reçu.
+- Le solde du compte caisse (8) sera lu dans Amplitude dès réception des extractions.
+- Écrans MONETICA V2 non repris à ce stade : « Arrêté GAB périodique », « Analyse compte GAB »,
+  « Consultation encaisse GAB » (attente de leur description).
