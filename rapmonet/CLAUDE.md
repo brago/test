@@ -16,6 +16,8 @@ Back-office monétique web (remplace MONETICA V2). Lire `docs/architecture.md` a
 - Schéma de base : **uniquement** via une nouvelle migration Flyway `V<n>__<sujet>.sql`. Ne jamais modifier une migration existante.
 - Toute règle de lecture de fichier ou de rapprochement s'accompagne d'un test basé sur un fichier d'exemple anonymisé dans `backend/src/test/resources/fichiers/`.
 - Ne jamais versionner de données bancaires réelles non anonymisées. Masquer les numéros de carte (6 premiers + 4 derniers chiffres) dans l'affichage et les journaux.
-- Les spécifications fournies par l'utilisateur sont rangées dans `docs/specs/`.
+- Les spécifications fournies par l'utilisateur sont résumées dans `docs/specs/` (les PDF éditeurs sont confidentiels : ne pas les versionner).
+- Fichiers réels (LIS, VSS…) : ils contiennent des numéros de carte. Ne jamais les copier dans le dépôt ; les tests utilisent des fichiers synthétiques (ex. `FichierLisSynthetique`).
+- Paramétrage LIS : généré depuis la spec par `scripts/spec-lis/` ; toute correction passe par une nouvelle migration.
 - Frontend : composants autonomes (standalone), signaux, Angular Material ; un dossier par module sous `src/app/<module>/`, chargé en différé depuis `app.routes.ts`. Retirer l'entrée « À venir » du module quand il est réalisé.
 - Mettre à jour le tableau « Feuille de route » de `docs/architecture.md` à la fin de chaque lot.

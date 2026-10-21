@@ -1,0 +1,19 @@
+.filtres { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+.filtres mat-form-field { width: 170px; }
+.filtres mat-form-field.large { width: 320px; }
+.tableau { overflow: auto; max-height: 60vh; border: 1px solid var(--mat-sys-outline-variant); border-radius: 8px; }
+table { width: 100%; }
+td, th { white-space: nowrap; padding: 0 10px !important; }
+.nombre { text-align: right; }
+.mono { font-family: 'Roboto Mono', monospace; font-size: 12px; }
+.discret { color: var(--mat-sys-on-surface-variant); font-size: 12px; }
+.cliquable { cursor: pointer; }
+.cliquable:hover { background: var(--mat-sys-surface-container-high); }
+.selection { background: var(--mat-sys-secondary-container); }
+.vide { padding: 16px !important; color: var(--mat-sys-on-surface-variant); }
+.detail { margin-top: 16px; }
+.fermer { margin-left: auto; }
+.brut { overflow-x: auto; background: var(--mat-sys-surface-container); padding: 8px; font-size: 12px; }
+.brut-cellule { white-space: pre; }
+.attributs td { white-space: normal; }
+.ko { color: var(--mat-sys-error); }

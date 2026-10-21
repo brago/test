@@ -1,0 +1,87 @@
+@if (format(); as f) {
+  <h1>Paramétrage – {{ f.libelle }}</h1>
+  <p class="aide">
+    Enregistrements de {{ f.longueurEnregistrement }} caractères. Code TC en position {{ f.zoneTc.position }},
+    séquence en position {{ f.zoneSequence.position }}, numéro de TCR en position {{ f.zoneTcr.position }}.
+    En-tête TC {{ f.tcEntete }}, fin TC {{ f.tcFin }}. Source : spécification LIS 3.038 (GIM/HPS).
+  </p>
+
+  <h2>Sous-fichiers</h2>
+  <div class="sous-fichiers">
+    @for (s of f.sousFichiers; track s.code) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>{{ s.code }} – {{ s.libelle }}</mat-card-title>
+          <mat-card-subtitle>TC {{ s.tcEntete }} … TC {{ s.tcFin }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ s.description }}</p>
+          <p class="mono">TC : {{ s.tcAutorises.join(', ') }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <h2>Codes transaction</h2>
+  <mat-form-field appearance="outline" class="recherche">
+    <mat-label>Filtrer (TC, champ…)</mat-label>
+    <input matInput [value]="filtre()" (input)="filtre.set($any($event.target).value)" />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-accordion multi>
+    @for (t of tcs(); track t.code) {
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title><span class="mono tc">TC {{ t.code }}</span> {{ t.libelle }}</mat-panel-title>
+          <mat-panel-description>
+            {{ t.tcrs.length }} TCR · {{ nbAttributs(t) }} champs
+            @if (t.description) { · {{ t.description }} }
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          @for (r of t.tcrs; track r.code) {
+            <h3>{{ r.libelle }}</h3>
+            @if (r.attributs.length === 0) {
+              <p class="aide">Aucun champ paramétré.</p>
+            } @else {
+              <table mat-table [dataSource]="r.attributs">
+                <ng-container matColumnDef="position">
+                  <th mat-header-cell *matHeaderCellDef>Position</th>
+                  <td mat-cell *matCellDef="let a">{{ a.position }}–{{ a.position + a.taille - 1 }}</td>
+                </ng-container>
+                <ng-container matColumnDef="taille">
+                  <th mat-header-cell *matHeaderCellDef>Taille</th>
+                  <td mat-cell *matCellDef="let a">{{ a.taille }}</td>
+                </ng-container>
+                <ng-container matColumnDef="code">
+                  <th mat-header-cell *matHeaderCellDef>Code</th>
+                  <td mat-cell *matCellDef="let a" class="mono">{{ a.code }}</td>
+                </ng-container>
+                <ng-container matColumnDef="libelle">
+                  <th mat-header-cell *matHeaderCellDef>Champ</th>
+                  <td mat-cell *matCellDef="let a">{{ a.libelle }}</td>
+                </ng-container>
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let a">{{ a.type }}@if (a.decimales) { ({{ a.decimales }} déc.) }</td>
+                </ng-container>
+                <ng-container matColumnDef="options">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let a">
+                    @if (a.confidentiel) { <mat-icon matTooltip="Numéro de carte : masqué avant stockage">lock</mat-icon> }
+                    @if (!a.specifique) { <span class="aide">non stocké</span> }
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+                <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+              </table>
+            }
+          }
+        </ng-template>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+} @else {
+  <p>Chargement du paramétrage…</p>
+}

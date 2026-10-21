@@ -1,0 +1,146 @@
+<h1>Chargement des fichiers LIS</h1>
+<p class="aide">
+  Sélectionnez le LIS SW et/ou le LIS PR de la journée. La date de journée est lue dans l'en-tête du fichier.
+  Les fichiers sont contrôlés puis intégrés ensemble : si l'un d'eux est rejeté, aucun n'est intégré.
+</p>
+
+<mat-card appearance="outlined" class="selection">
+  <mat-card-content>
+    <div class="ligne-fichier">
+      <span class="type">LIS SW</span>
+      <button mat-stroked-button (click)="choixSw.click()"><mat-icon>folder_open</mat-icon> Parcourir</button>
+      <input #choixSw type="file" hidden (change)="choisir('sw', $event)" />
+      <span class="nom">{{ sw()?.name ?? 'Aucun fichier' }}</span>
+      @if (sw()) { <button mat-icon-button (click)="sw.set(null)" matTooltip="Retirer"><mat-icon>close</mat-icon></button> }
+    </div>
+    <div class="ligne-fichier">
+      <span class="type">LIS PR</span>
+      <button mat-stroked-button (click)="choixPr.click()"><mat-icon>folder_open</mat-icon> Parcourir</button>
+      <input #choixPr type="file" hidden (change)="choisir('pr', $event)" />
+      <span class="nom">{{ pr()?.name ?? 'Aucun fichier' }}</span>
+      @if (pr()) { <button mat-icon-button (click)="pr.set(null)" matTooltip="Retirer"><mat-icon>close</mat-icon></button> }
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button (click)="integrer()" [disabled]="enCours() || (!sw() && !pr())">
+      <mat-icon>play_arrow</mat-icon> Intégrer
+    </button>
+  </mat-card-actions>
+  @if (enCours()) { <mat-progress-bar mode="indeterminate" /> }
+</mat-card>
+
+@if (erreur(); as e) { <p class="ko"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (rapport(); as r) {
+  <section class="rapport">
+    @if (r.integre) {
+      <p class="ok"><mat-icon>check_circle</mat-icon> Intégration réussie.</p>
+    } @else {
+      <p class="ko"><mat-icon>block</mat-icon> Intégration refusée : aucun fichier n'a été intégré.</p>
+    }
+    @for (f of r.fichiers; track f.nom) {
+      <mat-card appearance="outlined" class="fichier">
+        <mat-card-header>
+          <mat-card-title>LIS {{ f.typeLis }} – {{ f.nom }}</mat-card-title>
+          <mat-card-subtitle>
+            Journée {{ f.journee ? (f.journee | date: 'dd/MM/yyyy') : 'inconnue' }} ·
+            {{ f.nbEnregistrements | number }} lignes · {{ f.nbTransactions | number }} transactions
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-chip-set>
+            @for (r of f.repartitionTc | keyvalue; track r.key) { <mat-chip>TC {{ r.key }} : {{ r.value }}</mat-chip> }
+          </mat-chip-set>
+          @if (f.anomalies.length) {
+            <table mat-table [dataSource]="f.anomalies" class="anomalies">
+              <ng-container matColumnDef="gravite">
+                <th mat-header-cell *matHeaderCellDef>Gravité</th>
+                <td mat-cell *matCellDef="let a" [class.bloquante]="a.gravite === 'BLOQUANTE'">{{ a.gravite === 'BLOQUANTE' ? 'Bloquante' : 'Avertissement' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="ligne">
+                <th mat-header-cell *matHeaderCellDef>Ligne</th>
+                <td mat-cell *matCellDef="let a">{{ a.ligne ?? '–' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="message">
+                <th mat-header-cell *matHeaderCellDef>Message</th>
+                <td mat-cell *matCellDef="let a">{{ a.message }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="colonnesAnomalies"></tr>
+              <tr mat-row *matRowDef="let row; columns: colonnesAnomalies"></tr>
+            </table>
+          } @else {
+            <p class="ok"><mat-icon>check</mat-icon> Aucune anomalie.</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </section>
+}
+
+<h2>Fichiers intégrés</h2>
+@if (fichiers().length === 0) {
+  <p class="aide">Aucun fichier LIS intégré.</p>
+} @else {
+  <div class="tableau">
+    <table mat-table [dataSource]="fichiers()">
+      <ng-container matColumnDef="journee">
+        <th mat-header-cell *matHeaderCellDef>Journée</th>
+        <td mat-cell *matCellDef="let f">{{ f.journee | date: 'dd/MM/yyyy' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="typeLis">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let f">{{ f.typeLis }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef>Fichier</th>
+        <td mat-cell *matCellDef="let f">{{ f.nom }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbEnregistrements">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Lignes</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbEnregistrements | number }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbTransactions">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Transactions</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbTransactions | number }}</td>
+      </ng-container>
+      <ng-container matColumnDef="repartition">
+        <th mat-header-cell *matHeaderCellDef>Répartition par TC</th>
+        <td mat-cell *matCellDef="let f">
+          @for (r of f.repartitionTc | keyvalue; track r.key) { <span class="tc">{{ r.key }}:{{ r.value }}</span> }
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="nbAvertissements">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Avert.</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbAvertissements }}</td>
+      </ng-container>
+      <ng-container matColumnDef="integreLe">
+        <th mat-header-cell *matHeaderCellDef>Intégré le</th>
+        <td mat-cell *matCellDef="let f">{{ f.integreLe | date: 'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let f" class="actions">
+          <button mat-icon-button (click)="voirAnomalies(f)" matTooltip="Voir les anomalies"><mat-icon>report</mat-icon></button>
+          <button mat-icon-button (click)="annuler(f)" matTooltip="Annuler l'intégration"><mat-icon>delete</mat-icon></button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonnesHistorique"></tr>
+      <tr mat-row *matRowDef="let row; columns: colonnesHistorique"></tr>
+    </table>
+  </div>
+}
+
+@if (anomaliesAffichees(); as a) {
+  <mat-card appearance="outlined" class="fichier">
+    <mat-card-header>
+      <mat-card-title>Anomalies – {{ a.fichier.nom }}</mat-card-title>
+      <button mat-icon-button class="fermer" (click)="anomaliesAffichees.set(null)"><mat-icon>close</mat-icon></button>
+    </mat-card-header>
+    <mat-card-content>
+      @if (a.anomalies.length === 0) { <p class="ok">Aucune anomalie.</p> }
+      @for (x of a.anomalies; track $index) {
+        <p>{{ x.gravite === 'BLOQUANTE' ? 'Bloquante' : 'Avertissement' }} · ligne {{ x.ligne ?? '–' }} · {{ x.message }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+}

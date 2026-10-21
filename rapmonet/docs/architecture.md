@@ -60,7 +60,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 |---|---|---|
 | 0 | Socle : backend, frontend, base, tests, intégration continue | ✅ Fait |
 | 1 | Sécurité : connexion, blocage après 3 échecs, utilisateurs, profils, audit | À faire |
-| 2 | Moteur de lecture générique + paramétrage et chargement LIS | Attente spec LIS |
+| 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`) ; écrans de modification du paramétrage à venir |
 | 3 | VSS de VISA | Attente spec VSS |
 | 4 | E-journaux NCR + Amplitude (BKHIS, MOHISDET) + ACD | Attente specs |
 | 5 | GAB : paramétrage, appros, arrêtés, validation, rapports | À faire |

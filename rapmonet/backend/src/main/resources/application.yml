@@ -1,5 +1,8 @@
 rapmonet:
   version: '@project.version@'
+  securite:
+    # Clé de l'empreinte des numéros de carte. À DÉFINIR en production (variable RAPMONET_CLE_EMPREINTE_CARTE).
+    cle-empreinte-carte: ${RAPMONET_CLE_EMPREINTE_CARTE:cle-de-developpement-a-changer}
 
 spring:
   application:
@@ -31,3 +34,11 @@ management:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+# Taille maximale des fichiers envoyés (fichiers LIS, VSS…)
+---
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 200MB

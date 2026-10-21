@@ -1,0 +1,136 @@
+<h1>Exploration des données LIS</h1>
+
+<form class="filtres" (ngSubmit)="rechercher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Type de LIS</mat-label>
+    <mat-select [(ngModel)]="typeLis" name="typeLis">
+      <mat-option value="">Tous</mat-option>
+      <mat-option value="SW">SW</mat-option>
+      <mat-option value="PR">PR</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="large">
+    <mat-label>Code transaction (TC)</mat-label>
+    <mat-select [(ngModel)]="tc" name="tc">
+      <mat-option value="">Tous</mat-option>
+      @for (t of tcs(); track t.code) { <mat-option [value]="t.code">{{ t.code }} – {{ t.libelle }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+  <button mat-button type="button" (click)="reinitialiser()">Réinitialiser</button>
+</form>
+
+@if (chargement()) { <mat-progress-bar mode="indeterminate" /> }
+
+<div class="tableau">
+  <table mat-table [dataSource]="lignes()">
+    <ng-container matColumnDef="journee">
+      <th mat-header-cell *matHeaderCellDef>Journée</th>
+      <td mat-cell *matCellDef="let t">{{ t.journee | date: 'dd/MM/yy' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="typeLis">
+      <th mat-header-cell *matHeaderCellDef>LIS</th>
+      <td mat-cell *matCellDef="let t">{{ t.typeLis }}</td>
+    </ng-container>
+    <ng-container matColumnDef="sousFichier">
+      <th mat-header-cell *matHeaderCellDef>S/F</th>
+      <td mat-cell *matCellDef="let t">{{ t.sousFichier }}</td>
+    </ng-container>
+    <ng-container matColumnDef="tc">
+      <th mat-header-cell *matHeaderCellDef>TC</th>
+      <td mat-cell *matCellDef="let t" [title]="t.libelleTc ?? ''">{{ t.tc }} <span class="discret">{{ t.libelleTc }}</span></td>
+    </ng-container>
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let t">{{ $any(valeur(t, 'date')) | date: 'dd/MM/yy' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="montant">
+      <th mat-header-cell *matHeaderCellDef class="nombre">Montant</th>
+      <td mat-cell *matCellDef="let t" class="nombre">{{ $any(valeur(t, 'montant')) | number: '1.0-2' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="carte">
+      <th mat-header-cell *matHeaderCellDef>Carte</th>
+      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'carte') }}</td>
+    </ng-container>
+    <ng-container matColumnDef="libelle">
+      <th mat-header-cell *matHeaderCellDef>Commerçant / GAB</th>
+      <td mat-cell *matCellDef="let t">{{ valeur(t, 'libelle') }}</td>
+    </ng-container>
+    <ng-container matColumnDef="terminal">
+      <th mat-header-cell *matHeaderCellDef>Terminal</th>
+      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'terminal') }}</td>
+    </ng-container>
+    <ng-container matColumnDef="autorisation">
+      <th mat-header-cell *matHeaderCellDef>Autor.</th>
+      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'autorisation') }}</td>
+    </ng-container>
+    <ng-container matColumnDef="reference">
+      <th mat-header-cell *matHeaderCellDef>Référence (ARN / RRN)</th>
+      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'reference') }}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="colonnes; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: colonnes" (click)="ouvrir(row)" class="cliquable"
+        [class.selection]="detail()?.transaction?.id === row.id"></tr>
+    <tr class="mat-row" *matNoDataRow><td class="mat-cell vide" [attr.colspan]="colonnes.length">Aucune transaction.</td></tr>
+  </table>
+</div>
+<mat-paginator [length]="total()" [pageIndex]="page()" [pageSize]="taille()" [pageSizeOptions]="[25, 50, 100, 500]"
+               (page)="changerPage($event)" showFirstLastButtons />
+
+@if (detail(); as d) {
+  <mat-card appearance="outlined" class="detail">
+    <mat-card-header>
+      <mat-card-title>TC {{ d.transaction.tc }} – {{ d.transaction.libelleTc }}</mat-card-title>
+      <mat-card-subtitle>
+        {{ d.transaction.nomFichier }} · sous-fichier {{ d.transaction.sousFichier }} · séquence {{ d.transaction.sequence }}
+      </mat-card-subtitle>
+      <button mat-icon-button class="fermer" (click)="detail.set(null)"><mat-icon>close</mat-icon></button>
+    </mat-card-header>
+    <mat-card-content>
+      @for (l of d.lignes; track l.sequence) {
+        <h3>TCR {{ l.tcr }} <span class="discret">(ligne {{ l.sequence }})</span></h3>
+        <pre class="brut">{{ l.contenu }}</pre>
+        <table mat-table [dataSource]="l.attributs" class="attributs">
+          <ng-container matColumnDef="position">
+            <th mat-header-cell *matHeaderCellDef>Pos.</th>
+            <td mat-cell *matCellDef="let a">{{ a.position }}–{{ a.position + a.taille - 1 }}</td>
+          </ng-container>
+          <ng-container matColumnDef="code">
+            <th mat-header-cell *matHeaderCellDef>Code</th>
+            <td mat-cell *matCellDef="let a" class="mono">{{ a.code }}</td>
+          </ng-container>
+          <ng-container matColumnDef="libelle">
+            <th mat-header-cell *matHeaderCellDef>Champ</th>
+            <td mat-cell *matCellDef="let a">{{ a.libelle }}</td>
+          </ng-container>
+          <ng-container matColumnDef="brut">
+            <th mat-header-cell *matHeaderCellDef>Brut</th>
+            <td mat-cell *matCellDef="let a" class="mono brut-cellule">{{ a.brut }}</td>
+          </ng-container>
+          <ng-container matColumnDef="valeur">
+            <th mat-header-cell *matHeaderCellDef>Valeur</th>
+            <td mat-cell *matCellDef="let a">
+              @if (a.erreur) { <span class="ko">{{ a.erreur }}</span> }
+              @else if (estNombre(a.valeur)) { {{ a.valeur | number: '1.0-2' }} }
+              @else { {{ a.valeur }} }
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="colonnesAttributs"></tr>
+          <tr mat-row *matRowDef="let row; columns: colonnesAttributs"></tr>
+        </table>
+      }
+    </mat-card-content>
+  </mat-card>
+}

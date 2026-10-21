@@ -1,0 +1,7 @@
+.aide { color: var(--mat-sys-on-surface-variant); max-width: 900px; }
+.sous-fichiers { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.mono { font-family: 'Roboto Mono', monospace; font-size: 12px; }
+.tc { margin-right: 12px; font-weight: 500; }
+.recherche { width: 360px; margin-top: 8px; }
+table { width: 100%; margin-bottom: 16px; }
+mat-panel-description { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

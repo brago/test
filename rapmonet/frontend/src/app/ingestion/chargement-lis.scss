@@ -1,0 +1,17 @@
+.aide { color: var(--mat-sys-on-surface-variant); max-width: 900px; }
+.selection { max-width: 720px; }
+.ligne-fichier { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.type { width: 60px; font-weight: 500; }
+.nom { font-family: monospace; color: var(--mat-sys-on-surface-variant); }
+.ok, .ko { display: flex; align-items: center; gap: 8px; }
+.ok { color: #1b7f3b; }
+.ko { color: var(--mat-sys-error); }
+.fichier { margin: 12px 0; max-width: 1100px; }
+.fermer { margin-left: auto; }
+.anomalies { margin-top: 8px; }
+.bloquante { color: var(--mat-sys-error); font-weight: 500; }
+.tableau { overflow-x: auto; }
+.nombre { text-align: right; }
+.tc { font-family: monospace; margin-right: 8px; font-size: 12px; }
+.actions { white-space: nowrap; }
+mat-chip-set { display: block; margin-bottom: 8px; }
