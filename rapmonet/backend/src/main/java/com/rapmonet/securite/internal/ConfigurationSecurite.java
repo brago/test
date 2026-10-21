@@ -85,6 +85,8 @@ class ConfigurationSecurite {
                         .hasAnyAuthority(menu("COMPENSE_COMMERCANTS"), menu("COMPENSE_TRAITEMENT"), menu("COMPENSE_VALIDATION"))
                         .requestMatchers("/api/compense/commercants", "/api/compense/commercants/**", "/api/compense/parametres")
                         .hasAuthority(menu("COMPENSE_COMMERCANTS"))
+                        .requestMatchers("/api/rapprochement/gab-lis", "/api/rapprochement/gab-lis/**")
+                        .hasAuthority(menu("RAPPROCHEMENT_GAB_LIS"))
                         .requestMatchers(HttpMethod.GET, "/api/parametrage/**").hasAuthority(u)
                         .requestMatchers("/api/parametrage/gab/**").hasAuthority(menu("PARAMETRAGE_GAB"))
                         .requestMatchers("/api/parametrage/vss/**").hasAuthority(menu("PARAMETRAGE_VSS"))

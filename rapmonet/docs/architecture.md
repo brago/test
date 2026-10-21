@@ -64,7 +64,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 3 | Rapports VSS de VISA (fichiers VX / EP-747) : chargement, consultation, export, paramétrage | ✅ Fait (voir `docs/specs/vss.md`) |
 | 4 | E-journaux NCR ✅, intégration automatique quotidienne à 04:00 ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
 | 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |
-| 6 | Rapprochements + gestion des écarts (E-journal / Amplitude en premier) | Attente des données Amplitude |
+| 6 | Rapprochements + gestion des écarts : GAB ↔ LIS (retraits confrères) ✅ (voir `docs/specs/rapprochement-gab-lis.md`) · E-journal / Amplitude | Amplitude : attente des données |
 | 7 | Chargebacks GIM émission / acquisition : cycle de vie par ARN, délai, régularisation, journal GAB | ✅ Fait (voir `docs/specs/chargeback.md`) ; libellés des motifs à fournir |
 | 8 | KPI GAB / TPE / cartes (graphiques, tableau croisé), base trimestrielle réglementaire | ✅ Fait (voir `docs/specs/reporting.md`) ; formats BCEAO BP4 / VISA et PNB : attente des modèles |
 | 9 | Compense TPE : référentiel commerçants (import de la macro), commission / TAF, macro comptable Amplitude, validation à quatre yeux | ✅ Fait (voir `docs/specs/compense-tpe.md`) |
@@ -74,7 +74,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 1. Chargement automatique depuis un dossier surveillé (✅ journaux GAB, batch quotidien) ou SFTP, refus des doublons (empreinte du fichier).
 2. Lecture directe de BKHIS dans Amplitude si l'accès est possible (sinon import Excel).
 3. Règles de rapprochement paramétrables, avec tolérances.
-4. Gestion des écarts : statut, responsable, commentaires, justificatifs.
+4. Gestion des écarts : statut, responsable, commentaires, justificatifs (✅ GAB ↔ LIS).
 5. Validation à quatre yeux généralisée (✅ appros et arrêtés GAB).
 6. Prise en charge de Mastercard et d'autres marques de GAB que NCR.
 7. Double authentification, politique de mot de passe, masquage des numéros de carte.

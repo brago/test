@@ -36,6 +36,7 @@ public final class ActionsAudit {
     public static final String COMPENSE_CREATION = "COMPENSE_CREATION";
     public static final String COMPENSE_VALIDATION = "COMPENSE_VALIDATION";
     public static final String COMPENSE_ANNULATION = "COMPENSE_ANNULATION";
+    public static final String RAPPROCHEMENT_ECART = "RAPPROCHEMENT_ECART";
     public static final String EXPORT = "EXPORT";
 
     private ActionsAudit() {

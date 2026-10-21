@@ -63,7 +63,12 @@ export const MENU: EntreeMenu[] = [
       { code: 'COMPENSE_VALIDATION', libelle: 'Validation (4 yeux)', icone: 'verified_user', chemin: '/compense/validation', lot: 9 },
     ],
   },
-  { code: 'RAPPROCHEMENT', libelle: 'Rapprochements', icone: 'compare_arrows', chemin: '/rapprochement', lot: 6 },
+  {
+    code: 'RAPPROCHEMENT', libelle: 'Rapprochements', icone: 'compare_arrows', lot: 6,
+    enfants: [
+      { code: 'RAPPROCHEMENT_GAB_LIS', libelle: 'GAB ↔ LIS (retraits confrères)', icone: 'compare_arrows', chemin: '/rapprochement/gab-lis', lot: 6 },
+    ],
+  },
   {
     code: 'CHARGEBACK', libelle: 'Chargebacks', icone: 'currency_exchange', lot: 7,
     enfants: [

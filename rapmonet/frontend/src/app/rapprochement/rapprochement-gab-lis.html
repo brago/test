@@ -1,0 +1,150 @@
+<div class="entete">
+  <h1>Rapprochement GAB ↔ LIS</h1>
+  @if (resultat(); as r) {
+    <div class="boutons">
+      <button mat-stroked-button (click)="exporter('xlsx')" [disabled]="r.lignes.length === 0"><mat-icon>grid_on</mat-icon> Excel</button>
+      <button mat-stroked-button (click)="exporter('pdf')" [disabled]="r.lignes.length === 0"><mat-icon>print</mat-icon> Imprimer</button>
+    </div>
+  }
+</div>
+<p class="aide">
+  Chaque retrait d'une carte d'une autre banque distribué par nos GAB (journal NCR) doit être remonté par le GIM dans un
+  avis d'acquisition LIS (TC 49, code 6011), et chaque avis doit correspondre à un retrait du journal. Appariement : même GAB,
+  même carte (6 + 4 chiffres), même montant, heures proches ; à défaut, la référence du ticket égale au code d'autorisation.
+  Les retraits des cartes de la banque (compte imprimé sur le ticket ou BIN déclaré) seront rapprochés avec Amplitude.
+</p>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+<form class="filtres" (ngSubmit)="rapprocher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" required />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" required />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>GAB (terminal)</mat-label>
+    <input matInput name="terminal" [(ngModel)]="terminal" placeholder="Tous" />
+  </mat-form-field>
+  <button mat-flat-button type="submit" [disabled]="enCours()"><mat-icon>compare_arrows</mat-icon> Rapprocher</button>
+</form>
+
+@if (edition(); as e) {
+  <mat-card appearance="outlined" class="formulaire">
+    <mat-card-header>
+      <mat-card-title>{{ e.ligne.libelleResultat }} – GAB {{ e.ligne.terminal }}, {{ e.ligne.montant | number }} XOF</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="enregistrer()">
+        <div class="ligne">
+          <mat-form-field appearance="outline">
+            <mat-label>Traitement</mat-label>
+            <mat-select name="statut" [(ngModel)]="e.statut">
+              <mat-option value="JUSTIFIE">Justifié</mat-option>
+              <mat-option value="REGULARISE">Régularisé</mat-option>
+              <mat-option value="A_TRAITER">À traiter (annuler)</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="large">
+            <mat-label>Commentaire</mat-label>
+            <input matInput name="commentaire" [(ngModel)]="e.commentaire" maxlength="500"
+                   placeholder="Ex. : réclamation GIM n° …, retrait annulé, ticket rejoué…" />
+          </mat-form-field>
+        </div>
+        <div class="actions">
+          <button mat-button type="button" (click)="edition.set(null)">Annuler</button>
+          <button mat-flat-button type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (resultat(); as r) {
+  @let s = r.synthese;
+  <div class="tuiles">
+    <div class="tuile neutre"><span>Retraits confrères au journal</span><strong>{{ s.retraitsConfreres | number }}</strong><em>{{ s.montantRetraitsConfreres | number }} XOF</em></div>
+    <div class="tuile neutre"><span>Avis LIS (TC 49 GAB)</span><strong>{{ s.avisLis | number }}</strong><em>{{ s.montantAvisLis | number }} XOF</em></div>
+    <div class="tuile ok-fond"><span>Rapprochés</span><strong>{{ s.rapproches | number }}</strong><em>{{ s.montantRapproche | number }} XOF</em></div>
+    <div class="tuile ecart"><span>Retraits non remontés par le GIM</span><strong>{{ s.nonRemontes | number }}</strong><em>{{ s.montantNonRemonte | number }} XOF à réclamer</em></div>
+    <div class="tuile ecart"><span>Avis LIS sans retrait au journal</span><strong>{{ s.avisSansRetrait | number }}</strong><em>{{ s.montantAvisSansRetrait | number }} XOF</em></div>
+    <div class="tuile attente"><span>En attente des LIS (moins de {{ s.delaiLisJours }} j)</span><strong>{{ s.enAttente | number }}</strong><em>{{ s.montantEnAttente | number }} XOF</em></div>
+    <div class="tuile neutre"><span>Avis sur un GAB sans journal</span><strong>{{ s.journalAbsent | number }}</strong><em>{{ s.montantJournalAbsent | number }} XOF</em></div>
+    <div class="tuile neutre"><span>Retraits cartes de la banque (on-us)</span><strong>{{ s.retraitsOnUs | number }}</strong><em>{{ s.montantOnUs | number }} XOF · Amplitude</em></div>
+  </div>
+  <p class="discret">
+    Dernière journée LIS acquisition intégrée : {{ s.derniereJourneeLis ? (s.derniereJourneeLis | date: 'dd/MM/yyyy') : 'aucune' }}
+    · tolérance horaire {{ s.toleranceMinutes }} min · écarts à traiter : <strong>{{ s.ecartsATraiter }}</strong>
+  </p>
+
+  <mat-button-toggle-group [value]="vue" (change)="changerVue($event.value)" aria-label="Vue">
+    <mat-button-toggle value="ECARTS">Écarts et non rapprochés</mat-button-toggle>
+    <mat-button-toggle value="RAPPROCHES">Rapprochés</mat-button-toggle>
+    <mat-button-toggle value="TOUS">Tous</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <div class="tableau">
+    <table mat-table [dataSource]="r.lignes">
+      <ng-container matColumnDef="resultat">
+        <th mat-header-cell *matHeaderCellDef>Résultat</th>
+        <td mat-cell *matCellDef="let l"><span class="etiquette {{ l.resultat }}">{{ l.libelleResultat }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="terminal">
+        <th mat-header-cell *matHeaderCellDef>GAB</th>
+        <td mat-cell *matCellDef="let l" class="mono">{{ l.terminal }}</td>
+      </ng-container>
+      <ng-container matColumnDef="journal">
+        <th mat-header-cell *matHeaderCellDef>Ticket GAB</th>
+        <td mat-cell *matCellDef="let l">
+          @if (l.dateHeureJournal) {
+            {{ l.dateHeureJournal | date: 'dd/MM/yyyy HH:mm:ss' }}
+            <span class="discret">réf. {{ l.referenceJournal ?? '–' }}</span>
+          } @else { <span class="discret">–</span> }
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="lis">
+        <th mat-header-cell *matHeaderCellDef>Avis LIS</th>
+        <td mat-cell *matCellDef="let l">
+          @if (l.fichierLis) {
+            {{ l.dateHeureLis | date: 'dd/MM/yyyy HH:mm:ss' }}
+            <span class="discret">{{ l.reseau }} · autor. {{ l.autorisation ?? '–' }} · journée {{ l.journeeLis | date: 'dd/MM' }}</span>
+          } @else { <span class="discret">–</span> }
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="carte">
+        <th mat-header-cell *matHeaderCellDef>Carte</th>
+        <td mat-cell *matCellDef="let l" class="mono">{{ l.carte }}</td>
+      </ng-container>
+      <ng-container matColumnDef="montant">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Montant</th>
+        <td mat-cell *matCellDef="let l" class="nombre">{{ l.montant | number }}</td>
+      </ng-container>
+      <ng-container matColumnDef="ecart">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Écart</th>
+        <td mat-cell *matCellDef="let l" class="nombre">{{ l.ecartMinutes !== null ? l.ecartMinutes + ' min' : '' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="traitement">
+        <th mat-header-cell *matHeaderCellDef>Traitement</th>
+        <td mat-cell *matCellDef="let l">
+          @if (l.traitement) {
+            <span class="etiquette {{ l.traitement }}" [matTooltip]="l.commentaire ? l.commentaire + (l.traitePar ? ' (' + l.traitePar + ')' : '') : ''">
+              {{ libellesTraitement[l.traitement] }}</span>
+            <button mat-icon-button (click)="traiter(l)" matTooltip="Traiter l'écart"><mat-icon>edit_note</mat-icon></button>
+          }
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+      <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+    </table>
+  </div>
+  @if (r.lignes.length === 0) { <p class="aide">Aucune opération pour cette vue.</p> }
+} @else if (!enCours()) {
+  <p class="aide">Choisissez une période puis « Rapprocher ».</p>
+}
