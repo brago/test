@@ -1,0 +1,105 @@
+<h1>Commerçants et comptes de la compense</h1>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+<mat-tab-group animationDuration="0ms">
+  <mat-tab label="Commerçants ({{ commercants().length }})">
+    <div class="filtres">
+      <mat-form-field appearance="outline">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" placeholder="Terminal, nom, compte" />
+      </mat-form-field>
+      <button mat-stroked-button (click)="choix.click()" matTooltip="Feuille « N° COMPTES » de la macro (xlsx ou xlsm)">
+        <mat-icon>upload_file</mat-icon> Importer le classeur Excel</button>
+      <input #choix type="file" accept=".xlsx,.xlsm,.xls" hidden (change)="importer($event)" />
+      <button mat-flat-button (click)="nouveau()"><mat-icon>add</mat-icon> Nouveau commerçant</button>
+    </div>
+
+    @if (rapport(); as r) {
+      <p class="ok"><mat-icon>check_circle</mat-icon> Import : {{ r.lignes }} ligne(s), {{ r.crees }} créé(s), {{ r.modifies }} modifié(s),
+        {{ r.anomalies.length }} ignorée(s).</p>
+      @for (a of r.anomalies; track $index) { <p class="alerte"><mat-icon>warning</mat-icon> {{ a }}</p> }
+    }
+
+    @if (edition(); as e) {
+      <mat-card appearance="outlined" class="bloc">
+        <mat-card-header><mat-card-title>{{ e.nouveau ? 'Nouveau commerçant' : e.nom }}</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <form class="grille" (ngSubmit)="enregistrer()">
+            <mat-form-field appearance="outline">
+              <mat-label>Terminal ID</mat-label>
+              <input matInput name="terminal" [(ngModel)]="e.terminalId" required [readonly]="!e.nouveau" />
+              <mat-hint>Complété à 8 chiffres</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Nom du commerçant</mat-label>
+              <input matInput name="nom" [(ngModel)]="e.nom" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>N° de compte à créditer</mat-label>
+              <input matInput name="compte" [(ngModel)]="e.compte" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Taux GIM (%)</mat-label>
+              <input matInput type="number" step="0.01" min="0" name="gim" [(ngModel)]="e.gim" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Taux VISA (%)</mat-label>
+              <input matInput type="number" step="0.01" min="0" name="visa" [(ngModel)]="e.visa" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Taux MCI (%)</mat-label>
+              <input matInput type="number" step="0.01" min="0" name="mci" [(ngModel)]="e.mci" />
+            </mat-form-field>
+            <mat-slide-toggle name="actif" [(ngModel)]="e.actif">Actif</mat-slide-toggle>
+            <div class="actions pleine">
+              <button mat-button type="button" (click)="edition.set(null)">Annuler</button>
+              <button mat-flat-button type="submit">Enregistrer</button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <div class="tableau">
+      <table class="donnees liste">
+        <tr><th>Terminal</th><th>Commerçant</th><th>Compte</th><th class="nombre">GIM</th><th class="nombre">VISA</th><th class="nombre">MCI</th><th></th><th></th></tr>
+        @for (c of filtres(); track c.terminalId) {
+          <tr (click)="modifier(c)">
+            <td class="mono">{{ c.terminalId }}</td><td>{{ c.nom }}@if (!c.actif) { <span class="etiquette ANNULE">désactivé</span> }</td>
+            <td class="mono">{{ c.compte }}</td>
+            <td class="nombre">{{ c.tauxGim * 100 | number: '1.2-3' }} %</td><td class="nombre">{{ c.tauxVisa * 100 | number: '1.2-3' }} %</td>
+            <td class="nombre">{{ c.tauxMci * 100 | number: '1.2-3' }} %</td>
+            <td><mat-icon matTooltip="Modifier">edit</mat-icon></td>
+            <td><button mat-icon-button (click)="$event.stopPropagation(); supprimer(c)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button></td>
+          </tr>
+        }
+      </table>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Comptes et taux">
+    @if (parametres(); as p) {
+      <p class="aide">Comptes généraux de la pièce comptable (capture « EMIS ONUS, ACQ GIM… » de la macro). Ils sont figés dans chaque traitement à sa création.</p>
+      <form class="grille" (ngSubmit)="enregistrerParametres()">
+        @for (c of comptes; track c.cle) {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ c.libelle }}</mat-label>
+            <input matInput [name]="c.cle" [ngModel]="valeur(p, c.cle)" (ngModelChange)="changer(p, c.cle, $event)" />
+            <mat-hint>{{ c.aide }}</mat-hint>
+          </mat-form-field>
+        }
+        <mat-form-field appearance="outline">
+          <mat-label>Taux de TAF</mat-label>
+          <input matInput type="number" step="0.01" name="taf" [(ngModel)]="p.tauxTaf" />
+          <mat-hint>Commission HT = CCI / (1 + taux) ; 0,17 dans la macro</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Code opération (CODOPSC)</mat-label>
+          <input matInput name="code" [(ngModel)]="p.codeOperation" />
+        </mat-form-field>
+        <div class="actions pleine"><button mat-flat-button type="submit">Enregistrer</button></div>
+      </form>
+    }
+  </mat-tab>
+</mat-tab-group>

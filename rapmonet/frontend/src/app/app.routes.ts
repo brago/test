@@ -7,7 +7,7 @@ const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit',
   '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
-  '/reporting/kpi', '/reporting/reglementaire'];
+  '/reporting/kpi', '/reporting/reglementaire', '/compense/traitements', '/compense/commercants', '/compense/validation'];
 
 export const routes: Routes = [
   { path: 'connexion', title: 'Connexion – RAPMONET', loadComponent: () => import('./pages/connexion/connexion').then((m) => m.Connexion) },
@@ -62,6 +62,18 @@ export const routes: Routes = [
       {
         path: 'parametrage/vss', title: 'Paramétrage VSS – RAPMONET', data: { menu: 'PARAMETRAGE_VSS' },
         loadComponent: () => import('./parametrage/types-rapports-vss').then((m) => m.TypesRapportsVss),
+      },
+      {
+        path: 'compense/traitements', title: 'Compense TPE – RAPMONET', data: { menu: 'COMPENSE_TRAITEMENT' },
+        loadComponent: () => import('./compense/traitements').then((m) => m.TraitementsCompense),
+      },
+      {
+        path: 'compense/validation', title: 'Validation compense TPE – RAPMONET', data: { menu: 'COMPENSE_VALIDATION', validation: true },
+        loadComponent: () => import('./compense/traitements').then((m) => m.TraitementsCompense),
+      },
+      {
+        path: 'compense/commercants', title: 'Commerçants – RAPMONET', data: { menu: 'COMPENSE_COMMERCANTS' },
+        loadComponent: () => import('./compense/commercants').then((m) => m.Commercants),
       },
       {
         path: 'reporting/kpi', title: 'Indicateurs – RAPMONET', data: { menu: 'REPORTING_KPI' },

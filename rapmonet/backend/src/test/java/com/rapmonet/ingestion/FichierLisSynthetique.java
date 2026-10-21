@@ -38,7 +38,12 @@ public final class FichierLisSynthetique {
 
     /** Avis d'acquisition (TC 49) : transaction d'une carte d'une autre banque sur un GAB ou TPE de la banque. */
     public record AvisAcquisition(String carte, long montant, String terminal, String mcc, String dateTransaction,
-                                  String marchand) {
+                                  String marchand, String produit, long interchangeCentimes) {
+
+        /** Carte GIM d'une autre banque (indicateur de produit 3, interchange de 2,50). */
+        public AvisAcquisition(String carte, long montant, String terminal, String mcc, String dateTransaction, String marchand) {
+            this(carte, montant, terminal, mcc, dateTransaction, marchand, "3", 250);
+        }
     }
 
     /** Fichier dont le sous-fichier GIM local (FL) contient les opérations données. */
@@ -90,14 +95,22 @@ public final class FichierLisSynthetique {
                     ecrire(tcr0, 27, a.terminal());
                     ecrire(tcr0, 42, a.marchand());
                     ecrire(tcr0, 83, a.mcc());
+                    ecrire(tcr0, 98, "0");
+                    ecrire(tcr0, 99, a.produit());
                     ecrire(tcr0, 100, a.carte());
                     ecrire(tcr0, 125, a.dateTransaction());
+                    ecrire(tcr0, 131, "123456");
+                    ecrire(tcr0, 151, "000000000001");
                     ecrire(tcr0, 139, "%012d".formatted(a.montant()));
                     ecrire(tcr0, 186, a.terminal());
                     ecrire(tcr0, 208, "952");
                     ecrire(tcr0, 211, "%012d".formatted(a.montant()));
                     ecrire(tcr0, 223, "952");
                     ecrire(tcr0, 226, "0");
+                    ecrire(tcr0, 227, "%012d".formatted(a.interchangeCentimes()));
+                    ecrire(tcr0, 239, "952");
+                    ecrire(tcr0, 242, "0");
+                    ecrire(tcr0, 243, a.interchangeCentimes() > 0 ? "C" : " ");
                 }
             }
             StringBuilder fin = f.nouvelle(sf[1], "0");

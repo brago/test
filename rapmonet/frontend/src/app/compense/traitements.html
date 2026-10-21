@@ -1,0 +1,168 @@
+<h1>{{ validation ? 'Validation des compenses TPE' : 'Compense TPE' }}</h1>
+<p class="aide">
+  Paiement des commerçants pour les achats acquis (fichiers LIS, avis d'acquisition TC 49) : compte à débiter selon le réseau,
+  compte du commerçant à créditer, frais (CCI), commission HT et TAF. Le traitement validé produit la macro comptable à importer.
+  <a routerLink="/compense/commercants">Commerçants et comptes</a>
+</p>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (peutPreparer) {
+  <form class="filtres" (ngSubmit)="voirApercu()">
+    <mat-form-field appearance="outline">
+      <mat-label>Journée LIS</mat-label>
+      <mat-select name="journee" [(ngModel)]="journee">
+        @for (j of journees(); track j) { <mat-option [value]="j">{{ j | date: 'dd/MM/yyyy' }}</mat-option> }
+      </mat-select>
+      @if (!journees().length) { <mat-hint>Aucun achat TC 49 dans les LIS intégrés</mat-hint> }
+    </mat-form-field>
+    <button mat-flat-button type="submit" [disabled]="!journee"><mat-icon>preview</mat-icon> Préparer la compense</button>
+  </form>
+}
+
+@if (apercu(); as a) {
+  <mat-card appearance="outlined" class="bloc">
+    <mat-card-header>
+      <mat-card-title>Aperçu – journée du {{ a.journee | date: 'dd/MM/yyyy' }}</mat-card-title>
+      <mat-card-subtitle>{{ a.lignes.length }} achat(s) à compenser @if (a.dejaCompenses) { · {{ a.dejaCompenses }} déjà compensé(s) }</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @for (x of a.anomalies; track $index) { <p class="erreur"><mat-icon>block</mat-icon> {{ x }}</p> }
+      <table class="donnees">
+        <tr><th>Catégorie</th><th class="nombre">Achats</th><th class="nombre">Montant</th><th class="nombre">CCI (frais)</th>
+          <th class="nombre">Commission HT</th><th class="nombre">TAF</th><th>Compte débité</th></tr>
+        @for (t of a.totaux; track t.categorie) {
+          @if (t.nombre) {
+            <tr><td>{{ t.categorie }}</td><td class="nombre">{{ t.nombre }}</td><td class="nombre">{{ t.montant | number }}</td>
+              <td class="nombre">{{ t.frais | number }}</td><td class="nombre">{{ t.commission | number }}</td>
+              <td class="nombre">{{ t.taf | number }}</td><td class="mono">{{ t.compteDebit }}</td></tr>
+          }
+        }
+        @if (totalApercu(); as s) {
+          <tr class="total"><td>Total</td><td class="nombre">{{ a.lignes.length }}</td><td class="nombre">{{ s.montant | number }}</td>
+            <td class="nombre">{{ s.frais | number }}</td><td class="nombre">{{ s.commission | number }}</td><td class="nombre">{{ s.taf | number }}</td><td></td></tr>
+        }
+      </table>
+      <div class="tableau">
+        <table class="donnees">
+          <tr><th>Réseau</th><th>Date</th><th>Terminal</th><th>Commerçant</th><th>Compte</th><th class="nombre">Montant</th>
+            <th class="nombre">Taux</th><th class="nombre">CCI</th><th class="nombre">Comm. HT</th><th class="nombre">TAF</th><th>Auto.</th><th></th></tr>
+          @for (l of a.lignes; track l.achatId) {
+            <tr [class.anomalie]="l.anomalie">
+              <td>{{ l.reseau }}@if (l.onUs) { <span class="etiquette">on-us</span> }</td>
+              <td>{{ l.dateTransaction | date: 'dd/MM/yy' }}</td><td class="mono">{{ l.terminal }}</td><td>{{ l.commercant }}</td>
+              <td class="mono">{{ l.compte }}</td><td class="nombre">{{ l.montant | number }}</td>
+              <td class="nombre">{{ l.taux | percent: '1.2-3' }}</td><td class="nombre">{{ l.cci | number: '1.0-3' }}</td>
+              <td class="nombre">{{ l.commission | number }}</td><td class="nombre">{{ l.taf | number }}</td>
+              <td class="mono">{{ l.autorisation }}</td>
+              <td>@if (l.anomalie) { <mat-icon class="erreur" [matTooltip]="l.anomalie">error</mat-icon> }</td>
+            </tr>
+          }
+        </table>
+      </div>
+    </mat-card-content>
+    <mat-card-actions class="actions">
+      <button mat-button (click)="apercu.set(null)">Fermer</button>
+      <button mat-flat-button (click)="creer()" [disabled]="a.anomalies.length > 0 || !a.lignes.length"
+              [matTooltip]="a.anomalies.length ? 'Corrigez les anomalies (référentiel, comptes) avant de créer le traitement' : ''">
+        <mat-icon>playlist_add_check</mat-icon> Créer le traitement</button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+@if (selection(); as t) {
+  <mat-card appearance="outlined" class="bloc">
+    <mat-card-header>
+      <mat-card-title>Compense {{ t.reference }} – journée du {{ t.journee | date: 'dd/MM/yyyy' }}
+        <span class="etiquette {{ t.statut }}">{{ statuts[t.statut] }}</span></mat-card-title>
+      <mat-card-subtitle>{{ t.nbTransactions }} achat(s) · {{ t.montant | number }} XOF · commission {{ t.commission | number }} ·
+        TAF {{ t.taf | number }} · préparé par {{ t.creePar }}
+        @if (t.decidePar) { · {{ t.statut === 'VALIDE' ? 'validé' : 'annulé' }} par {{ t.decidePar }} }
+        @if (t.motif) { · {{ t.motif }} }</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-tab-group animationDuration="0ms">
+        @for (r of reseaux; track r.code) {
+          @if (lignesDe(t.lignes, r.code).length) {
+            <mat-tab label="Pièce {{ r.libelle }} ({{ lignesDe(t.lignes, r.code).length }})">
+              <div class="tableau">
+                <table class="donnees">
+                  <tr><th>CPTE A DBT</th><th>NOMS COMMERCANTS</th><th>N COMPTE</th><th class="nombre">MONTANTS</th><th class="nombre">CCI</th>
+                    <th class="nombre">COMM ACQUI</th><th>CPTE COM</th><th class="nombre">TAF</th><th>CPTE TAF</th><th>C_AUTHO</th></tr>
+                  @for (l of lignesDe(t.lignes, r.code); track l.achatId) {
+                    <tr><td class="mono">{{ l.compteDebit }}</td><td>{{ l.commercant }}</td><td class="mono">{{ l.compte }}</td>
+                      <td class="nombre">{{ l.montant | number }}</td><td class="nombre">{{ l.cci | number: '1.0-3' }}</td>
+                      <td class="nombre">{{ l.commission | number }}</td><td class="mono">{{ t.parametres.compteCommission }}</td>
+                      <td class="nombre">{{ l.taf | number }}</td><td class="mono">{{ t.parametres.compteTaf }}</td><td class="mono">{{ l.autorisation }}</td></tr>
+                  }
+                  <tr class="total"><td>TOTAUX</td><td></td><td></td><td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'montant') | number }}</td>
+                    <td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'cci') | number: '1.0-3' }}</td>
+                    <td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'commission') | number }}</td><td></td>
+                    <td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'taf') | number }}</td><td></td><td></td></tr>
+                </table>
+              </div>
+            </mat-tab>
+          }
+        }
+        <mat-tab label="Macro comptable ({{ t.ecritures?.length }})">
+          <div class="tableau">
+            <table class="donnees">
+              <tr><th>COMPTE</th><th>DATOPER</th><th>DATVAL</th><th class="nombre">MNTFRF</th><th>LIBELLE</th><th>CODOPSC</th><th>DEVISE</th></tr>
+              @for (e of t.ecritures; track $index) {
+                <tr><td class="mono">{{ e.compte }}</td><td>{{ e.dateOperation | date: 'dd/MM/yyyy' }}</td><td>{{ e.dateValeur | date: 'dd/MM/yyyy' }}</td>
+                  <td class="nombre" [class.debit]="e.montant < 0">{{ e.montant | number }}</td><td>{{ e.libelle }}</td>
+                  <td>{{ t.parametres.codeOperation }}</td><td>{{ t.parametres.devise }}</td></tr>
+              }
+            </table>
+          </div>
+        </mat-tab>
+        <mat-tab label="Récapitulatif">
+          <table class="donnees">
+            <tr><th>Réseau</th><th class="nombre">Nb</th><th class="nombre">Montant</th><th class="nombre">Comm. HT</th><th class="nombre">TAF</th>
+              <th class="nombre">CCI total</th><th>Compte débit</th><th>Compte crédit</th></tr>
+            @for (x of t.totaux; track x.categorie) {
+              <tr><td>{{ x.categorie }}</td><td class="nombre">{{ x.nombre }}</td><td class="nombre">{{ x.montant | number }}</td>
+                <td class="nombre">{{ x.commission | number }}</td><td class="nombre">{{ x.taf | number }}</td><td class="nombre">{{ x.frais | number }}</td>
+                <td class="mono">{{ x.compteDebit }}</td><td class="mono">{{ x.compteCredit }}</td></tr>
+            }
+          </table>
+          <h3>Comptes mouvementés</h3>
+          <table class="donnees">
+            <tr><th>Compte</th><th>Libellé</th><th class="nombre">Débit</th><th class="nombre">Crédit</th><th class="nombre">Solde net</th></tr>
+            @for (c of t.comptes; track $index) {
+              <tr><td class="mono">{{ c.compte }}</td><td>{{ c.libelle }}</td><td class="nombre">{{ c.debit | number }}</td>
+                <td class="nombre">{{ c.credit | number }}</td><td class="nombre">{{ c.credit - c.debit | number }}</td></tr>
+            }
+          </table>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+    <mat-card-actions class="actions">
+      @if (t.statut !== 'ANNULE') {
+        <button mat-stroked-button (click)="excel(t)"><mat-icon>grid_on</mat-icon> {{ t.statut === 'SAISI' ? 'Brouillon Excel' : 'Macro comptable (Excel)' }}</button>
+      }
+      @if (peutValider && t.statut !== 'ANNULE') { <button mat-button (click)="decider(t, 'annulation')"><mat-icon>block</mat-icon> Annuler</button> }
+      @if (peutValider && t.statut === 'SAISI') {
+        <button mat-flat-button (click)="decider(t, 'validation')" [disabled]="!peutDecider(t)"
+                [matTooltip]="peutDecider(t) ? '' : 'Validation à quatre yeux : une autre personne que celle qui a préparé le traitement doit valider'">
+          <mat-icon>task_alt</mat-icon> Valider</button>
+      }
+      <button mat-button (click)="selection.set(null)">Fermer</button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+<h2>{{ validation ? 'Traitements à valider' : 'Traitements' }}</h2>
+@if (!traitements().length) { <p class="aide">Aucun traitement.</p> } @else {
+  <table class="donnees liste">
+    <tr><th>Référence</th><th>Journée</th><th class="nombre">Achats</th><th class="nombre">Montant</th><th class="nombre">Commission</th>
+      <th class="nombre">TAF</th><th>Statut</th><th>Préparé par</th><th>Validé / annulé par</th></tr>
+    @for (t of traitements(); track t.id) {
+      <tr (click)="ouvrir(t)" [class.choisie]="selection()?.id === t.id">
+        <td>{{ t.reference }}</td><td>{{ t.journee | date: 'dd/MM/yyyy' }}</td><td class="nombre">{{ t.nbTransactions }}</td>
+        <td class="nombre">{{ t.montant | number }}</td><td class="nombre">{{ t.commission | number }}</td><td class="nombre">{{ t.taf | number }}</td>
+        <td><span class="etiquette {{ t.statut }}">{{ statuts[t.statut] }}</span></td><td>{{ t.creePar }}</td><td>{{ t.decidePar }}</td>
+      </tr>
+    }
+  </table>
+}

@@ -67,6 +67,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 6 | Rapprochements + gestion des écarts (E-journal / Amplitude en premier) | Attente des données Amplitude |
 | 7 | Chargebacks GIM émission / acquisition : cycle de vie par ARN, délai, régularisation, journal GAB | ✅ Fait (voir `docs/specs/chargeback.md`) ; libellés des motifs à fournir |
 | 8 | KPI GAB / TPE / cartes (graphiques, tableau croisé), base trimestrielle réglementaire | ✅ Fait (voir `docs/specs/reporting.md`) ; formats BCEAO BP4 / VISA et PNB : attente des modèles |
+| 9 | Compense TPE : référentiel commerçants (import de la macro), commission / TAF, macro comptable Amplitude, validation à quatre yeux | ✅ Fait (voir `docs/specs/compense-tpe.md`) |
 
 ## Améliorations prévues par rapport à MONETICA V2
 

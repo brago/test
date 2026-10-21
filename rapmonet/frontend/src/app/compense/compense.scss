@@ -1,0 +1,27 @@
+.aide { color: var(--mat-sys-on-surface-variant); max-width: 1000px; }
+.ok, .erreur, .alerte { display: flex; align-items: center; gap: 8px; }
+.ok { color: #1b7f3b; }
+.erreur { color: var(--mat-sys-error); }
+.alerte { color: #8a4b00; }
+.filtres { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.filtres mat-form-field { width: 200px; }
+.bloc { margin: 12px 0 20px; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.tableau { overflow-x: auto; max-height: 520px; overflow-y: auto; margin-top: 8px; }
+.donnees { border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+.donnees th, .donnees td { padding: 4px 10px; border-bottom: 1px solid var(--mat-sys-outline-variant); text-align: left; white-space: nowrap; }
+.donnees th { background: var(--mat-sys-surface-container); font-weight: 500; position: sticky; top: 0; }
+.donnees tr.total td { font-weight: 600; border-top: 2px solid var(--mat-sys-outline); }
+.donnees tr.anomalie td { background: #fde0dd; }
+.donnees td.debit { color: #a4251b; }
+.liste tr:not(:first-child) { cursor: pointer; }
+.liste tr.choisie { background: var(--mat-sys-secondary-container); }
+.nombre { text-align: right !important; font-variant-numeric: tabular-nums; }
+.mono { font-family: 'Roboto Mono', monospace; font-size: 12px; }
+.etiquette { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-left: 6px; background: var(--mat-sys-surface-container-high); }
+.etiquette.SAISI { background: #fdebd0; color: #8a4b00; }
+.etiquette.VALIDE { background: #dcf3e3; color: #1b6b35; }
+.etiquette.ANNULE { background: #e6e6e6; color: #444; }
+h2, h3 { font-size: 15px; font-weight: 500; margin: 16px 0 6px; }
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 4px 16px; max-width: 1100px; }
+.pleine { grid-column: 1 / -1; }

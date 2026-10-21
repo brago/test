@@ -55,6 +55,14 @@ export const MENU: EntreeMenu[] = [
       { code: 'GAB_VALIDATION', libelle: 'Validation (4 yeux)', icone: 'verified_user', chemin: '/gab/validation', lot: 5 },
     ],
   },
+  {
+    code: 'COMPENSE', libelle: 'Compense TPE', icone: 'storefront', lot: 9,
+    enfants: [
+      { code: 'COMPENSE_TRAITEMENT', libelle: 'Traitements de compense', icone: 'receipt', chemin: '/compense/traitements', lot: 9 },
+      { code: 'COMPENSE_COMMERCANTS', libelle: 'Commerçants et comptes', icone: 'store', chemin: '/compense/commercants', lot: 9 },
+      { code: 'COMPENSE_VALIDATION', libelle: 'Validation (4 yeux)', icone: 'verified_user', chemin: '/compense/validation', lot: 9 },
+    ],
+  },
   { code: 'RAPPROCHEMENT', libelle: 'Rapprochements', icone: 'compare_arrows', chemin: '/rapprochement', lot: 6 },
   {
     code: 'CHARGEBACK', libelle: 'Chargebacks', icone: 'currency_exchange', lot: 7,
