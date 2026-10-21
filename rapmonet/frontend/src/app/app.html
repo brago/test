@@ -24,7 +24,7 @@
           @if (entree.enfants) {
             <div mat-subheader class="groupe"><mat-icon>{{ entree.icone }}</mat-icon> {{ entree.libelle }}</div>
             @for (e of entree.enfants; track e.code) {
-              <a mat-list-item [routerLink]="e.chemin" routerLinkActive #rla="routerLinkActive" [activated]="rla.isActive" class="enfant">
+              <a mat-list-item [routerLink]="e.chemin" routerLinkActive [routerLinkActiveOptions]="lienExact" #rla="routerLinkActive" [activated]="rla.isActive" class="enfant">
                 <mat-icon matListItemIcon>{{ e.icone }}</mat-icon>
                 <span matListItemTitle>{{ e.libelle }}</span>
               </a>

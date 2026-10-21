@@ -4,6 +4,7 @@ import { sessionOuverte, sessionRequise } from './core/auth.guard';
 
 /** Écrans réalisés ; les autres entrées du menu affichent la page « À venir ». */
 const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
+  '/ingestion/vss', '/exploration/vss', '/parametrage/vss',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit'];
 
 export const routes: Routes = [
@@ -39,6 +40,18 @@ export const routes: Routes = [
       {
         path: 'exploration', title: 'Exploration LIS – RAPMONET', data: { menu: 'EXPLORATION_LIS' },
         loadComponent: () => import('./exploration/exploration-lis').then((m) => m.ExplorationLis),
+      },
+      {
+        path: 'ingestion/vss', title: 'Chargement VSS – RAPMONET', data: { menu: 'CHARGEMENT_VSS' },
+        loadComponent: () => import('./ingestion/chargement-vss').then((m) => m.ChargementVss),
+      },
+      {
+        path: 'exploration/vss', title: 'Rapports VSS – RAPMONET', data: { menu: 'EXPLORATION_VSS' },
+        loadComponent: () => import('./exploration/exploration-vss').then((m) => m.ExplorationVss),
+      },
+      {
+        path: 'parametrage/vss', title: 'Paramétrage VSS – RAPMONET', data: { menu: 'PARAMETRAGE_VSS' },
+        loadComponent: () => import('./parametrage/types-rapports-vss').then((m) => m.TypesRapportsVss),
       },
       {
         path: 'parametrage', title: 'Paramétrage LIS – RAPMONET', data: { menu: 'PARAMETRAGE_LIS' },

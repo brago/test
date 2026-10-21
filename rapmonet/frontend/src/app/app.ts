@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { IsActiveMatchOptions, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -20,6 +20,11 @@ import { AuthService } from './core/auth.service';
 })
 export class App {
   protected readonly auth = inject(AuthService);
+
+  /** Lien actif seulement sur son chemin exact (« /exploration » ≠ « /exploration/vss »), paramètres ignorés. */
+  protected readonly lienExact: IsActiveMatchOptions = {
+    paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored',
+  };
 
   /** Menu limité aux entrées autorisées par le profil. */
   protected readonly menu = computed<EntreeMenu[]>(() => {

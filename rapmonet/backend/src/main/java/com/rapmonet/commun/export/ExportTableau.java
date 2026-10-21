@@ -147,7 +147,10 @@ public final class ExportTableau {
     }
 
     private static void nombre(Cell cellule, Object v, CellStyle style) {
-        if (v instanceof Number n) {
+        if (v instanceof Tableau.MontantSens m) {
+            cellule.setCellValue(m.signe().doubleValue());
+            cellule.setCellStyle(style);
+        } else if (v instanceof Number n) {
             cellule.setCellValue(n.doubleValue());
             cellule.setCellStyle(style);
         } else {
@@ -250,8 +253,11 @@ public final class ExportTableau {
 
     private static String brut(Tableau.Colonne c, Object v) {
         return switch (c.type()) {
-            case MONTANT -> v instanceof Number n ? montant(n) : v.toString();
-            case ENTIER -> v instanceof Number n ? NumberFormat.getIntegerInstance(FR).format(n) : v.toString();
+            case MONTANT -> v instanceof Tableau.MontantSens m
+                    ? montant(m.montant()) + (m.sens() == null ? "" : " " + m.sens())
+                    : v instanceof Number n ? montant(n) : v.toString();
+            case ENTIER -> v instanceof Tableau.MontantSens m ? NumberFormat.getIntegerInstance(FR).format(m.montant())
+                    : v instanceof Number n ? NumberFormat.getIntegerInstance(FR).format(n) : v.toString();
             case DATE -> {
                 LocalDate d = date(v);
                 yield d != null ? DATE.format(d) : v.toString();
@@ -267,7 +273,8 @@ public final class ExportTableau {
     private static String montant(Number n) {
         NumberFormat f = NumberFormat.getNumberInstance(FR);
         BigDecimal b = n instanceof BigDecimal bd ? bd : new BigDecimal(n.toString());
-        f.setMinimumFractionDigits(b.scale() > 0 && b.stripTrailingZeros().scale() > 0 ? 2 : 0);
+        // Précision d'origine conservée (315.00 → « 315,00 », 1430040 → « 1 430 040 »), au plus 2 décimales.
+        f.setMinimumFractionDigits(Math.clamp(b.scale(), 0, 2));
         f.setMaximumFractionDigits(2);
         return f.format(b);
     }

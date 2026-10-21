@@ -1,0 +1,404 @@
+REPORT ID:  VSS-110                                         VISANET SETTLEMENT SERVICE                        PAGE:              1  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+ ROLLUP TO:          9000000002 SUMM TEST                    SETTLEMENT SUMMARY REPORT                         REPORT DATE: 22JUL26  
+ FUNDS XFER ENTITY:  1000000003 GIM-TEST                                                                                             
+                                                                                                                                     
+ SETTLEMENT CURRENCY:  EUR                                                                                                           
+                                                                                                                                     
+                                                                                                                                     
+                                                                       CREDIT                     DEBIT                     TOTAL    
+                                              COUNT                    AMOUNT                    AMOUNT                    AMOUNT    
+                                                                                                                                     
+ INTERCHANGE VALUE                                                                                                                   
+                                                                                                                                     
+    TOTAL ACQUIRER                                0                      0.00                      0.00                      0.00    
+    TOTAL ISSUER                                 20                    315.00                  2,481.67                  2,166.67DB  
+    TOTAL OTHER                                   0                      0.00                      0.00                      0.00    
+                                                                                                                                     
+    TOTAL INTERCHANGE VALUE                      20                    315.00                  2,481.67                  2,166.67DB  
+                                                                                                                                     
+ REIMBURSEMENT FEES                                                                                                                  
+                                                                                                                                     
+    TOTAL ACQUIRER                                                       0.00                      0.00                      0.00    
+    TOTAL ISSUER                                                        12.53                      2.91                      9.62CR  
+    TOTAL OTHER                                                          0.00                      0.00                      0.00    
+                                                                                                                                     
+    TOTAL REIMBURSEMENT FEES                                            12.53                      2.91                      9.62CR  
+                                                                                                                                     
+ VISA CHARGES                                                                                                                        
+                                                                                                                                     
+    TOTAL ACQUIRER                                                       0.00                      0.00                      0.00    
+    TOTAL ISSUER                                                         0.00                     26.91                     26.91DB  
+    TOTAL OTHER                                                          0.00                      0.00                      0.00    
+                                                                                                                                     
+    TOTAL VISA CHARGES                                                   0.00                     26.91                     26.91DB  
+                                                                                                                                     
+ TOTAL                                                                                                                               
+                                                                                                                                     
+    TOTAL ACQUIRER                                                       0.00                      0.00                      0.00    
+    TOTAL ISSUER                                                       327.53                  2,511.49                  2,183.96DB  
+    TOTAL OTHER                                                          0.00                      0.00                      0.00    
+                                                                                                                                     
+    NET SETTLEMENT AMOUNT                                              327.53                  2,511.49                  2,183.96DB  
+                                                                                                                                     
+                                                                                                                                     
+                                                   *** END OF VSS-110 REPORT ***                                                     
+REPORT ID:  VSS-120                                         VISANET SETTLEMENT SERVICE                        PAGE:              1  
+ REPORTING FOR:      1000000001 BANQUE ESSAI               INTERNATIONAL SETTLEMENT SERVICE                    PROC DATE:   22JUL26  
+ ROLLUP TO:          9000000002 SUMM TEST                      INTERCHANGE VALUE REPORT                        REPORT DATE: 22JUL26  
+ FUNDS XFER ENTITY:  1000000003 GIM-TEST                                                                                             
+                                                                                                                                     
+                                                                                                                                     
+ SETTLEMENT CURRENCY:  EUR                                                                                                           
+ CLEARING CURRENCY:    XOF                                                                                                           
+                                                                                                                                     
+                                                                                                                                     
+                                          RATE               COUNT               CLEARING          INTERCHANGE          INTERCHANGE  
+                                         TABLE                                    AMOUNT              VALUE                VALUE     
+                                            ID                                                       CREDITS               DEBITS    
+                                                                                                                                     
+                                                                                                                                     
+ ISSUER TRANSACTIONS                                                                                                                 
+                                                                                                                                     
+                                                                                                                                     
+   PURCHASE                                                                                                                          
+    ORIGINAL SALE                        A1358                   1              295,709DB                                    437.68  
+                                         A1359                  12              870,431DB                                  1,326.70  
+                                         A1360                   4               72,600DB                                    110.66  
+    TOTAL ORIGINAL SALE                                         17            1,238,740DB                                  1,875.04  
+                                                                                                                                     
+   TOTAL PURCHASE                                               17            1,238,740DB                                  1,875.04  
+   NET   PURCHASE                                                                                                          1,875.04  
+                                                                                                                                     
+                                                                                                                                     
+   MERCHANDISE CREDIT                                                                                                                
+    ORIGINAL                             A1359                   1              206,626CR               315.00                       
+                                                                                                                                     
+   TOTAL MERCHANDISE CREDIT                                      1              206,626CR               315.00                       
+   NET   MERCHANDISE CREDIT                                                                             315.00                       
+                                                                                                                                     
+                                                                                                                                     
+   ATM CASH                                                                                                                          
+    ORIGINAL WITHDRAWAL                  A1359                   1              295,181DB                                    450.00  
+                                         A1360                   1              102,745DB                                    156.63  
+    TOTAL ORIGINAL WITHDRAWAL                                    2              397,926DB                                    606.63  
+                                                                                                                                     
+   TOTAL ATM CASH                                                2              397,926DB                                    606.63  
+   NET   ATM CASH                                                                                                            606.63  
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL ISSUER INTERCHANGE                                       20            1,430,040DB               315.00             2,481.67  
+ NET   ISSUER INTERCHANGE                                                                                                  2,166.67  
+                                                                                                                                     
+                                                                                                                                     
+                                                   ***  END OF VSS-120 REPORT  ***                                                   
+REPORT ID:  VSS-130                                         VISANET SETTLEMENT SERVICE                        PAGE:              1  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+ ROLLUP TO:          9000000002 SUMM TEST                     REIMBURSEMENT FEES REPORT                        REPORT DATE: 22JUL26  
+ FUNDS XFER ENTITY:  1000000003 GIM-TEST                                                                                             
+                                                                                                                                     
+ SETTLEMENT CURRENCY:  EUR                                                                                                           
+                                                                                                REIMBURSEMENT         REIMBURSEMENT  
+                                                        COUNT              INTERCHANGE               FEE                   FEE       
+                                                                              AMOUNT               CREDITS                DEBITS     
+ ISSUER TRANSACTIONS                                                                                                                 
+                                                                                                                                     
+    PURCHASE                                                                                                                         
+       ORIGINAL SALE                                                                                                                 
+          VISA INTERNATIONAL                                                                                                         
+             E.U. - C.E.M.E.A                                                                                                        
+                EEAINT CN DBPP                             10               1,095.21DB                   2.19                        
+                EEAINT CNPCNDBPP                            2                 231.49DB                   2.66                        
+             TOTAL E.U. - C.E.M.E.A                                                                      4.85                        
+                                                                                                                                     
+          VISA CEMEA                                                                                                                 
+             LEBANON - IVRCOAST                                                                                                      
+                CEMEA CLAS                                  1                 437.68DB                   5.91                        
+             U.A.EMIR - IVRCOAST                                                                                                     
+                CEMEA ALT CLAS                              1                   3.96DB                   0.06                        
+             IVRCOAST - IVRCOAST                                                                                                     
+                AUTH SEC                                    3                 106.70DB                   1.71                        
+          TOTAL VISA CEMEA                                                                               7.68                        
+                                                                                                                                     
+       TOTAL ORIGINAL SALE                                                                              12.53                        
+                                                                                                                                     
+    TOTAL PURCHASE                                         17               1,875.04DB                  12.53                        
+    NET   PURCHASE                                                                                      12.53                        
+                                                                                                                                     
+    MERCHANDISE CREDIT                                                                                                               
+       ORIGINAL                                                                                                                      
+          VISA INTERNATIONAL                                                                                                         
+             E.U. - C.E.M.E.A                                                                                                        
+                EEAINT VCHMRDBPP                            1                 315.00CR                   0.00                        
+                                                                                                                                     
+    TOTAL MERCHANDISE CREDIT                                1                 315.00CR                   0.00                        
+    NET   MERCHANDISE CREDIT                                                                             0.00                        
+                                                                                                                                     
+    ATM CASH                                                                                                                         
+       ORIGINAL WITHDRAWAL                                                                                                           
+          VISA INTERNATIONAL                                                                                                         
+             E.U. - C.E.M.E.A                                                                                                        
+                ATM DCC AF                                  1                 156.63DB                   0.00                        
+                ATM NO AF                                   1                 450.00DB                                         2.91  
+             TOTAL E.U. - C.E.M.E.A                                                                                            2.91  
+                                                                                                                                     
+    TOTAL ATM CASH                                          2                 606.63DB                                         2.91  
+    NET   ATM CASH                                                                                                             2.91  
+                                                                                                                                     
+ TOTAL ISSUER REIMB FEES                                                                                12.53                  2.91  
+ NET   ISSUER REIMB FEES                                                                                 9.62                        
+                                                                                                                                     
+                                                                                                                                     
+                                                    *** END OF VSS-130 REPORT ***                                                    
+REPORT ID:  VSS-140                                         VISANET SETTLEMENT SERVICE                        PAGE:              1  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+ ROLLUP TO:          9000000002 SUMM TEST                       VISA CHARGES REPORT                            REPORT DATE: 22JUL26  
+ FUNDS XFER ENTITY:  1000000003 GIM-TEST                                                                                             
+                                                                                                                                     
+ SETTLEMENT CURRENCY:  EUR                                                                                                           
+                                                             COUNT            INTERCHANGE         VISA CHARGES         VISA CHARGES  
+                                                                                AMOUNT              CREDITS               DEBITS     
+                                                                                                                                     
+ ISSUER TRANSACTIONS                                                                                                                 
+                                                                                                                                     
+   CURRENCY CONVERSION FEES                                                                                                          
+                                                                                                                                     
+     PURCHASE                                                                                                                        
+       ORIGINAL SALE                                                                                                                 
+         VISA INTERNATIONAL                                                                                                          
+            E.U. - C.E.M.E.A                                     1                 8.76DB                                            
+                                                                                                                                     
+         VISA CEMEA                                                                                                                  
+            LEBANON - IVRCOAST                                   1               437.68DB                                            
+                                                                                                                                     
+       TOTAL PURCHASE                                            2               446.44DB                                            
+       NET   PURCHASE                                                                                     0.00                       
+                                                                                                                                     
+    TOTAL CURRENCY CONVERSION FEES                               2               446.44DB                                            
+    NET   CURRENCY CONVERSION FEES                                                                        0.00                       
+                                                                                                                                     
+   ISA CHARGE MULTI CURR PUR                                                                                                         
+     PURCHASE                                                                                                                        
+       ORIGINAL SALE                                                                                                                 
+         VISA INTERNATIONAL                                                                                                          
+            E.U. - C.E.M.E.A                                     1                 8.76DB                                      0.09  
+                                                                                                                                     
+         VISA CEMEA                                                                                                                  
+            LEBANON - IVRCOAST                                   1               437.68DB                                      4.38  
+                                                                                                                                     
+       TOTAL PURCHASE                                            2               446.44DB                                      4.47  
+       NET   PURCHASE                                                                                                          4.47  
+                                                                                                                                     
+    TOTAL ISA CHARGE MULTI CURR PUR                              2               446.44DB                                      4.47  
+    NET   ISA CHARGE MULTI CURR PUR                                                                                            4.47  
+                                                                                                                                     
+   ISA CHARGE SINGLE CURR PUR                                                                                                        
+     PURCHASE                                                                                                                        
+       ORIGINAL SALE                                                                                                                 
+         VISA INTERNATIONAL                                                                                                          
+            E.U. - C.E.M.E.A                                    11             1,317.94DB                                     13.18  
+                                                                                                                                     
+         VISA CEMEA                                                                                                                  
+            U.A.EMIR - IVRCOAST                                  1                 3.96DB                                      0.04  
+                                                                                                                                     
+       TOTAL PURCHASE                                           12             1,321.90DB                                     13.22  
+       NET   PURCHASE                                                                                                         13.22  
+REPORT ID:  VSS-140                                         VISANET SETTLEMENT SERVICE                        PAGE:              2  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+ ROLLUP TO:          9000000002 SUMM TEST                       VISA CHARGES REPORT                            REPORT DATE: 22JUL26  
+ FUNDS XFER ENTITY:  1000000003 GIM-TEST                                                                                             
+                                                                                                                                     
+ SETTLEMENT CURRENCY:  EUR                                                                                                           
+                                                             COUNT            INTERCHANGE         VISA CHARGES         VISA CHARGES  
+                                                                                AMOUNT              CREDITS               DEBITS     
+                                                                                                                                     
+     MERCHANDISE CREDIT                                                                                                              
+       ORIGINAL                                                                                                                      
+         VISA INTERNATIONAL                                                                                                          
+            E.U. - C.E.M.E.A                                     1               315.00CR                                      3.15  
+                                                                                                                                     
+       TOTAL MERCHANDISE CREDIT                                  1               315.00CR                                      3.15  
+       NET   MERCHANDISE CREDIT                                                                                                3.15  
+                                                                                                                                     
+    TOTAL ISA CHARGE SINGLE CURR PUR                            13             1,006.90DB                                     16.37  
+    NET   ISA CHARGE SINGLE CURR PUR                                                                                          16.37  
+                                                                                                                                     
+   ISA CHARGE SINGLE CURR CASH                                                                                                       
+     ATM CASH                                                                                                                        
+       ORIGINAL WITHDRAWAL                                                                                                           
+         VISA INTERNATIONAL                                                                                                          
+            E.U. - C.E.M.E.A                                     2               606.63DB                                      6.07  
+                                                                                                                                     
+       TOTAL ATM CASH                                            2               606.63DB                                      6.07  
+       NET   ATM CASH                                                                                                          6.07  
+                                                                                                                                     
+    TOTAL ISA CHARGE SINGLE CURR CASH                            2               606.63DB                                      6.07  
+    NET   ISA CHARGE SINGLE CURR CASH                                                                                          6.07  
+                                                                                                                                     
+ TOTAL ISSUER CHARGES                                                                                                         26.91  
+ NET   ISSUER CHARGES                                                                                                         26.91  
+                                                                                                                                     
+                                                                                                                                     
+                                                    *** END OF VSS-140 REPORT ***                                                    
+REPORT ID:  VSS-210                                         VISANET SETTLEMENT SERVICE                        PAGE:              1  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+ ROLLUP TO:          9000000002 SUMM TEST                  CURRENCY CONVERSION FEES REPORT                     REPORT DATE: 22JUL26  
+ FUNDS XFER ENTITY:  1000000003 GIM-TEST                                                                                             
+                                                                                                                                     
+ SETTLEMENT CURRENCY:  EUR                                                                                                           
+ CLEARING CURRENCY:  XOF                                                                                                             
+                                                                                                                                     
+                             ***********SETTLEMENT CURRENCY*********** *********************CLEARING CURRENCY**********************  
+                                      INTERCHANGE         CONVERSION            INTERCHANGE         CONVERSION         ISS FX CALC   
+                                        AMOUNT               FEE                  AMOUNT               FEE                AMT        
+                                                                                                                                     
+ ISSUER TRANSACTIONS                                                                                                                 
+                                                                                                                                     
+ PURCHASE                                                                                                                            
+  ORIGINAL SALE                                                                                                                      
+   VISA INTERNATIONAL                        8.76DB             0.00                  5,747DB                0                172DB  
+   VISA CEMEA                              437.68DB             0.00                287,096DB                0              8,613DB  
+ TOTAL ORIGINAL SALE                                                                                                                 
+                                           446.44DB             0.00                292,843DB                0              8,785DB  
+                                                                                                                                     
+ TOTAL PURCHASE                                                                                                                      
+                                           446.44DB             0.00                292,843DB                0              8,785DB  
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL CURRENCY CONVERSION FEES                                                                                                      
+                                           446.44DB             0.00                292,843DB                0              8,785DB  
+                                                                                                                                     
+                                                                                                                                     
+                                                    *** END OF VSS-210 REPORT ***                                                    
+REPORT ID:  VSS-300                                         VISANET SETTLEMENT SERVICE                        PAGE:              1  
+ REPORTING FOR:      1000000001 BANQUE ESSAI               INTERNATIONAL SETTLEMENT SERVICE                    PROC DATE:   22JUL26  
+                                                              SRE FINANCIAL RECAP REPORT                       REPORT DATE: 22JUL26  
+                                                                                                                                     
+ SETTLEMENT CURRENCY:  EUR                                                                                                           
+                                                                                                                                     
+                                                                                                                                     
+                                  TOTAL                  TOTAL                TOTAL                    TOTAL                 NET     
+                               INTERCHANGE            INTERCHANGE         REIMBURSEMENT                 VISA             SETTLEMENT  
+                                  COUNT                  VALUE                 FEES                   CHARGES              AMOUNT    
+                                                                                                                                     
+                                                                                                                                     
+                                                   *** NO DATA FOR THIS REPORT ***                                                   
+                                                                                                                                     
+                                                                                                                                     
+                                                   *** END OF VSS-300 REPORT ***                                                     
+REPORT ID:  VSS-900-S                                       VISANET SETTLEMENT SERVICE                        PAGE:              1  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+                                                           SUMMARY RECONCILIATION REPORT                       REPORT DATE: 22JUL26  
+                                                                                                                                     
+ CLEARING CURRENCY:  XOF                                                                                                             
+                                                                                                                                     
+                                                             COUNT              CLEARING            TOTAL                  TOTAL     
+                                                                                 AMOUNT             COUNT                 CLEARING   
+                                                                                                                           AMOUNT    
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL ISSUER TRANSACTIONS                                                                                                           
+       FINANCIAL TRANSACTIONS                                                                                                        
+         RECEIVED FROM VISA                                     20           1,430,040DB                                             
+                                                                                                                                     
+       TOTAL SENT TO SETTLEMENT                                                                        20              1,430,040DB   
+                                                                                                                                     
+       TOTAL TRANSACTIONS                                                                              20              1,430,040DB   
+REPORT ID:  VSS-900-S                                       VISANET SETTLEMENT SERVICE                        PAGE:              2  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+                                                           SUMMARY RECONCILIATION REPORT                       REPORT DATE: 22JUL26  
+                                                                                                                                     
+ CLEARING CURRENCY:  XOF                                                                                                             
+                                                                                                                                     
+                                                             COUNT              CLEARING            TOTAL                  TOTAL     
+                                                                                 AMOUNT             COUNT                 CLEARING   
+                                                                                                                           AMOUNT    
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL CLEARING CURRENCY: XOF                                                                                                        
+       FINANCIAL TRANSACTIONS                                                                                                        
+         RECEIVED FROM VISA                                     20           1,430,040DB                                             
+                                                                                                                                     
+       TOTAL SENT TO SETTLEMENT                                                                        20              1,430,040DB   
+                                                                                                                                     
+       TOTAL TRANSACTIONS                                                                              20              1,430,040DB   
+REPORT ID:  VSS-900-S                                       VISANET SETTLEMENT SERVICE                        PAGE:              3  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+                                                           SUMMARY RECONCILIATION REPORT                       REPORT DATE: 22JUL26  
+                                                                                                                                     
+ CLEARING CURRENCY:  NONE                                                                                                            
+                                                                                                                                     
+                                                             COUNT              CLEARING            TOTAL                  TOTAL     
+                                                                                 AMOUNT             COUNT                 CLEARING   
+                                                                                                                           AMOUNT    
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL ISSUER TRANSACTIONS                                                                                                           
+       NON-FINANCIAL TRANSACTIONS                                                                                                    
+         RECEIVED FROM VISA                                     40                                                                   
+                                                                                                                                     
+       TOTAL NON-FINANCIAL                                                                             40                            
+                                                                                                                                     
+       TOTAL TRANSACTIONS                                                                              40                            
+REPORT ID:  VSS-900-S                                       VISANET SETTLEMENT SERVICE                        PAGE:              4  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+                                                           SUMMARY RECONCILIATION REPORT                       REPORT DATE: 22JUL26  
+                                                                                                                                     
+ CLEARING CURRENCY:  NONE                                                                                                            
+                                                                                                                                     
+                                                             COUNT              CLEARING            TOTAL                  TOTAL     
+                                                                                 AMOUNT             COUNT                 CLEARING   
+                                                                                                                           AMOUNT    
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL OTHER TRANSACTIONS                                                                                                            
+       NON-FINANCIAL TRANSACTIONS                                                                                                    
+         RECEIVED FROM VISA                                  1,569                                                                   
+                                                                                                                                     
+       TOTAL NON-FINANCIAL                                                                          1,569                            
+                                                                                                                                     
+       TOTAL TRANSACTIONS                                                                           1,569                            
+REPORT ID:  VSS-900-S                                       VISANET SETTLEMENT SERVICE                        PAGE:              5  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+                                                           SUMMARY RECONCILIATION REPORT                       REPORT DATE: 22JUL26  
+                                                                                                                                     
+ CLEARING CURRENCY:  NONE                                                                                                            
+                                                                                                                                     
+                                                             COUNT              CLEARING            TOTAL                  TOTAL     
+                                                                                 AMOUNT             COUNT                 CLEARING   
+                                                                                                                           AMOUNT    
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL CLEARING CURRENCY: NONE                                                                                                       
+       NON-FINANCIAL TRANSACTIONS                                                                                                    
+         RECEIVED FROM VISA                                  1,609                                                                   
+                                                                                                                                     
+       TOTAL NON-FINANCIAL                                                                          1,609                            
+                                                                                                                                     
+       TOTAL TRANSACTIONS                                                                           1,609                            
+REPORT ID:  VSS-900-S                                       VISANET SETTLEMENT SERVICE                        PAGE:              6  
+ REPORTING FOR:      1000000001 BANQUE ESSAI              INTERNATIONAL SETTLEMENT SERVICE                     PROC DATE:   22JUL26  
+                                                           SUMMARY RECONCILIATION REPORT                       REPORT DATE: 22JUL26  
+                                                                                                                                     
+ CLEARING CURRENCY:  ALL                                                                                                             
+                                                                                                                                     
+                                                             COUNT              CLEARING            TOTAL                  TOTAL     
+                                                                                 AMOUNT             COUNT                 CLEARING   
+                                                                                                                           AMOUNT    
+                                                                                                                                     
+                                                                                                                                     
+ TOTAL 1000000001 BANQUE ESSAI                                                                                                       
+       FINANCIAL TRANSACTIONS                                                                                                        
+         RECEIVED FROM VISA                                     20                                                                   
+                                                                                                                                     
+       TOTAL SENT TO SETTLEMENT                                                                        20                            
+                                                                                                                                     
+       NON-FINANCIAL TRANSACTIONS                                                                                                    
+         RECEIVED FROM VISA                                  1,609                                                                   
+                                                                                                                                     
+       TOTAL NON-FINANCIAL                                                                          1,609                            
+                                                                                                                                     
+       TOTAL TRANSACTIONS                                                                           1,629                            
+                                                                                                                                     
+                                                                                                                                     
+                                                   *** END OF VSS-900-S REPORT ***                                                   

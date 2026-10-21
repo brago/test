@@ -15,3 +15,12 @@
 .tc { font-family: monospace; margin-right: 8px; font-size: 12px; }
 .actions { white-space: nowrap; }
 mat-chip-set { display: block; margin-bottom: 8px; }
+.synthese { display: flex; flex-wrap: wrap; gap: 24px; margin: 8px 0 12px; }
+.synthese > div { display: flex; flex-direction: column; }
+.etiquette-synthese { font-size: 12px; color: var(--mat-sys-on-surface-variant); }
+.synthese strong { font-size: 18px; }
+.rapports { display: flex; flex-wrap: wrap; gap: 6px; }
+.puce { background: var(--mat-sys-surface-container-high); border-radius: 12px; padding: 2px 10px; font-size: 12px; }
+.puce.ignore { text-decoration: line-through; opacity: .6; }
+.discret { color: var(--mat-sys-on-surface-variant); font-size: 12px; }
+code { font-size: 13px; }

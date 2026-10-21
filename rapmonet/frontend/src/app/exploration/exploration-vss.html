@@ -1,0 +1,90 @@
+<h1>Rapports VSS</h1>
+
+<form class="filtres" (ngSubmit)="rechercher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="large">
+    <mat-label>Rapport</mat-label>
+    <mat-select [(ngModel)]="code" name="code">
+      <mat-option value="">Tous</mat-option>
+      @for (t of types(); track t.code) { <mat-option [value]="t.code">{{ t.code }} – {{ t.libelle }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+</form>
+
+<div class="disposition">
+  <mat-card appearance="outlined" class="liste">
+    @if (liste().length === 0) { <p class="vide">Aucun rapport pour ces critères.</p> }
+    <mat-nav-list dense>
+      @for (g of parDate(); track g.date) {
+        <div mat-subheader>Traitement du {{ g.date | date: 'dd/MM/yyyy' }}</div>
+        @for (r of g.rapports; track r.id) {
+          <a mat-list-item (click)="ouvrir(r)" [activated]="rapport()?.resume?.id === r.id">
+            <span matListItemTitle>{{ r.code }} <span class="discret">{{ r.libelleType ?? r.titre }}</span></span>
+            <span matListItemLine class="discret">
+              {{ r.sansDonnees ? 'Aucune donnée' : r.nbLignes + ' lignes' }}@if (r.nbPages > 1) { · {{ r.nbPages }} pages }
+            </span>
+          </a>
+        }
+      }
+    </mat-nav-list>
+  </mat-card>
+
+  @if (rapport(); as r) {
+    <mat-card appearance="outlined" class="rapport">
+      <div class="entete-rapport">
+        <div>
+          <h2>{{ r.resume.code }} – {{ r.resume.libelleType ?? r.resume.titre }}</h2>
+          <p class="discret">
+            {{ r.resume.titre }} · traitement du {{ r.resume.dateTraitement | date: 'dd/MM/yyyy' }}<br />
+            SRE {{ r.resume.sreId }} {{ r.resume.sreNom }}
+            @if (r.rollup) { · rollup {{ r.rollup }} }
+            @if (r.entiteFonds) { · règlement {{ r.entiteFonds }} }
+          </p>
+        </div>
+        <div class="boutons">
+          <button mat-stroked-button (click)="exporter('xlsx')"><mat-icon>grid_on</mat-icon> Excel</button>
+          <button mat-stroked-button (click)="exporter('pdf')"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+        </div>
+      </div>
+      @if (erreur(); as e) { <p class="ko">{{ e }}</p> }
+      @if (r.resume.sansDonnees) {
+        <p class="vide">Visa indique : aucune donnée pour ce rapport.</p>
+      } @else {
+        <div class="tableau">
+          <table class="vss">
+            <thead>
+              <tr>
+                <th class="libelle">Libellé</th>
+                @if (devises().compensationVariable) { <th>Devise compens.</th> }
+                @for (c of r.colonnes; track c) { <th class="nombre">{{ enteteColonne(c) }}</th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of r.lignes; track l.rang) {
+                <tr [class.total]="estTotal(l)" [class.section]="estSection(l)" [title]="l.chemin">
+                  <td class="libelle" [style.padding-left.px]="8 + l.niveau * 16">{{ l.libelle }}</td>
+                  @if (devises().compensationVariable) { <td class="devise">{{ l.deviseCompensation }}</td> }
+                  @for (c of r.colonnes; track c) {
+                    <td class="nombre" [class.db]="l.valeurs[c]?.sens === 'DB'">{{ valeur(c, l.valeurs[c]) }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </mat-card>
+  }
+</div>

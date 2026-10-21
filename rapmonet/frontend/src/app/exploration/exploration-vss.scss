@@ -1,0 +1,23 @@
+.filtres { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+.filtres mat-form-field { width: 170px; }
+.filtres mat-form-field.large { width: 320px; }
+.disposition { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .disposition { grid-template-columns: 1fr; } }
+.liste { max-height: 75vh; overflow: auto; }
+.rapport { padding: 16px; min-width: 0; }
+.entete-rapport { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.entete-rapport h2 { margin: 0 0 4px; }
+.boutons button { margin-left: 8px; }
+.discret { color: var(--mat-sys-on-surface-variant); font-size: 12px; }
+.vide { color: var(--mat-sys-on-surface-variant); padding: 12px; }
+.ko { color: var(--mat-sys-error); }
+.tableau { overflow: auto; max-height: 65vh; margin-top: 12px; }
+table.vss { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.vss th { position: sticky; top: 0; background: var(--mat-sys-surface-container); text-align: left;
+  padding: 6px 8px; font-weight: 500; font-size: 12px; white-space: normal; vertical-align: bottom; }
+table.vss td { padding: 4px 8px; border-bottom: 1px solid var(--mat-sys-outline-variant); white-space: nowrap; }
+table.vss .nombre { text-align: right; font-variant-numeric: tabular-nums; }
+table.vss .devise { color: var(--mat-sys-on-surface-variant); font-size: 12px; }
+table.vss tr.total td { font-weight: 600; background: var(--mat-sys-surface-container-low); }
+table.vss td.db { color: #a4251b; }
+table.vss tr.section td { font-weight: 500; color: var(--mat-sys-primary); padding-top: 10px; border-bottom: none; }

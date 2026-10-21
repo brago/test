@@ -31,7 +31,7 @@ class SystemeIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.application").value("RAPMONET"))
                 .andExpect(jsonPath("$.baseDeDonnees.produit").value("PostgreSQL"))
-                .andExpect(jsonPath("$.baseDeDonnees.schemaVersion").value("5"));
+                .andExpect(jsonPath("$.baseDeDonnees.schemaVersion").value("6"));
     }
 
     @Test

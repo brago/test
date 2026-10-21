@@ -25,15 +25,24 @@ export const MENU: EntreeMenu[] = [
   },
   {
     code: 'PARAMETRAGE', libelle: 'Paramétrage', icone: 'tune', lot: 2,
-    enfants: [{ code: 'PARAMETRAGE_LIS', libelle: 'Format LIS', icone: 'description', chemin: '/parametrage', lot: 2 }],
+    enfants: [
+      { code: 'PARAMETRAGE_LIS', libelle: 'Format LIS', icone: 'description', chemin: '/parametrage', lot: 2 },
+      { code: 'PARAMETRAGE_VSS', libelle: 'Rapports VSS', icone: 'fact_check', chemin: '/parametrage/vss', lot: 3 },
+    ],
   },
   {
     code: 'CHARGEMENT', libelle: 'Chargement des données', icone: 'upload_file', lot: 2,
-    enfants: [{ code: 'CHARGEMENT_LIS', libelle: 'Fichiers LIS', icone: 'drive_folder_upload', chemin: '/ingestion', lot: 2 }],
+    enfants: [
+      { code: 'CHARGEMENT_LIS', libelle: 'Fichiers LIS', icone: 'drive_folder_upload', chemin: '/ingestion', lot: 2 },
+      { code: 'CHARGEMENT_VSS', libelle: 'Fichiers VSS (VX)', icone: 'credit_card', chemin: '/ingestion/vss', lot: 3 },
+    ],
   },
   {
     code: 'EXPLORATION', libelle: 'Exploration', icone: 'manage_search', lot: 2,
-    enfants: [{ code: 'EXPLORATION_LIS', libelle: 'Données LIS', icone: 'table_view', chemin: '/exploration', lot: 2 }],
+    enfants: [
+      { code: 'EXPLORATION_LIS', libelle: 'Données LIS', icone: 'table_view', chemin: '/exploration', lot: 2 },
+      { code: 'EXPLORATION_VSS', libelle: 'Rapports VSS', icone: 'summarize', chemin: '/exploration/vss', lot: 3 },
+    ],
   },
   { code: 'GAB', libelle: 'GAB : appros & arrêtés', icone: 'atm', chemin: '/gab', lot: 5 },
   { code: 'RAPPROCHEMENT', libelle: 'Rapprochements', icone: 'compare_arrows', chemin: '/rapprochement', lot: 6 },

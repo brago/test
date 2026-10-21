@@ -13,6 +13,16 @@ public record Tableau(String titre, List<String> criteres, String auteur, List<C
 
     public enum Type { TEXTE, ENTIER, MONTANT, DATE, DATE_HEURE }
 
+    /**
+     * Montant avec son sens comptable (convention Visa : « 2 183,96 DB »).
+     * Excel reçoit le montant signé (débit négatif), le PDF le montant suivi du sens.
+     */
+    public record MontantSens(java.math.BigDecimal montant, String sens) {
+        public java.math.BigDecimal signe() {
+            return "DB".equals(sens) ? montant.negate() : montant;
+        }
+    }
+
     /** @param largeur largeur relative de la colonne dans le PDF */
     public record Colonne(String libelle, Type type, float largeur) {
     }

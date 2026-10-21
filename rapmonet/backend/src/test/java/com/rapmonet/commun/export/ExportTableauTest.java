@@ -56,6 +56,8 @@ class ExportTableauTest {
     void formatageFrancaisSansEspaceInsecable() {
         assertThat(ExportTableau.texte(COLONNES.get(1), 1234567L)).isEqualTo("1 234 567");
         assertThat(ExportTableau.texte(COLONNES.get(1), new BigDecimal("12.50"))).isEqualTo("12,50");
+        assertThat(ExportTableau.texte(COLONNES.get(1), new BigDecimal("315.00"))).isEqualTo("315,00");
+        assertThat(ExportTableau.texte(COLONNES.get(1), new Tableau.MontantSens(new BigDecimal("2183.96"), "DB"))).isEqualTo("2 183,96 DB");
         assertThat(ExportTableau.texte(COLONNES.get(0), "2023-02-10")).isEqualTo("10/02/2023");
     }
 }

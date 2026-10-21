@@ -1,0 +1,124 @@
+<h1>Chargement des rapports VSS (VX)</h1>
+<p class="aide">
+  Fichier de rapports VisaNet Settlement Service (EP-747) transmis par le GIM, par exemple <code>BHCI_VX747.txt</code>.
+  La date de traitement et la banque (SRE) sont lues dans les rapports. Les types de rapports à enregistrer se
+  choisissent dans Paramétrage › Rapports VSS.
+</p>
+
+<mat-card appearance="outlined" class="selection">
+  <mat-card-content>
+    <div class="ligne-fichier">
+      <span class="type">Fichier</span>
+      <button mat-stroked-button (click)="choix.click()"><mat-icon>folder_open</mat-icon> Parcourir</button>
+      <input #choix type="file" accept=".txt,text/plain" hidden (change)="choisir($event)" />
+      <span class="nom">{{ fichier()?.name ?? 'Aucun fichier' }}</span>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button (click)="integrer()" [disabled]="enCours() || !fichier()"><mat-icon>play_arrow</mat-icon> Intégrer</button>
+  </mat-card-actions>
+  @if (enCours()) { <mat-progress-bar mode="indeterminate" /> }
+</mat-card>
+
+@if (erreur(); as e) { <p class="ko"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (resultat(); as r) {
+  <mat-card appearance="outlined" class="fichier">
+    <mat-card-header>
+      <mat-card-title>
+        @if (r.integre) { <span class="ok"><mat-icon>check_circle</mat-icon> {{ r.nom }} intégré</span> }
+        @else { <span class="ko"><mat-icon>block</mat-icon> {{ r.nom }} refusé</span> }
+      </mat-card-title>
+      <mat-card-subtitle>
+        Traitement du {{ r.dateTraitement ? (r.dateTraitement | date: 'dd/MM/yyyy') : '?' }} · SRE {{ r.sreId }} {{ r.sreNom }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="synthese">
+        <div><span class="etiquette-synthese">Net à régler (VSS-110)</span>
+          <strong>{{ montant(r.synthese.montantNet, r.synthese.deviseReglement) }}</strong></div>
+        <div><span class="etiquette-synthese">Transactions</span><strong>{{ r.synthese.nbTransactions ?? '–' }}</strong></div>
+        <div><span class="etiquette-synthese">Compensé (VSS-900-S)</span>
+          <strong>{{ montant(r.synthese.montantCompensation, r.synthese.deviseCompensation, 0) }}</strong></div>
+      </div>
+      <p class="rapports">
+        @for (x of r.rapports; track x.code + $index) {
+          <span class="puce" [class.ignore]="x.ignore" [title]="x.titre">{{ x.code }}
+            @if (x.ignore) { (ignoré) } @else if (x.sansDonnees) { (vide) } @else { · {{ x.nbLignes }} lignes }</span>
+        }
+      </p>
+      @for (a of r.anomalies; track $index) {
+        <p [class.ko]="a.gravite === 'BLOQUANTE'">{{ a.gravite === 'BLOQUANTE' ? 'Bloquante' : 'Avertissement' }} : {{ a.message }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+}
+
+<h2>Fichiers intégrés</h2>
+@if (fichiers().length === 0) {
+  <p class="aide">Aucun fichier VSS intégré.</p>
+} @else {
+  <div class="tableau">
+    <table mat-table [dataSource]="fichiers()">
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Traitement</th>
+        <td mat-cell *matCellDef="let f">{{ f.dateTraitement | date: 'dd/MM/yyyy' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef>Fichier</th>
+        <td mat-cell *matCellDef="let f">{{ f.nom }}</td>
+      </ng-container>
+      <ng-container matColumnDef="sre">
+        <th mat-header-cell *matHeaderCellDef>SRE</th>
+        <td mat-cell *matCellDef="let f">{{ f.sreId }} <span class="discret">{{ f.sreNom }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="net">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Net à régler</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ montant(f.synthese.montantNet, f.synthese.deviseReglement) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbTransactions">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Trans.</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.synthese.nbTransactions }}</td>
+      </ng-container>
+      <ng-container matColumnDef="compensation">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Compensé</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ montant(f.synthese.montantCompensation, f.synthese.deviseCompensation, 0) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbRapports">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Rapports</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbRapports }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbAvertissements">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Avert.</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbAvertissements }}</td>
+      </ng-container>
+      <ng-container matColumnDef="integre">
+        <th mat-header-cell *matHeaderCellDef>Intégré</th>
+        <td mat-cell *matCellDef="let f">{{ f.integreLe | date: 'dd/MM/yyyy HH:mm' }} <span class="discret">{{ f.integrePar }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let f" class="actions">
+          <a mat-icon-button routerLink="/exploration/vss" [queryParams]="{ date: f.dateTraitement }" matTooltip="Voir les rapports"><mat-icon>summarize</mat-icon></a>
+          <button mat-icon-button (click)="voirAnomalies(f)" matTooltip="Voir les anomalies"><mat-icon>report</mat-icon></button>
+          <button mat-icon-button (click)="annuler(f)" matTooltip="Annuler l'intégration"><mat-icon>delete</mat-icon></button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+      <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+    </table>
+  </div>
+}
+
+@if (anomaliesAffichees(); as a) {
+  <mat-card appearance="outlined" class="fichier">
+    <mat-card-header>
+      <mat-card-title>Anomalies – {{ a.fichier.nom }}</mat-card-title>
+      <button mat-icon-button class="fermer" (click)="anomaliesAffichees.set(null)"><mat-icon>close</mat-icon></button>
+    </mat-card-header>
+    <mat-card-content>
+      @if (a.anomalies.length === 0) { <p class="ok">Aucune anomalie.</p> }
+      @for (x of a.anomalies; track $index) { <p>{{ x.gravite === 'BLOQUANTE' ? 'Bloquante' : 'Avertissement' }} · {{ x.message }}</p> }
+    </mat-card-content>
+  </mat-card>
+}
