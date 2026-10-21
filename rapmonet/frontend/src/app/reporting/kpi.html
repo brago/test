@@ -1,0 +1,85 @@
+<div class="entete">
+  <h1>Indicateurs de performance</h1>
+  <div class="boutons">
+    <button mat-stroked-button (click)="exporter('xlsx')" [disabled]="!kpi()?.lignes?.length"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')" [disabled]="!kpi()?.lignes?.length"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+  </div>
+</div>
+
+<form class="filtres" (ngSubmit)="afficher()">
+  <mat-form-field appearance="outline" class="indicateur">
+    <mat-label>Indicateur</mat-label>
+    <mat-select name="indicateur" [(ngModel)]="indicateur" (selectionChange)="afficher()">
+      @for (a of axes; track a.axe) {
+        <mat-optgroup [label]="a.libelle">
+          @for (i of indicateursDe(a.axe); track i.code) { <mat-option [value]="i.code">{{ i.libelle }}</mat-option> }
+        </mat-optgroup>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Du mois</mat-label>
+    <input matInput type="month" name="du" [(ngModel)]="du" required />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au mois</mat-label>
+    <input matInput type="month" name="au" [(ngModel)]="au" required />
+  </mat-form-field>
+  <mat-button-toggle-group [value]="mesure()" (change)="mesure.set($event.value)" aria-label="Mesure">
+    <mat-button-toggle value="MONTANT">Montant</mat-button-toggle>
+    <mat-button-toggle value="NOMBRE">Nombre</mat-button-toggle>
+  </mat-button-toggle-group>
+  <button mat-flat-button type="submit"><mat-icon>bar_chart</mat-icon> Afficher</button>
+</form>
+
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (kpi(); as k) {
+  <p class="aide">{{ k.description }}</p>
+  @if (k.avertissement) { <p class="alerte"><mat-icon>info</mat-icon> {{ k.avertissement }}</p> }
+
+  <div class="tuiles">
+    <div class="tuile"><span>Montant total (XOF)</span><strong>{{ k.totalMontant | number }}</strong></div>
+    <div class="tuile"><span>Opérations</span><strong>{{ k.totalNombre | number }}</strong></div>
+    <div class="tuile"><span>{{ entite(k.axe) }} actifs</span><strong>{{ k.lignes.length | number }}</strong></div>
+    <div class="tuile"><span>Montant moyen (XOF)</span><strong>{{ (k.totalNombre ? k.totalMontant / k.totalNombre : 0) | number: '1.0-0' }}</strong></div>
+  </div>
+
+  @if (k.lignes.length) {
+    <div class="graphiques">
+      <section class="carte-graphique">
+        <h2>{{ mesure() === 'MONTANT' ? 'Montant par mois (XOF)' : 'Opérations par mois' }}</h2>
+        <app-graphique-barres [points]="parMois()" orientation="colonnes" [unite]="mesure() === 'MONTANT' ? 'XOF' : 'opération(s)'"
+                              [titre]="k.libelle + ' par mois'" />
+      </section>
+      <section class="carte-graphique">
+        <h2>{{ k.lignes.length > 10 ? '10 premiers' : 'Classement' }} : {{ entite(k.axe) }}</h2>
+        <app-graphique-barres [points]="classement()" orientation="barres" [unite]="mesure() === 'MONTANT' ? 'XOF' : 'opération(s)'"
+                              [titre]="'Classement des ' + entite(k.axe)" />
+      </section>
+    </div>
+
+    <h2>Tableau croisé – {{ mesure() === 'MONTANT' ? 'montants (XOF)' : 'nombre d\'opérations' }}</h2>
+    <div class="tableau">
+      <table class="croise">
+        <thead>
+          <tr><th>{{ entite(k.axe) }}</th><th>Libellé</th>
+            @for (m of k.mois; track m) { <th class="nombre">{{ libelleMois(m) }}</th> }
+            <th class="nombre">Total</th></tr>
+        </thead>
+        <tbody>
+          @for (l of k.lignes; track l.entite) {
+            <tr><td class="mono">{{ l.entite }}</td><td>{{ l.libelle }}</td>
+              @for (v of valeurs(l); track $index) { <td class="nombre" [class.vide]="!v">{{ v ? (v | number) : '–' }}</td> }
+              <td class="nombre total">{{ (mesure() === 'MONTANT' ? l.totalMontant : l.totalNombre) | number }}</td></tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr><td colspan="2">Total</td>
+            @for (v of (mesure() === 'MONTANT' ? k.totauxMontant : k.totauxNombre); track $index) { <td class="nombre">{{ v | number }}</td> }
+            <td class="nombre">{{ (mesure() === 'MONTANT' ? k.totalMontant : k.totalNombre) | number }}</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  }
+}

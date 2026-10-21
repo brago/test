@@ -36,8 +36,19 @@ public final class FichierLisSynthetique {
                             String dateTransaction, String motif, String message, String fid, String rid) {
     }
 
+    /** Avis d'acquisition (TC 49) : transaction d'une carte d'une autre banque sur un GAB ou TPE de la banque. */
+    public record AvisAcquisition(String carte, long montant, String terminal, String mcc, String dateTransaction,
+                                  String marchand) {
+    }
+
     /** Fichier dont le sous-fichier GIM local (FL) contient les opérations données. */
     public static byte[] creer(String jjmmaa, String numeroFichier, List<Operation> operations) {
+        return creer(jjmmaa, numeroFichier, operations, List.of());
+    }
+
+    /** Fichier dont le sous-fichier GIM local (FL) contient les opérations puis les avis d'acquisition. */
+    public static byte[] creer(String jjmmaa, String numeroFichier, List<Operation> operations,
+                               List<AvisAcquisition> avis) {
         FichierLisSynthetique f = new FichierLisSynthetique();
         f.entete(jjmmaa, numeroFichier);
         for (String[] sf : SOUS_FICHIERS) {
@@ -72,6 +83,21 @@ public final class FichierLisSynthetique {
                     ecrire(tcr1, 158, "120000");
                     ecrire(tcr1, 164, "952");
                     ecrire(tcr1, 167, "952");
+                }
+                for (AvisAcquisition a : avis) {
+                    StringBuilder tcr0 = f.nouvelle("49", "0");
+                    ecrire(tcr0, 10, "18");
+                    ecrire(tcr0, 27, a.terminal());
+                    ecrire(tcr0, 42, a.marchand());
+                    ecrire(tcr0, 83, a.mcc());
+                    ecrire(tcr0, 100, a.carte());
+                    ecrire(tcr0, 125, a.dateTransaction());
+                    ecrire(tcr0, 139, "%012d".formatted(a.montant()));
+                    ecrire(tcr0, 186, a.terminal());
+                    ecrire(tcr0, 208, "952");
+                    ecrire(tcr0, 211, "%012d".formatted(a.montant()));
+                    ecrire(tcr0, 223, "952");
+                    ecrire(tcr0, 226, "0");
                 }
             }
             StringBuilder fin = f.nouvelle(sf[1], "0");

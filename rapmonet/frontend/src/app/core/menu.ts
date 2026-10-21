@@ -63,7 +63,13 @@ export const MENU: EntreeMenu[] = [
       { code: 'CHARGEBACK_ACQUISITION', libelle: 'Acquisition', icone: 'call_received', chemin: '/chargeback/acquisition', lot: 7 },
     ],
   },
-  { code: 'REPORTING', libelle: 'Pilotage & réglementaire', icone: 'insights', chemin: '/reporting', lot: 8 },
+  {
+    code: 'REPORTING', libelle: 'Pilotage & réglementaire', icone: 'insights', lot: 8,
+    enfants: [
+      { code: 'REPORTING_KPI', libelle: 'Indicateurs (KPI)', icone: 'bar_chart', chemin: '/reporting/kpi', lot: 8 },
+      { code: 'REPORTING_REGLEMENTAIRE', libelle: 'Réglementaire BCEAO / VISA', icone: 'account_balance', chemin: '/reporting/reglementaire', lot: 8 },
+    ],
+  },
 ];
 
 /** Entrées pointant vers un écran (feuilles du menu). */

@@ -6,7 +6,8 @@ import { sessionOuverte, sessionRequise } from './core/auth.guard';
 const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit',
-  '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition'];
+  '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
+  '/reporting/kpi', '/reporting/reglementaire'];
 
 export const routes: Routes = [
   { path: 'connexion', title: 'Connexion – RAPMONET', loadComponent: () => import('./pages/connexion/connexion').then((m) => m.Connexion) },
@@ -61,6 +62,14 @@ export const routes: Routes = [
       {
         path: 'parametrage/vss', title: 'Paramétrage VSS – RAPMONET', data: { menu: 'PARAMETRAGE_VSS' },
         loadComponent: () => import('./parametrage/types-rapports-vss').then((m) => m.TypesRapportsVss),
+      },
+      {
+        path: 'reporting/kpi', title: 'Indicateurs – RAPMONET', data: { menu: 'REPORTING_KPI' },
+        loadComponent: () => import('./reporting/kpi').then((m) => m.KpiComponent),
+      },
+      {
+        path: 'reporting/reglementaire', title: 'Réglementaire – RAPMONET', data: { menu: 'REPORTING_REGLEMENTAIRE' },
+        loadComponent: () => import('./reporting/reglementaire').then((m) => m.Reglementaire),
       },
       {
         path: 'chargeback/emission', title: 'Chargebacks émission – RAPMONET', data: { menu: 'CHARGEBACK_EMISSION', sens: 'emission' },

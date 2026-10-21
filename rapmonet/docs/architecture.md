@@ -52,7 +52,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | États PDF | OpenPDF pour les listes (`commun.export`) ; JasperReports pour les états mis en page (lots 5 et 8) |
 | Export Excel | Apache POI |
 | Tableaux de données (frontend) | Angular Material, AG Grid si besoin |
-| Graphiques | ECharts |
+| Graphiques | SVG natif (composant `reporting/graphique-barres`), sans dépendance |
 
 ## Feuille de route
 
@@ -66,7 +66,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |
 | 6 | Rapprochements + gestion des écarts (E-journal / Amplitude en premier) | Attente des données Amplitude |
 | 7 | Chargebacks GIM émission / acquisition : cycle de vie par ARN, délai, régularisation, journal GAB | ✅ Fait (voir `docs/specs/chargeback.md`) ; libellés des motifs à fournir |
-| 8 | KPI, BCEAO, VISA | Attente modèles d'états |
+| 8 | KPI GAB / TPE / cartes (graphiques, tableau croisé), base trimestrielle réglementaire | ✅ Fait (voir `docs/specs/reporting.md`) ; formats BCEAO BP4 / VISA et PNB : attente des modèles |
 
 ## Améliorations prévues par rapport à MONETICA V2
 
@@ -78,4 +78,4 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 6. Prise en charge de Mastercard et d'autres marques de GAB que NCR.
 7. Double authentification, politique de mot de passe, masquage des numéros de carte.
 8. PDF générés dans le navigateur, plus de gestion d'imprimante.
-9. Tableau de bord en temps réel et alertes.
+9. Tableau de bord en temps réel et alertes (✅ indicateurs mensuels ; alertes à venir).

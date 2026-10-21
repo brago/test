@@ -3,6 +3,7 @@ package com.rapmonet.gab.internal;
 import com.rapmonet.commun.web.RegleMetierException;
 import com.rapmonet.commun.web.RessourceIntrouvableException;
 import com.rapmonet.gab.BinsBanque;
+import com.rapmonet.gab.ReferentielGab;
 import com.rapmonet.ingestion.CoupuresGab;
 import com.rapmonet.securite.ActionsAudit;
 import com.rapmonet.securite.JournalAudit;
@@ -27,7 +28,7 @@ import java.util.regex.Pattern;
 /** Paramétrage des GAB, de leurs profils (cassettes et coupures) et des BIN cartes. */
 @Service
 @Transactional
-public class ParametrageGabService implements CoupuresGab, BinsBanque {
+public class ParametrageGabService implements CoupuresGab, BinsBanque, ReferentielGab {
 
     /** Cassette d'un profil : lettre A à D, valeur du billet, type de billet NCR (1 à 4). */
     public record Cassette(String cassette, long coupure, int type) {
@@ -236,6 +237,22 @@ public class ParametrageGabService implements CoupuresGab, BinsBanque {
     @Transactional(readOnly = true)
     public boolean binsParametres() {
         return jdbc.sql("select count(*) from bin_carte").query(Integer.class).single() > 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, String> libellesGab() {
+        Map<String, String> m = new HashMap<>();
+        jdbc.sql("select terminal_id, libelle from gab").query((rs, n) -> m.put(rs.getString(1), rs.getString(2))).list();
+        return m;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, String> produitsBin() {
+        Map<String, String> m = new HashMap<>();
+        jdbc.sql("select bin, libelle from bin_carte").query((rs, n) -> m.put(rs.getString(1), rs.getString(2))).list();
+        return m;
     }
 
     public void supprimerBin(String bin, String utilisateur) {

@@ -1,0 +1,43 @@
+<div class="entete">
+  <h1>Réglementaire BCEAO / VISA</h1>
+  <div class="boutons">
+    <button mat-stroked-button (click)="exporter('xlsx')"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+  </div>
+</div>
+<p class="alerte"><mat-icon>info</mat-icon> Données de base des états réglementaires, calculées sur les fichiers intégrés.
+  Les formats officiels BCEAO (BP4) et VISA (Issuing, Acquiring, Prepaid) seront produits à réception des modèles.</p>
+
+<form class="filtres" (ngSubmit)="afficher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Année</mat-label>
+    <mat-select name="annee" [(ngModel)]="annee">
+      @for (a of annees; track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Trimestre</mat-label>
+    <mat-select name="trimestre" [(ngModel)]="trimestre">
+      @for (t of [1, 2, 3, 4]; track t) { <mat-option [value]="t">Trimestre {{ t }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Calculer</button>
+</form>
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (etat(); as e) {
+  <p class="aide">Du {{ e.du | date: 'dd/MM/yyyy' }} au {{ e.au | date: 'dd/MM/yyyy' }}</p>
+  @for (s of sections(); track s.section) {
+    <h2>{{ s.section }}</h2>
+    <table class="croise etat">
+      <thead><tr><th>Rubrique</th><th>Réseau</th><th class="nombre">Nombre</th><th class="nombre">Montant (XOF)</th>
+        <th class="nombre">GAB / TPE / BIN</th></tr></thead>
+      <tbody>
+        @for (l of s.lignes; track $index) {
+          <tr [class.vide]="!l.nombre"><td>{{ l.rubrique }}</td><td>{{ l.reseau }}</td><td class="nombre">{{ l.nombre | number }}</td>
+            <td class="nombre">{{ l.montant | number }}</td><td class="nombre">{{ l.entites || '–' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  }
+}
