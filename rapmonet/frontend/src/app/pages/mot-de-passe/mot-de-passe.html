@@ -1,0 +1,35 @@
+<div class="fond" [class.plein]="obligatoire()">
+  <mat-card class="carte">
+    <h1>Changer mon mot de passe</h1>
+    @if (obligatoire()) {
+      <p class="info">
+        <mat-icon>info</mat-icon>
+        Pour votre première connexion (ou après une réinitialisation), vous devez définir un nouveau mot de passe.
+      </p>
+    }
+    <form (ngSubmit)="enregistrer()">
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe actuel</mat-label>
+        <input matInput type="password" name="actuel" [(ngModel)]="actuel" autocomplete="current-password" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Nouveau mot de passe</mat-label>
+        <input matInput type="password" name="nouveau" [ngModel]="nouveau()" (ngModelChange)="nouveau.set($event)" autocomplete="new-password" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmer le nouveau mot de passe</mat-label>
+        <input matInput type="password" name="confirmation" [ngModel]="confirmation()" (ngModelChange)="confirmation.set($event)" autocomplete="new-password" required />
+      </mat-form-field>
+      <ul class="regles">
+        @for (r of regles(); track r.libelle) {
+          <li [class.ok]="r.ok"><mat-icon>{{ r.ok ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon> {{ r.libelle }}</li>
+        }
+      </ul>
+      @if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+      <div class="actions">
+        <button mat-button type="button" (click)="annuler()">{{ obligatoire() ? 'Se déconnecter' : 'Annuler' }}</button>
+        <button mat-flat-button type="submit" [disabled]="enCours() || !valide() || !actuel">Enregistrer</button>
+      </div>
+    </form>
+  </mat-card>
+</div>

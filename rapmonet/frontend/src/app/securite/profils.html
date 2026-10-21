@@ -1,0 +1,64 @@
+<div class="entete">
+  <h1>Profils</h1>
+  <button mat-flat-button (click)="nouveau()"><mat-icon>add</mat-icon> Nouveau profil</button>
+</div>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+
+<div class="disposition">
+  <mat-card appearance="outlined" class="liste">
+    <mat-nav-list>
+      @for (p of profils(); track p.code) {
+        <a mat-list-item (click)="selectionner(p)" [activated]="saisie()?.code === p.code && !saisie()?.creation">
+          <span matListItemTitle>{{ p.libelle }} @if (p.systeme) { <mat-icon class="cadenas">lock</mat-icon> }</span>
+          <span matListItemLine class="discret">{{ p.code }} · {{ p.menus.length }} menus · {{ p.nbUtilisateurs }} utilisateur(s)</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-card>
+
+  @if (saisie(); as s) {
+    <mat-card appearance="outlined" class="editeur">
+      <mat-card-content>
+        <form (ngSubmit)="enregistrer()">
+          <div class="grille">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput name="code" [(ngModel)]="s.code" [disabled]="!s.creation" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Libellé</mat-label>
+              <input matInput name="libelle" [(ngModel)]="s.libelle" [disabled]="s.systeme" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="pleine">
+              <mat-label>Description</mat-label>
+              <input matInput name="description" [(ngModel)]="s.description" [disabled]="s.systeme" />
+            </mat-form-field>
+          </div>
+          @if (s.systeme) {
+            <p class="discret"><mat-icon class="cadenas">lock</mat-icon> Profil protégé : il donne accès à tous les menus et ne peut pas être modifié.</p>
+          }
+          <h3>Menus autorisés</h3>
+          <div class="arbre">
+            @for (m of menus(); track m.code) {
+              <mat-checkbox [checked]="s.menus.has(m.code)" (change)="basculer(m, $event.checked)" [disabled]="s.systeme"
+                            [style.padding-left.px]="(profondeur().get(m.code) ?? 0) * 28" [class.racine]="!m.parentCode">
+                {{ m.libelle }}
+              </mat-checkbox>
+            }
+          </div>
+          @if (erreur(); as x) { <p class="erreur"><mat-icon>error</mat-icon> {{ x }}</p> }
+          @if (!s.systeme) {
+            <div class="actions">
+              @if (!s.creation) { <button mat-button type="button" class="danger" (click)="supprimer()"><mat-icon>delete</mat-icon> Supprimer</button> }
+              <span class="espace"></span>
+              <button mat-button type="button" (click)="saisie.set(null)">Annuler</button>
+              <button mat-flat-button type="submit">Enregistrer</button>
+            </div>
+          }
+        </form>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <p class="discret">Sélectionnez un profil pour voir ou modifier ses menus.</p>
+  }
+</div>

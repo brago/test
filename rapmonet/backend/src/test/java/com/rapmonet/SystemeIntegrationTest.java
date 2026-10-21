@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,12 +25,18 @@ class SystemeIntegrationTest {
     MockMvc mvc;
 
     @Test
+    @WithMockUser(authorities = "UTILISATEUR")
     void infoSystemeRenvoieVersionEtBase() throws Exception {
         mvc.perform(get("/api/systeme/info"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.application").value("RAPMONET"))
                 .andExpect(jsonPath("$.baseDeDonnees.produit").value("PostgreSQL"))
-                .andExpect(jsonPath("$.baseDeDonnees.schemaVersion").value("4"));
+                .andExpect(jsonPath("$.baseDeDonnees.schemaVersion").value("5"));
+    }
+
+    @Test
+    void infoSystemeExigeUneSession() throws Exception {
+        mvc.perform(get("/api/systeme/info")).andExpect(status().isUnauthorized());
     }
 
     @Test

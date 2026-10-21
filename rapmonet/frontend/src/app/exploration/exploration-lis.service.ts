@@ -15,7 +15,19 @@ export interface TransactionLis {
   libelleTc: string | null;
   sequence: number;
   nbTcr: number;
+  synthese: Synthese;
   attributs: Record<string, unknown>;
+}
+
+/** Valeurs principales d'une transaction, calculées par le serveur. */
+export interface Synthese {
+  date: string | null;
+  montant: number | null;
+  carte: string | null;
+  libelle: string | null;
+  terminal: string | null;
+  autorisation: string | null;
+  reference: string | null;
 }
 export interface ValeurAttribut {
   code: string; libelle: string; position: number; taille: number; brut: string; valeur: unknown; erreur: string | null;

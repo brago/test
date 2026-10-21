@@ -57,6 +57,21 @@ npm start
 Ouvrir http://localhost:4200. Les appels `/api` sont redirigés vers le backend
 (fichier `proxy.conf.json`).
 
+### 4. Première connexion
+
+Au premier démarrage, le backend crée le compte **`admin`** (mot de passe **`admin`**, ou la
+valeur de `RAPMONET_ADMIN_MOT_DE_PASSE`). Le changement de mot de passe est imposé à la
+première connexion. L'administrateur crée ensuite les profils et les utilisateurs
+(menu Sécurité & habilitations).
+
+### Variables d'environnement (production)
+
+| Variable | Rôle |
+|---|---|
+| `RAPMONET_DB_URL`, `RAPMONET_DB_USER`, `RAPMONET_DB_PASSWORD` | Connexion PostgreSQL |
+| `RAPMONET_ADMIN_MOT_DE_PASSE` | Mot de passe initial du compte `admin` |
+| `RAPMONET_CLE_EMPREINTE_CARTE` | Clé secrète des empreintes de numéros de carte (16 caractères minimum) |
+
 ## Tests
 
 ```bash

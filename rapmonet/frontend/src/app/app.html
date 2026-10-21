@@ -1,23 +1,47 @@
-<mat-toolbar class="barre">
-  <button mat-icon-button (click)="nav.toggle()" aria-label="Afficher ou masquer le menu">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span class="titre">RAPMONET</span>
-  <span class="sous-titre">Back-office monétique</span>
-</mat-toolbar>
+@if (auth.connecte()) {
+  <mat-toolbar class="barre">
+    <button mat-icon-button (click)="nav.toggle()" aria-label="Afficher ou masquer le menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <span class="titre">RAPMONET</span>
+    <span class="sous-titre">Back-office monétique</span>
+    <span class="espace"></span>
+    @if (auth.utilisateur(); as u) {
+      <button mat-button class="utilisateur" [matMenuTriggerFor]="menuUtilisateur">
+        <mat-icon>account_circle</mat-icon> {{ u.nom }} <span class="profil">· {{ u.libelleProfil }}</span>
+      </button>
+      <mat-menu #menuUtilisateur="matMenu">
+        <a mat-menu-item routerLink="/mot-de-passe"><mat-icon>key</mat-icon> Changer mon mot de passe</a>
+        <button mat-menu-item (click)="deconnecter()"><mat-icon>logout</mat-icon> Se déconnecter</button>
+      </mat-menu>
+    }
+  </mat-toolbar>
 
-<mat-sidenav-container class="conteneur">
-  <mat-sidenav #nav mode="side" opened class="menu">
-    <mat-nav-list>
-      @for (entree of menu; track entree.chemin) {
-        <a mat-list-item [routerLink]="entree.chemin" routerLinkActive #rla="routerLinkActive" [activated]="rla.isActive">
-          <mat-icon matListItemIcon>{{ entree.icone }}</mat-icon>
-          <span matListItemTitle>{{ entree.libelle }}</span>
-        </a>
-      }
-    </mat-nav-list>
-  </mat-sidenav>
-  <mat-sidenav-content class="contenu">
-    <router-outlet />
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  <mat-sidenav-container class="conteneur">
+    <mat-sidenav #nav mode="side" opened class="menu">
+      <mat-nav-list>
+        @for (entree of menu(); track entree.code) {
+          @if (entree.enfants) {
+            <div mat-subheader class="groupe"><mat-icon>{{ entree.icone }}</mat-icon> {{ entree.libelle }}</div>
+            @for (e of entree.enfants; track e.code) {
+              <a mat-list-item [routerLink]="e.chemin" routerLinkActive #rla="routerLinkActive" [activated]="rla.isActive" class="enfant">
+                <mat-icon matListItemIcon>{{ e.icone }}</mat-icon>
+                <span matListItemTitle>{{ e.libelle }}</span>
+              </a>
+            }
+          } @else {
+            <a mat-list-item [routerLink]="entree.chemin" routerLinkActive #rla="routerLinkActive" [activated]="rla.isActive">
+              <mat-icon matListItemIcon>{{ entree.icone }}</mat-icon>
+              <span matListItemTitle>{{ entree.libelle }}</span>
+            </a>
+          }
+        }
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content class="contenu">
+      <router-outlet />
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+} @else {
+  <router-outlet />
+}

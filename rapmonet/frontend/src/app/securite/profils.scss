@@ -1,0 +1,8 @@
+.disposition { display: grid; grid-template-columns: minmax(240px, 320px) 1fr; gap: 16px; align-items: start; margin-top: 12px; }
+@media (max-width: 800px) { .disposition { grid-template-columns: 1fr; } }
+.editeur { max-width: 760px; }
+.arbre { display: flex; flex-direction: column; margin-bottom: 16px; }
+.racine { font-weight: 500; margin-top: 4px; }
+.cadenas { font-size: 16px; width: 16px; height: 16px; vertical-align: middle; }
+.espace { flex: 1; }
+.danger { color: var(--mat-sys-error); }

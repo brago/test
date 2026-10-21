@@ -6,7 +6,12 @@
   button { color: inherit; }
   .titre { font-weight: 700; letter-spacing: 1px; }
   .sous-titre { font-size: 14px; opacity: .8; }
+  .espace { flex: 1; }
+  .profil { opacity: .75; font-size: 13px; }
 }
 .conteneur { flex: 1; }
 .menu { width: 270px; }
+.groupe { display: flex; align-items: center; gap: 8px; font-weight: 500; margin-top: 8px; }
+.groupe mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.enfant { padding-left: 16px; }
 .contenu { padding: 24px; }

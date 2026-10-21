@@ -7,12 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -23,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@WithMockUser(authorities = {"UTILISATEUR", "MENU_CHARGEMENT_LIS", "MENU_EXPLORATION_LIS"})
 class IntegrationLisIntegrationTest {
 
     private static final String CARTE = "4999990000001234";
@@ -48,7 +51,7 @@ class IntegrationLisIntegrationTest {
 
     @Test
     void integreUnFichierEtMasqueLesNumerosDeCarte() throws Exception {
-        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())))
+        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.integre").value(true))
                 .andExpect(jsonPath("$.fichiers[0].journee").value("2023-02-10"))
@@ -75,8 +78,8 @@ class IntegrationLisIntegrationTest {
 
     @Test
     void refuseUnFichierDejaIntegre() throws Exception {
-        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier()))).andExpect(status().isOk());
-        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())))
+        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())).with(csrf())).andExpect(status().isOk());
+        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())).with(csrf()))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.integre").value(false))
                 .andExpect(jsonPath("$.fichiers[0].anomalies[0].message", containsString("déjà intégré")));
@@ -86,7 +89,7 @@ class IntegrationLisIntegrationTest {
     void refuseUnFichierTronqueSansRienEnregistrer() throws Exception {
         String texte = new String(fichier(), java.nio.charset.StandardCharsets.ISO_8859_1);
         byte[] tronque = texte.substring(0, texte.lastIndexOf("91")).getBytes(java.nio.charset.StandardCharsets.ISO_8859_1);
-        mvc.perform(multipart("/api/ingestion/lis").file(sw(tronque)))
+        mvc.perform(multipart("/api/ingestion/lis").file(sw(tronque)).with(csrf()))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.fichiers[0].anomalies[*].message", org.hamcrest.Matchers.hasItem(containsString("Fin de fichier absente"))));
         assertThat(jdbc.queryForObject("select count(*) from lis_fichier", Integer.class)).isZero();
@@ -94,7 +97,7 @@ class IntegrationLisIntegrationTest {
 
     @Test
     void detailEtAnnulation() throws Exception {
-        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier()))).andExpect(status().isOk());
+        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())).with(csrf())).andExpect(status().isOk());
         Long transaction = jdbc.queryForObject("select min(id) from lis_transaction", Long.class);
         Long fichierId = jdbc.queryForObject("select id from lis_fichier", Long.class);
 
@@ -105,9 +108,31 @@ class IntegrationLisIntegrationTest {
                 .andExpect(jsonPath("$.lignes[0].contenu", containsString("499999******1234")));
 
         mvc.perform(get("/api/ingestion/lis")).andExpect(jsonPath("$", hasSize(1)));
-        mvc.perform(delete("/api/ingestion/lis/{id}", fichierId)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/ingestion/lis/{id}", fichierId).with(csrf())).andExpect(status().isNoContent());
         mvc.perform(get("/api/ingestion/lis")).andExpect(jsonPath("$", hasSize(0)));
         mvc.perform(get("/api/exploration/lis/transactions/{id}", transaction)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void exportExcelEtPdf() throws Exception {
+        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())).with(csrf())).andExpect(status().isOk());
+        mvc.perform(get("/api/exploration/lis/transactions/export").param("format", "xlsx").param("tc", "07"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Content-Disposition", containsString("transactions_lis_")));
+        byte[] pdf = mvc.perform(get("/api/exploration/lis/transactions/export").param("format", "pdf"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+        assertThat(new String(pdf, 0, 5, java.nio.charset.StandardCharsets.ISO_8859_1)).isEqualTo("%PDF-");
+        mvc.perform(get("/api/exploration/lis/transactions/export").param("format", "csv"))
+                .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"UTILISATEUR", "MENU_EXPLORATION_LIS"})
+    void chargementInterditSansLeMenu() throws Exception {
+        mvc.perform(multipart("/api/ingestion/lis").file(sw(fichier())).with(csrf())).andExpect(status().isForbidden());
     }
 
     @Test

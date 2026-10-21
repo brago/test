@@ -47,9 +47,9 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | Besoin | Choix |
 |---|---|
 | Traitements de fichiers volumineux | Spring Batch (à introduire au lot 2) |
-| Sécurité | Spring Security + JWT (lot 1), Keycloak envisageable plus tard |
+| Sécurité | Spring Security, session serveur + CSRF, BCrypt (ADR 0002) ; LDAP / AD envisageable |
 | Audit | Journal applicatif des actions + historique des modifications |
-| États PDF | JasperReports (remplace Crystal Reports) |
+| États PDF | OpenPDF pour les listes (`commun.export`) ; JasperReports pour les états mis en page (lots 5 et 8) |
 | Export Excel | Apache POI |
 | Tableaux de données (frontend) | Angular Material, AG Grid si besoin |
 | Graphiques | ECharts |
@@ -59,7 +59,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | Lot | Contenu | Statut |
 |---|---|---|
 | 0 | Socle : backend, frontend, base, tests, intégration continue | ✅ Fait |
-| 1 | Sécurité : connexion, blocage après 3 échecs, utilisateurs, profils, audit | À faire |
+| 1 | Sécurité : connexion, blocage après 3 échecs, utilisateurs, profils, audit ; exports Excel / PDF | ✅ Fait (voir ADR 0002) |
 | 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`) ; écrans de modification du paramétrage à venir |
 | 3 | VSS de VISA | Attente spec VSS |
 | 4 | E-journaux NCR + Amplitude (BKHIS, MOHISDET) + ACD | Attente specs |

@@ -1,0 +1,28 @@
+<div class="fond">
+  <mat-card class="carte">
+    <div class="marque">
+      <span class="titre">RAPMONET</span>
+      <span class="sous-titre">Back-office monétique</span>
+    </div>
+    <form (ngSubmit)="connecter()">
+      @if (expiree) { <p class="info"><mat-icon>schedule</mat-icon> Votre session a expiré. Reconnectez-vous.</p> }
+      <mat-form-field appearance="outline">
+        <mat-label>Identifiant</mat-label>
+        <input matInput name="login" [(ngModel)]="login" autocomplete="username" required autofocus />
+        <mat-icon matSuffix>person</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput name="motDePasse" [(ngModel)]="motDePasse" [type]="masque() ? 'password' : 'text'"
+               autocomplete="current-password" required />
+        <button mat-icon-button matSuffix type="button" (click)="masque.set(!masque())"
+                [attr.aria-label]="masque() ? 'Afficher le mot de passe' : 'Masquer le mot de passe'">
+          <mat-icon>{{ masque() ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+      </mat-form-field>
+      @if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+      <button mat-flat-button type="submit" [disabled]="enCours() || !login || !motDePasse">Se connecter</button>
+    </form>
+    <p class="aide">Après 3 tentatives infructueuses, le compte est verrouillé : contactez l'administrateur.</p>
+  </mat-card>
+</div>

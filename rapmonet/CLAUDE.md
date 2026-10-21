@@ -20,4 +20,7 @@ Back-office monétique web (remplace MONETICA V2). Lire `docs/architecture.md` a
 - Fichiers réels (LIS, VSS…) : ils contiennent des numéros de carte. Ne jamais les copier dans le dépôt ; les tests utilisent des fichiers synthétiques (ex. `FichierLisSynthetique`).
 - Paramétrage LIS : généré depuis la spec par `scripts/spec-lis/` ; toute correction passe par une nouvelle migration.
 - Frontend : composants autonomes (standalone), signaux, Angular Material ; un dossier par module sous `src/app/<module>/`, chargé en différé depuis `app.routes.ts`. Retirer l'entrée « À venir » du module quand il est réalisé.
+- Sécurité : toute nouvelle API doit être déclarée dans `securite/internal/ConfigurationSecurite` avec le menu qui l'autorise (sinon refusée). Nouveau menu = migration `securite_menu` + entrée dans `frontend/src/app/core/menu.ts` + route avec `data.menu`. Tests : `@WithMockUser(authorities = ...)` et `.with(csrf())` sur les requêtes POST/PUT/DELETE.
+- Tracer les actions significatives avec `JournalAudit` (module sécurité).
+- Exports de listes : `commun.export` (`Tableau` + `ReponseExport`) ; le frontend télécharge via `core/telechargement.ts`.
 - Mettre à jour le tableau « Feuille de route » de `docs/architecture.md` à la fin de chaque lot.

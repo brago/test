@@ -1,0 +1,76 @@
+<div class="entete">
+  <h1>Piste d'audit</h1>
+  <div>
+    <button mat-stroked-button (click)="exporter('xlsx')"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+  </div>
+</div>
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+<form class="filtres" (ngSubmit)="rechercher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Utilisateur</mat-label>
+    <input matInput [(ngModel)]="login" name="login" />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Action</mat-label>
+    <mat-select [(ngModel)]="action" name="action">
+      <mat-option value="">Toutes</mat-option>
+      @for (a of actions(); track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+</form>
+
+@if (chargement()) { <mat-progress-bar mode="indeterminate" /> }
+<div class="tableau">
+  <table mat-table [dataSource]="lignes()">
+    <ng-container matColumnDef="horodatage">
+      <th mat-header-cell *matHeaderCellDef>Date et heure</th>
+      <td mat-cell *matCellDef="let e">{{ e.horodatage | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="login">
+      <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+      <td mat-cell *matCellDef="let e" class="mono">{{ e.login }}</td>
+    </ng-container>
+    <ng-container matColumnDef="action">
+      <th mat-header-cell *matHeaderCellDef>Action</th>
+      <td mat-cell *matCellDef="let e" class="mono">{{ e.action }}</td>
+    </ng-container>
+    <ng-container matColumnDef="objet">
+      <th mat-header-cell *matHeaderCellDef>Objet</th>
+      <td mat-cell *matCellDef="let e">{{ e.objet }}</td>
+    </ng-container>
+    <ng-container matColumnDef="detail">
+      <th mat-header-cell *matHeaderCellDef>Détail</th>
+      <td mat-cell *matCellDef="let e">{{ e.detail }}</td>
+    </ng-container>
+    <ng-container matColumnDef="adresseIp">
+      <th mat-header-cell *matHeaderCellDef>Adresse IP</th>
+      <td mat-cell *matCellDef="let e" class="mono">{{ e.adresseIp }}</td>
+    </ng-container>
+    <ng-container matColumnDef="succes">
+      <th mat-header-cell *matHeaderCellDef>Résultat</th>
+      <td mat-cell *matCellDef="let e">
+        <span class="etiquette" [class.vert]="e.succes" [class.rouge]="!e.succes">{{ e.succes ? 'Succès' : 'Échec' }}</span>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+    <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+    <tr class="mat-row" *matNoDataRow><td class="mat-cell" [attr.colspan]="colonnes.length">Aucun événement.</td></tr>
+  </table>
+</div>
+<mat-paginator [length]="total()" [pageIndex]="page()" [pageSize]="taille()" [pageSizeOptions]="[25, 50, 100, 500]"
+               (page)="changerPage($event)" showFirstLastButtons />

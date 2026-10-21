@@ -5,6 +5,7 @@ import com.rapmonet.ingestion.FichierLis;
 import com.rapmonet.ingestion.IntegrationLis;
 import com.rapmonet.ingestion.RapportIntegration;
 import com.rapmonet.ingestion.TypeLis;
+import com.rapmonet.securite.Securite;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,7 +50,7 @@ class LisController {
         if (fichiers.isEmpty()) {
             throw new RegleMetierException("Sélectionnez au moins un fichier LIS (SW ou PR).");
         }
-        RapportIntegration rapport = integration.integrer(fichiers, null);
+        RapportIntegration rapport = integration.integrer(fichiers, Securite.login());
         return ResponseEntity.status(rapport.integre() ? HttpStatus.OK : HttpStatus.UNPROCESSABLE_CONTENT).body(rapport);
     }
 

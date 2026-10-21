@@ -1,0 +1,23 @@
+package com.rapmonet.securite;
+
+/** Codes des actions enregistrées dans la piste d'audit. */
+public final class ActionsAudit {
+
+    public static final String CONNEXION = "CONNEXION";
+    public static final String DECONNEXION = "DECONNEXION";
+    public static final String VERROUILLAGE = "VERROUILLAGE";
+    public static final String CHANGEMENT_MOT_DE_PASSE = "CHANGEMENT_MOT_DE_PASSE";
+    public static final String UTILISATEUR_CREATION = "UTILISATEUR_CREATION";
+    public static final String UTILISATEUR_MODIFICATION = "UTILISATEUR_MODIFICATION";
+    public static final String UTILISATEUR_DEVERROUILLAGE = "UTILISATEUR_DEVERROUILLAGE";
+    public static final String UTILISATEUR_REINITIALISATION_MDP = "UTILISATEUR_REINITIALISATION_MDP";
+    public static final String PROFIL_CREATION = "PROFIL_CREATION";
+    public static final String PROFIL_MODIFICATION = "PROFIL_MODIFICATION";
+    public static final String PROFIL_SUPPRESSION = "PROFIL_SUPPRESSION";
+    public static final String LIS_INTEGRATION = "LIS_INTEGRATION";
+    public static final String LIS_ANNULATION = "LIS_ANNULATION";
+    public static final String EXPORT = "EXPORT";
+
+    private ActionsAudit() {
+    }
+}

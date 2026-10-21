@@ -15,6 +15,8 @@ import com.rapmonet.ingestion.moteur.ResultatLecture;
 import com.rapmonet.ingestion.moteur.TransactionLue;
 import com.rapmonet.parametrage.FormatFichier;
 import com.rapmonet.parametrage.FormatsFichiers;
+import com.rapmonet.securite.ActionsAudit;
+import com.rapmonet.securite.JournalAudit;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -50,10 +52,12 @@ class IntegrationLisService implements IntegrationLis {
     private final JdbcTemplate jdbcTemplate;
     private final JsonMapper json;
     private final EmpreinteCarte empreinte;
+    private final JournalAudit audit;
 
     IntegrationLisService(FormatsFichiers formats, JdbcClient jdbc, JdbcTemplate jdbcTemplate, JsonMapper json,
-                          EmpreinteCarte empreinte) {
+                          EmpreinteCarte empreinte, JournalAudit audit) {
         this.empreinte = empreinte;
+        this.audit = audit;
         this.formats = formats;
         this.jdbc = jdbc;
         this.jdbcTemplate = jdbcTemplate;
@@ -96,6 +100,12 @@ class IntegrationLisService implements IntegrationLis {
                     a.lecture().lignes().size(), a.lecture().transactions().size(), a.repartitionTc(),
                     a.anomalies().stream().map(IntegrationLisService::versRapport).toList()));
         }
+        String noms = String.join(", ", fichiers.stream().map(FichierRecu::nom).toList());
+        long bloquantes = analyses.stream().flatMap(a -> a.anomalies().stream())
+                .filter(x -> x.gravite() == Gravite.BLOQUANTE).count();
+        audit.enregistrer(ActionsAudit.LIS_INTEGRATION, noms, integre
+                ? rapports.stream().map(r -> r.typeLis() + " " + r.journee() + " : " + r.nbTransactions() + " transactions").toList().toString()
+                : "Rejeté : " + bloquantes + " anomalie(s) bloquante(s)", integre);
         return new RapportIntegration(integre, rapports);
     }
 
@@ -227,7 +237,10 @@ class IntegrationLisService implements IntegrationLis {
     @Transactional
     public void annuler(long fichierId) {
         verifierExistence(fichierId);
+        String nom = jdbc.sql("select nom || ' (' || type_lis || ' ' || journee || ')' from lis_fichier where id = ?")
+                .param(fichierId).query(String.class).single();
         jdbc.sql("delete from lis_fichier where id = ?").param(fichierId).update();
+        audit.enregistrer(ActionsAudit.LIS_ANNULATION, nom, null);
     }
 
     private void verifierExistence(long fichierId) {

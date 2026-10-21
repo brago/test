@@ -13,21 +13,11 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
-import { dateIso, premier } from '../core/format';
+import { dateIso } from '../core/format';
+import { Telechargement } from '../core/telechargement';
 import { ParametrageService } from '../parametrage/parametrage.service';
 import { TypeLis } from '../ingestion/lis.service';
 import { DetailTransaction, ExplorationLisService, TransactionLis } from './exploration-lis.service';
-
-/** Colonnes de synthèse : les codes d'attributs diffèrent selon le TC, on prend le premier présent. */
-const COLONNES_ATTRIBUTS: Record<string, string[]> = {
-  date: ['LIS_TRANSACTION_DATE', 'LIS_SETTLEMENT_DATE', 'LIS_REMITTANCE_DEPOSIT_DATE_6'],
-  montant: ['LIS_SOURCE_AMOUNT', 'LIS_TRANSACTION_AMOUNT', 'LIS_NET_AMOUNT_IN_CFA', 'LIS_AMOUNT_IN_REMITTANCE_CURRENCY_12'],
-  carte: ['LIS_CARDHOLDER_CARD_NUMBER_INVOLVED_IN_TRANSACTION'],
-  libelle: ['LIS_MERCHANT_NAME', 'LIS_MERCHANT_ACRONYM', 'LIS_TYPE_OF_REPORTING'],
-  terminal: ['LIS_CARD_ACCEPTOR_TERMINAL_IDENTIFICATION', 'LIS_TERMINAL_NUMBER'],
-  autorisation: ['LIS_AUTHORISATION_CODE'],
-  reference: ['LIS_ACQUIRERS_REFERENCE_NUMBER', 'LIS_ACQUIRERS_MICROFILM_REFERENCE_NUMBER', 'LIS_RETRIEVAL_REFERENCE_NUMBER'],
-};
 
 @Component({
   selector: 'app-exploration-lis',
@@ -41,6 +31,7 @@ const COLONNES_ATTRIBUTS: Record<string, string[]> = {
 })
 export class ExplorationLis {
   private readonly service = inject(ExplorationLisService);
+  private readonly telechargement = inject(Telechargement);
 
   protected du: Date | null = null;
   protected au: Date | null = null;
@@ -69,15 +60,31 @@ export class ExplorationLis {
     this.rechercher();
   }
 
-  protected valeur(t: TransactionLis, colonne: string): unknown {
-    return premier(t.attributs, COLONNES_ATTRIBUTS[colonne]);
+  protected readonly exportEnCours = signal(false);
+  protected readonly erreurExport = signal<string | null>(null);
+
+  private critere() {
+    return { du: dateIso(this.du), au: dateIso(this.au), typeLis: this.typeLis, tc: this.tc };
+  }
+
+  /** Exporte toutes les transactions correspondant aux filtres (pas seulement la page affichée). */
+  protected exporter(format: 'xlsx' | 'pdf'): void {
+    this.exportEnCours.set(true);
+    this.erreurExport.set(null);
+    this.telechargement.telecharger('/api/exploration/lis/transactions/export', { format, ...this.critere() }).subscribe({
+      next: () => this.exportEnCours.set(false),
+      error: (e: Error) => {
+        this.erreurExport.set(e.message);
+        this.exportEnCours.set(false);
+      },
+    });
   }
 
   protected rechercher(page = 0): void {
     this.page.set(page);
     this.chargement.set(true);
     this.service
-      .rechercher({ du: dateIso(this.du), au: dateIso(this.au), typeLis: this.typeLis, tc: this.tc }, page, this.taille())
+      .rechercher(this.critere(), page, this.taille())
       .subscribe({
         next: (r) => {
           this.lignes.set(r.elements);

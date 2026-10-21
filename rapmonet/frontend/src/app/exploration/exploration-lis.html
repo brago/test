@@ -1,4 +1,12 @@
-<h1>Exploration des données LIS</h1>
+<div class="entete">
+  <h1>Exploration des données LIS</h1>
+  <div>
+    <button mat-stroked-button (click)="exporter('xlsx')" [disabled]="exportEnCours() || total() === 0"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')" [disabled]="exportEnCours() || total() === 0"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+  </div>
+</div>
+@if (exportEnCours()) { <p class="discret">Préparation de l'export…</p> }
+@if (erreurExport(); as e) { <p class="ko"><mat-icon>error</mat-icon> {{ e }}</p> }
 
 <form class="filtres" (ngSubmit)="rechercher()">
   <mat-form-field appearance="outline">
@@ -54,31 +62,31 @@
     </ng-container>
     <ng-container matColumnDef="date">
       <th mat-header-cell *matHeaderCellDef>Date</th>
-      <td mat-cell *matCellDef="let t">{{ $any(valeur(t, 'date')) | date: 'dd/MM/yy' }}</td>
+      <td mat-cell *matCellDef="let t">{{ t.synthese.date | date: 'dd/MM/yy' }}</td>
     </ng-container>
     <ng-container matColumnDef="montant">
       <th mat-header-cell *matHeaderCellDef class="nombre">Montant</th>
-      <td mat-cell *matCellDef="let t" class="nombre">{{ $any(valeur(t, 'montant')) | number: '1.0-2' }}</td>
+      <td mat-cell *matCellDef="let t" class="nombre">{{ t.synthese.montant | number: '1.0-2' }}</td>
     </ng-container>
     <ng-container matColumnDef="carte">
       <th mat-header-cell *matHeaderCellDef>Carte</th>
-      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'carte') }}</td>
+      <td mat-cell *matCellDef="let t" class="mono">{{ t.synthese.carte }}</td>
     </ng-container>
     <ng-container matColumnDef="libelle">
       <th mat-header-cell *matHeaderCellDef>Commerçant / GAB</th>
-      <td mat-cell *matCellDef="let t">{{ valeur(t, 'libelle') }}</td>
+      <td mat-cell *matCellDef="let t">{{ t.synthese.libelle }}</td>
     </ng-container>
     <ng-container matColumnDef="terminal">
       <th mat-header-cell *matHeaderCellDef>Terminal</th>
-      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'terminal') }}</td>
+      <td mat-cell *matCellDef="let t" class="mono">{{ t.synthese.terminal }}</td>
     </ng-container>
     <ng-container matColumnDef="autorisation">
       <th mat-header-cell *matHeaderCellDef>Autor.</th>
-      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'autorisation') }}</td>
+      <td mat-cell *matCellDef="let t" class="mono">{{ t.synthese.autorisation }}</td>
     </ng-container>
     <ng-container matColumnDef="reference">
       <th mat-header-cell *matHeaderCellDef>Référence (ARN / RRN)</th>
-      <td mat-cell *matCellDef="let t" class="mono">{{ valeur(t, 'reference') }}</td>
+      <td mat-cell *matCellDef="let t" class="mono">{{ t.synthese.reference }}</td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="colonnes; sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: colonnes" (click)="ouvrir(row)" class="cliquable"

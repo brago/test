@@ -3,6 +3,9 @@ rapmonet:
   securite:
     # Clé de l'empreinte des numéros de carte. À DÉFINIR en production (variable RAPMONET_CLE_EMPREINTE_CARTE).
     cle-empreinte-carte: ${RAPMONET_CLE_EMPREINTE_CARTE:cle-de-developpement-a-changer}
+    admin:
+      # Mot de passe du compte « admin » créé au premier démarrage ; à changer à la première connexion.
+      mot-de-passe-initial: ${RAPMONET_ADMIN_MOT_DE_PASSE:admin}
 
 spring:
   application:
@@ -22,6 +25,12 @@ spring:
 
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: strict
   error:
     include-message: always
 
