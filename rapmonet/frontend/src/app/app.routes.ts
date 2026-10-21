@@ -5,7 +5,8 @@ import { sessionOuverte, sessionRequise } from './core/auth.guard';
 /** Écrans réalisés ; les autres entrées du menu affichent la page « À venir ». */
 const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
-  '/securite/utilisateurs', '/securite/profils', '/securite/audit'];
+  '/securite/utilisateurs', '/securite/profils', '/securite/audit',
+  '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation'];
 
 export const routes: Routes = [
   { path: 'connexion', title: 'Connexion – RAPMONET', loadComponent: () => import('./pages/connexion/connexion').then((m) => m.Connexion) },
@@ -60,6 +61,22 @@ export const routes: Routes = [
       {
         path: 'parametrage/vss', title: 'Paramétrage VSS – RAPMONET', data: { menu: 'PARAMETRAGE_VSS' },
         loadComponent: () => import('./parametrage/types-rapports-vss').then((m) => m.TypesRapportsVss),
+      },
+      {
+        path: 'parametrage/gab', title: 'Paramétrage GAB – RAPMONET', data: { menu: 'PARAMETRAGE_GAB' },
+        loadComponent: () => import('./gab/parametrage-gab').then((m) => m.ParametrageGab),
+      },
+      {
+        path: 'gab/appros', title: 'Approvisionnements GAB – RAPMONET', data: { menu: 'GAB_APPRO' },
+        loadComponent: () => import('./gab/appros').then((m) => m.Appros),
+      },
+      {
+        path: 'gab/arretes', title: 'Arrêtés GAB – RAPMONET', data: { menu: 'GAB_ARRETE' },
+        loadComponent: () => import('./gab/arretes').then((m) => m.Arretes),
+      },
+      {
+        path: 'gab/validation', title: 'Validation GAB – RAPMONET', data: { menu: 'GAB_VALIDATION' },
+        loadComponent: () => import('./gab/validation').then((m) => m.ValidationGab),
       },
       {
         path: 'parametrage', title: 'Paramétrage LIS – RAPMONET', data: { menu: 'PARAMETRAGE_LIS' },

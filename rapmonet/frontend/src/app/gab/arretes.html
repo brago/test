@@ -1,0 +1,266 @@
+<div class="entete">
+  <h1>Arrêtés GAB</h1>
+  <div class="boutons">
+    <button mat-stroked-button (click)="exporter('xlsx')" [disabled]="total() === 0"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')" [disabled]="total() === 0"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+    @if (peutSaisir) { <button mat-flat-button (click)="nouveau()"><mat-icon>add</mat-icon> Nouvel arrêté</button> }
+  </div>
+</div>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur() && !formulaire()) { <p class="erreur"><mat-icon>error</mat-icon> {{ erreur() }}</p> }
+
+@if (formulaire(); as f) {
+  <mat-card appearance="outlined" class="formulaire">
+    <mat-card-header><mat-card-title>{{ f.id ? 'Modifier l\'arrêté' : 'Nouvel arrêté' }}</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="enregistrer()">
+        <div class="grille">
+          <mat-form-field appearance="outline">
+            <mat-label>GAB</mat-label>
+            <mat-select name="terminal" [(ngModel)]="f.terminal" (selectionChange)="f.approId = null; preparer()" required [disabled]="!!f.id">
+              @for (g of gabs(); track g.terminalId) { <mat-option [value]="g.terminalId">{{ g.terminalId }} – {{ g.libelle }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date de l'arrêté</mat-label>
+            <input matInput [matDatepicker]="pJour" name="jour" [(ngModel)]="f.jour" (dateChange)="preparer()" required />
+            <mat-datepicker-toggle matIconSuffix [for]="pJour" />
+            <mat-datepicker #pJour />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Heure</mat-label>
+            <input matInput type="time" name="heure" [(ngModel)]="f.heure" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Gabiste</mat-label>
+            <input matInput name="gabiste" [(ngModel)]="f.gabiste" required />
+          </mat-form-field>
+          @if (preparation(); as p) {
+            <mat-form-field appearance="outline" class="pleine">
+              <mat-label>Journée appro arrêtée (0)</mat-label>
+              <mat-select name="appro" [(ngModel)]="f.approId" (selectionChange)="modifie()" required>
+                @for (a of p.approsNonArretes; track a.id) {
+                  <mat-option [value]="a.id">{{ a.reference }} du {{ a.dateAppro | date: 'dd/MM/yyyy HH:mm' }} – {{ a.montant | number }} XOF – {{ a.gabiste }}</mat-option>
+                }
+              </mat-select>
+              @if (p.approsNonArretes.length === 0) { <mat-hint class="erreur">Aucun appro validé à arrêter pour ce GAB.</mat-hint> }
+            </mat-form-field>
+          }
+        </div>
+
+        @if (preparation(); as p) {
+          <h3>Compteurs du journal GAB (JGA), par type de billet</h3>
+          @if (p.passage; as pa) {
+            <p class="discret">Passage du gabiste lu dans le journal à {{ pa.dateHeure | date: 'HH:mm' }} : compteurs relevés
+              avant la remise à zéro. <button mat-button type="button" (click)="reprendreJournal()">Reprendre le journal</button></p>
+          } @else {
+            <p class="alerte"><mat-icon>info</mat-icon> Aucun passage superviseur dans les journaux intégrés ce jour-là : saisissez les compteurs du ticket d'arrêté.</p>
+          }
+          <table class="billetage">
+            <tr><th>Billets</th><th>(1) En cassette</th><th>(2) Rejets / retraits</th><th class="nombre">Montant (XOF)</th></tr>
+            @for (t of types(); track t) {
+              <tr class="journal">
+                <td>{{ p.coupures[t - 1] | number }} <span class="discret">type {{ t }} – cassettes {{ cassettesDuType(t) }}</span></td>
+                <td><input type="number" min="0" [name]="'j' + t" [(ngModel)]="f.journal[t].nombre" (ngModelChange)="modifie()" /></td>
+                <td><input type="number" min="0" [name]="'jr' + t" [(ngModel)]="f.journal[t].rejet" (ngModelChange)="modifie()" /></td>
+                <td class="nombre">{{ ((f.journal[t].nombre || 0) + (f.journal[t].rejet || 0)) * p.coupures[t - 1] | number }}</td>
+              </tr>
+            }
+          </table>
+
+          <h3>Inventaire physique, par cassette</h3>
+          <table class="billetage">
+            <tr><th>Cassette</th><th>(3) En cassette</th><th>(4) Bac de rejet</th><th class="nombre">Montant (XOF)</th></tr>
+            @for (c of p.cassettes; track c.cassette) {
+              <tr>
+                <td>{{ c.cassette }} – {{ c.coupure | number }}</td>
+                <td><input type="number" min="0" [name]="'i' + c.cassette" [(ngModel)]="f.inventaire[c.cassette].nombre" (ngModelChange)="modifie()" /></td>
+                <td><input type="number" min="0" [name]="'ir' + c.cassette" [(ngModel)]="f.inventaire[c.cassette].rejet" (ngModelChange)="modifie()" /></td>
+                <td class="nombre">{{ ((f.inventaire[c.cassette].nombre || 0) + (f.inventaire[c.cassette].rejet || 0)) * c.coupure | number }}</td>
+              </tr>
+            }
+          </table>
+
+          <div class="grille">
+            <mat-form-field appearance="outline">
+              <mat-label>(7) Transactions en attente (XOF)</mat-label>
+              <input matInput type="number" min="0" name="attente" [(ngModel)]="f.transactionsAttente" (ngModelChange)="modifie()" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>(8) Solde comptable (XOF)</mat-label>
+              <input matInput type="number" min="0" name="comptable" [(ngModel)]="f.soldeComptable" (ngModelChange)="modifie()" />
+              <mat-hint>Compte {{ p.gab.compteCaisse ?? 'caisse' }}</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="pleine">
+              <mat-label>Commentaire</mat-label>
+              <textarea matInput name="commentaire" [(ngModel)]="f.commentaire" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+
+          @if (calcul(); as k) {
+            <div class="soldes">
+              <div class="solde"><span>(0) Appro arrêté</span><strong>{{ k.appro | number }}</strong></div>
+              <div class="solde"><span>(5) = (1) + (2) Solde journal</span><strong>{{ k.journal | number }}</strong></div>
+              <div class="solde"><span>(6) = (3) + (4) Solde physique</span><strong>{{ k.physique | number }}</strong></div>
+              <div class="solde"><span>Écart (6) − (5)</span>
+                <strong [class.ecart-neg]="k.ecart < 0" [class.ecart-pos]="k.ecart > 0">{{ k.ecart | number }}</strong></div>
+              <div class="solde"><span>Écart comptable (6) + (7) − (8)</span>
+                <strong [class.ecart-neg]="(k.ecartComptable ?? 0) < 0" [class.ecart-pos]="(k.ecartComptable ?? 0) > 0">{{ k.ecartComptable === null ? '–' : (k.ecartComptable | number) }}</strong></div>
+              @if (k.theorique !== null) {
+                <div class="solde" matTooltip="Appro moins les retraits distribués selon les journaux intégrés depuis l'appro">
+                  <span>Solde théorique (0) − retraits journal</span><strong>{{ k.theorique | number }}</strong></div>
+              }
+              @if (p.couverture; as c) {
+                <div class="solde" [class.incomplet]="c.joursCouverts < c.joursPeriode"
+                     matTooltip="Le solde théorique n'est fiable que si tous les journaux de la période sont intégrés">
+                  <span>Journaux intégrés sur la période</span><strong>{{ c.joursCouverts }} / {{ c.joursPeriode }} jours</strong></div>
+              }
+            </div>
+          }
+        }
+
+        @if (erreur(); as x) { <p class="erreur"><mat-icon>error</mat-icon> {{ x }}</p> }
+        <div class="actions">
+          <button mat-button type="button" (click)="formulaire.set(null)">Annuler</button>
+          <button mat-flat-button type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (selection(); as a) {
+  <mat-card appearance="outlined" class="detail">
+    <mat-card-header>
+      <mat-card-title>Arrêté {{ a.reference }} – GAB {{ a.terminal }} <span class="etiquette {{ a.statut }}">{{ statuts[a.statut] }}</span></mat-card-title>
+      <mat-card-subtitle>{{ a.libelleGab }} · {{ a.dateArrete | date: 'dd/MM/yyyy HH:mm' }} · gabiste {{ a.gabiste }} ·
+        appro {{ a.approReference }} du {{ a.dateAppro | date: 'dd/MM/yyyy' }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="soldes">
+        <div class="solde"><span>(0) Appro</span><strong>{{ a.montantAppro | number }}</strong></div>
+        <div class="solde"><span>(5) Solde journal</span><strong>{{ a.montantJournal | number }}</strong></div>
+        <div class="solde"><span>(6) Solde physique</span><strong>{{ a.montantPhysique | number }}</strong></div>
+        <div class="solde"><span>Écart (6) − (5)</span>
+          <strong [class.ecart-neg]="a.ecartPhysiqueJournal < 0" [class.ecart-pos]="a.ecartPhysiqueJournal > 0">{{ a.ecartPhysiqueJournal | number }}</strong></div>
+        <div class="solde"><span>(7) Attente · (8) Comptable</span><strong>{{ a.transactionsAttente | number }} · {{ a.soldeComptable === null ? '–' : (a.soldeComptable | number) }}</strong></div>
+        <div class="solde"><span>Écart comptable (6) + (7) − (8)</span>
+          <strong [class.ecart-neg]="(a.ecartPhysiqueComptable ?? 0) < 0" [class.ecart-pos]="(a.ecartPhysiqueComptable ?? 0) > 0">{{ a.ecartPhysiqueComptable === null ? '–' : (a.ecartPhysiqueComptable | number) }}</strong></div>
+        @if (a.retraitsJournal !== null) {
+          <div class="solde"><span>Retraits selon les journaux</span><strong>{{ a.retraitsJournal | number }}</strong></div>
+          <div class="solde"><span>Solde théorique · écart (5) − théorique</span><strong>{{ a.soldeTheorique | number }} · {{ a.ecartJournalTheorique | number }}</strong></div>
+        }
+        @if (a.couverture; as c) {
+          <div class="solde" [class.incomplet]="c.joursCouverts < c.joursPeriode"><span>Journaux intégrés sur la période</span>
+            <strong>{{ c.joursCouverts }} / {{ c.joursPeriode }} jours</strong></div>
+        }
+      </div>
+      <table class="billetage">
+        <tr><th>Billets</th><th class="nombre">(1) Cassette</th><th class="nombre">(2) Rejets</th><th class="nombre">Montant</th></tr>
+        @for (l of a.journal; track l.type) {
+          <tr class="journal"><td>{{ l.coupure | number }} <span class="discret">type {{ l.type }}</span></td><td class="nombre">{{ l.cassette }}</td>
+            <td class="nombre">{{ l.rejet }}</td><td class="nombre">{{ l.montant | number }}</td></tr>
+        }
+        <tr><th>Cassette</th><th class="nombre">(3) Physique</th><th class="nombre">(4) Rejets</th><th class="nombre">Montant</th></tr>
+        @for (l of a.inventaire; track l.cassette) {
+          <tr><td>{{ l.cassette }} – {{ l.coupure | number }}</td><td class="nombre">{{ l.nombre }}</td>
+            <td class="nombre">{{ l.rejet }}</td><td class="nombre">{{ l.montant | number }}</td></tr>
+        }
+      </table>
+      <p class="discret">
+        Saisi par {{ a.saisiPar }} le {{ a.saisiLe | date: 'dd/MM/yyyy HH:mm' }}
+        @if (a.modifiePar !== a.saisiPar) { · modifié par {{ a.modifiePar }} }
+        @if (a.decidePar) { · {{ a.statut === 'VALIDE' ? 'validé' : 'annulé' }} par {{ a.decidePar }} le {{ a.decideLe | date: 'dd/MM/yyyy HH:mm' }} }
+        @if (a.motif) { · motif : {{ a.motif }} }
+        @if (a.commentaire) { · {{ a.commentaire }} }
+      </p>
+    </mat-card-content>
+    <mat-card-actions class="actions">
+      <button mat-button (click)="rapport(a)"><mat-icon>picture_as_pdf</mat-icon> Rapport d'arrêté</button>
+      @if (peutSaisir && a.statut === 'SAISI') { <button mat-button (click)="modifier(a)"><mat-icon>edit</mat-icon> Modifier</button> }
+      @if (peutValider && a.statut !== 'ANNULE') { <button mat-button (click)="decider(a, 'annulation')"><mat-icon>block</mat-icon> Annuler</button> }
+      @if (peutValider && a.statut === 'SAISI') {
+        <button mat-flat-button (click)="decider(a, 'validation')" [disabled]="!peutDecider(a)"
+                [matTooltip]="peutDecider(a) ? '' : 'Validation à quatre yeux : une autre personne que celle qui a saisi doit valider'">
+          <mat-icon>task_alt</mat-icon> Valider</button>
+      }
+      <button mat-button (click)="selection.set(null)">Fermer</button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+<form class="filtres" (ngSubmit)="rechercher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>GAB</mat-label>
+    <mat-select [(ngModel)]="terminal" name="terminal">
+      <mat-option value="">Tous les GAB</mat-option>
+      @for (g of gabs(); track g.terminalId) { <mat-option [value]="g.terminalId">{{ g.terminalId }} – {{ g.libelle }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Statut</mat-label>
+    <mat-select [(ngModel)]="statut" name="statut">
+      <mat-option value="">Tous</mat-option>
+      <mat-option value="SAISI">À valider</mat-option>
+      <mat-option value="VALIDE">Validé</mat-option>
+      <mat-option value="ANNULE">Annulé</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+</form>
+
+<div class="tableau">
+  <table mat-table [dataSource]="lignes()">
+    <ng-container matColumnDef="reference">
+      <th mat-header-cell *matHeaderCellDef>Référence</th>
+      <td mat-cell *matCellDef="let a"><a href="javascript:void(0)" (click)="ouvrir(a.id)">{{ a.reference }}</a></td>
+    </ng-container>
+    <ng-container matColumnDef="dateArrete">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let a">{{ a.dateArrete | date: 'dd/MM/yyyy HH:mm' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="terminal">
+      <th mat-header-cell *matHeaderCellDef>GAB</th>
+      <td mat-cell *matCellDef="let a">{{ a.terminal }} <span class="discret">{{ a.libelleGab }}</span></td>
+    </ng-container>
+    <ng-container matColumnDef="appro">
+      <th mat-header-cell *matHeaderCellDef class="nombre">(0) Appro</th>
+      <td mat-cell *matCellDef="let a" class="nombre">{{ a.montantAppro | number }} <span class="discret">{{ a.approReference }}</span></td>
+    </ng-container>
+    <ng-container matColumnDef="journal">
+      <th mat-header-cell *matHeaderCellDef class="nombre">(5) Journal</th>
+      <td mat-cell *matCellDef="let a" class="nombre">{{ a.montantJournal | number }}</td>
+    </ng-container>
+    <ng-container matColumnDef="physique">
+      <th mat-header-cell *matHeaderCellDef class="nombre">(6) Physique</th>
+      <td mat-cell *matCellDef="let a" class="nombre">{{ a.montantPhysique | number }}</td>
+    </ng-container>
+    <ng-container matColumnDef="ecart">
+      <th mat-header-cell *matHeaderCellDef class="nombre">Écart (6)−(5)</th>
+      <td mat-cell *matCellDef="let a" class="nombre" [class.ecart-neg]="a.ecartPhysiqueJournal < 0" [class.ecart-pos]="a.ecartPhysiqueJournal > 0">{{ a.ecartPhysiqueJournal | number }}</td>
+    </ng-container>
+    <ng-container matColumnDef="ecartComptable">
+      <th mat-header-cell *matHeaderCellDef class="nombre">Écart comptable</th>
+      <td mat-cell *matCellDef="let a" class="nombre" [class.ecart-neg]="(a.ecartPhysiqueComptable ?? 0) < 0">{{ a.ecartPhysiqueComptable === null ? '–' : (a.ecartPhysiqueComptable | number) }}</td>
+    </ng-container>
+    <ng-container matColumnDef="statut">
+      <th mat-header-cell *matHeaderCellDef>Statut</th>
+      <td mat-cell *matCellDef="let a"><span class="etiquette {{ a.statut }}">{{ statuts[a.statut] }}</span></td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+    <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+  </table>
+</div>
+<mat-paginator [length]="total()" [pageIndex]="page()" [pageSize]="taille()" [pageSizeOptions]="[25, 50, 100]" (page)="changerPage($event)" />

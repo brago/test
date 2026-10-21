@@ -1,0 +1,48 @@
+.entete { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.entete .boutons button { margin-left: 8px; }
+.aide { color: var(--mat-sys-on-surface-variant); max-width: 900px; }
+.formulaire { margin: 12px 0 20px; max-width: 1100px; }
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 16px; align-items: center; }
+.pleine { grid-column: 1 / -1; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.ok, .erreur, .alerte { display: flex; align-items: center; gap: 8px; }
+.ok { color: #1b7f3b; }
+.erreur { color: var(--mat-sys-error); }
+.alerte { color: #8a4b00; }
+.tableau { overflow-x: auto; }
+table.mat-mdc-table { width: 100%; }
+.mono { font-family: 'Roboto Mono', monospace; font-size: 12px; }
+.nombre { text-align: right; font-variant-numeric: tabular-nums; }
+.actions-ligne { white-space: nowrap; text-align: right; }
+.etiquette { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 4px; white-space: nowrap; }
+.SAISI, .orange { background: #fdebd0; color: #8a4b00; }
+.VALIDE, .vert { background: #dcf3e3; color: #1b6b35; }
+.ANNULE, .gris { background: #e6e6e6; color: #444; }
+.rouge { background: #fde0dd; color: #a4251b; }
+.filtres { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.filtres mat-form-field { width: 170px; }
+.discret { color: var(--mat-sys-on-surface-variant); font-size: 12px; }
+.billetage { border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+.billetage th, .billetage td { padding: 4px 10px; border-bottom: 1px solid var(--mat-sys-outline-variant); }
+.billetage th { text-align: left; font-weight: 500; background: var(--mat-sys-surface-container); }
+.billetage input { width: 90px; text-align: right; padding: 4px 6px; font: inherit; border: 1px solid var(--mat-sys-outline); border-radius: 4px; background: var(--mat-sys-surface); color: inherit; }
+.billetage .journal { background: #eef3fb; }
+.billetage tr.total td { font-weight: 600; }
+.ecart-neg { color: var(--mat-sys-error); font-weight: 600; }
+.ecart-pos { color: #8a4b00; font-weight: 600; }
+.soldes { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 16px; margin: 12px 0; }
+.solde { border: 1px solid var(--mat-sys-outline-variant); border-radius: 8px; padding: 8px 12px; }
+.solde span { display: block; font-size: 12px; color: var(--mat-sys-on-surface-variant); }
+.solde strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+.controle { padding: 8px 12px; border-radius: 8px; margin: 8px 0; display: flex; gap: 8px; align-items: center; }
+.controle.CONCORDANT { background: #dcf3e3; color: #1b6b35; }
+.controle.ECART { background: #fde0dd; color: #a4251b; }
+.controle.ABSENT { background: var(--mat-sys-surface-container); color: var(--mat-sys-on-surface-variant); }
+.detail { margin: 12px 0; max-width: 1100px; }
+.detail dl { display: grid; grid-template-columns: 170px 1fr 170px 1fr; gap: 4px 12px; margin: 0; }
+.detail dt { color: var(--mat-sys-on-surface-variant); }
+.detail dd { margin: 0; }
+@media (max-width: 800px) { .detail dl { grid-template-columns: 140px 1fr; } }
+.solde.incomplet { border-color: #e0a040; background: #fff6e8; }
+.solde.incomplet span::after { content: ' – solde théorique incomplet'; color: #8a4b00; }
+.formulaire mat-form-field { margin-bottom: 4px; }

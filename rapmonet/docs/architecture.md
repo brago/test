@@ -20,10 +20,10 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | Module | Package | Rôle | Écrans MONETICA V2 couverts |
 |---|---|---|---|
 | Sécurité | `securite` | Utilisateurs, profils, menus autorisés, mots de passe, piste d'audit | §II |
-| Paramétrage | `parametrage` | Formats LIS (Fichier/Sous-fichier/TC/TCR/Attribut), formats VSS (Fichier EP/Sous-fichier/Record/Line/Attribut), codes réponse, GAB, profils GAB, BIN | §III, §V |
+| Paramétrage | `parametrage` | Formats LIS (Fichier/Sous-fichier/TC/TCR/Attribut), formats VSS (Fichier EP/Sous-fichier/Record/Line/Attribut), codes réponse | §III |
 | Ingestion | `ingestion` | Moteur de lecture générique piloté par le paramétrage ; chargement LIS, VSS, E-journaux, BKHIS, MOHISDET | §III |
 | Exploration | `exploration` | Consultation, filtres, export PDF/Excel des données chargées, ACD | §IV |
-| GAB | `gab` | Approvisionnements, arrêtés, billetage, validation à quatre yeux | §V |
+| GAB | `gab` | Paramétrage GAB, profils GAB (cassettes), BIN ; approvisionnements, arrêtés, billetage, validation à quatre yeux, rapports | §V |
 | Rapprochement | `rapprochement` | Moteur de règles ; LIS/SBA, E-journal/SBA, LIS/VSS, comptes d'activité ; gestion des écarts | §VI A–D |
 | Chargeback | `chargeback` | Suivi émission et acquisition (ARN/RRN) | §VI E |
 | Reporting | `reporting` | KPI GAB/TPE/Carte, tableaux croisés, BCEAO, VISA Issuing/Acquiring | §VII |
@@ -63,7 +63,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`) ; écrans de modification du paramétrage à venir |
 | 3 | Rapports VSS de VISA (fichiers VX / EP-747) : chargement, consultation, export, paramétrage | ✅ Fait (voir `docs/specs/vss.md`) |
 | 4 | E-journaux NCR ✅, intégration automatique quotidienne à 04:00 ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
-| 5 | GAB : paramétrage, appros, arrêtés, validation, rapports | À faire |
+| 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |
 | 6 | Rapprochements + gestion des écarts (E-journal / Amplitude en premier) | Attente des données Amplitude |
 | 7 | Chargebacks | À faire |
 | 8 | KPI, BCEAO, VISA | Attente modèles d'états |
@@ -74,7 +74,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 2. Lecture directe de BKHIS dans Amplitude si l'accès est possible (sinon import Excel).
 3. Règles de rapprochement paramétrables, avec tolérances.
 4. Gestion des écarts : statut, responsable, commentaires, justificatifs.
-5. Validation à quatre yeux généralisée.
+5. Validation à quatre yeux généralisée (✅ appros et arrêtés GAB).
 6. Prise en charge de Mastercard et d'autres marques de GAB que NCR.
 7. Double authentification, politique de mot de passe, masquage des numéros de carte.
 8. PDF générés dans le navigateur, plus de gestion d'imprimante.

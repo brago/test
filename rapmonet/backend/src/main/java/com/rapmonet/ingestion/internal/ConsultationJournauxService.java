@@ -2,6 +2,8 @@ package com.rapmonet.ingestion.internal;
 
 import com.rapmonet.commun.PageResultat;
 import com.rapmonet.ingestion.ConsultationJournaux;
+import com.rapmonet.ingestion.CoupuresGab;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +37,10 @@ class ConsultationJournauxService implements ConsultationJournaux {
     private final JdbcClient jdbc;
     private final JsonMapper json;
 
-    ConsultationJournauxService(JdbcClient jdbc, JsonMapper json) {
+    private final ObjectProvider<CoupuresGab> coupuresGab;
+
+    ConsultationJournauxService(JdbcClient jdbc, JsonMapper json, ObjectProvider<CoupuresGab> coupuresGab) {
+        this.coupuresGab = coupuresGab;
         this.jdbc = jdbc;
         this.json = json;
     }
@@ -139,13 +145,32 @@ class ConsultationJournauxService implements ConsultationJournaux {
                             rs.getBoolean("complete"), rs.getString("texte"),
                             jdbc.sql(SELECT + " where o.session_id = ? order by o.numero_ligne").param(id)
                                     .query((r, k) -> operation(r)).list(),
-                            coupures());
+                            coupures(rs.getString("terminal_id")));
                 }).optional();
     }
 
-    private List<Long> coupures() {
+    private List<Long> coupures(String terminal) {
+        CoupuresGab gab = coupuresGab.getIfAvailable();
+        var duGab = gab == null ? java.util.Optional.<List<Long>>empty() : gab.coupuresParType(terminal);
+        if (duGab.isPresent()) {
+            return duGab.get();
+        }
         return jdbc.sql("select valeur from parametre_application where cle = 'ejournal.coupures'").query(String.class)
                 .optional().map(IntegrationJournauxService::lireCoupures).orElse(null);
+    }
+
+    @Override
+    public int joursCouverts(String terminal, LocalDate du, LocalDate au) {
+        return jdbc.sql("select count(distinct date_session) from ej_session where terminal_id = ? and date_session between ? and ?")
+                .params(terminal, du, au).query(Integer.class).single();
+    }
+
+    @Override
+    public long montantDistribue(String terminal, LocalDateTime apres, LocalDateTime jusqua) {
+        return jdbc.sql("""
+                        select coalesce(sum(coalesce(montant_billets, montant)), 0) from ej_operation
+                        where terminal_id = ? and type = 'RETRAIT' and statut = 'DISTRIBUE' and date_heure > ? and date_heure <= ?""")
+                .params(terminal, Timestamp.valueOf(apres), Timestamp.valueOf(jusqua)).query(Long.class).single();
     }
 
     @Override

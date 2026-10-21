@@ -28,6 +28,7 @@ export const MENU: EntreeMenu[] = [
     enfants: [
       { code: 'PARAMETRAGE_LIS', libelle: 'Format LIS', icone: 'description', chemin: '/parametrage', lot: 2 },
       { code: 'PARAMETRAGE_VSS', libelle: 'Rapports VSS', icone: 'fact_check', chemin: '/parametrage/vss', lot: 3 },
+      { code: 'PARAMETRAGE_GAB', libelle: 'GAB, profils et BIN', icone: 'atm', chemin: '/parametrage/gab', lot: 5 },
     ],
   },
   {
@@ -46,7 +47,14 @@ export const MENU: EntreeMenu[] = [
       { code: 'EXPLORATION_EJOURNAL', libelle: 'Journaux GAB', icone: 'local_atm', chemin: '/exploration/ejournal', lot: 4 },
     ],
   },
-  { code: 'GAB', libelle: 'GAB : appros & arrêtés', icone: 'atm', chemin: '/gab', lot: 5 },
+  {
+    code: 'GAB', libelle: 'GAB : appros & arrêtés', icone: 'atm', lot: 5,
+    enfants: [
+      { code: 'GAB_APPRO', libelle: 'Approvisionnements', icone: 'add_card', chemin: '/gab/appros', lot: 5 },
+      { code: 'GAB_ARRETE', libelle: 'Arrêtés', icone: 'point_of_sale', chemin: '/gab/arretes', lot: 5 },
+      { code: 'GAB_VALIDATION', libelle: 'Validation (4 yeux)', icone: 'verified_user', chemin: '/gab/validation', lot: 5 },
+    ],
+  },
   { code: 'RAPPROCHEMENT', libelle: 'Rapprochements', icone: 'compare_arrows', chemin: '/rapprochement', lot: 6 },
   { code: 'CHARGEBACK', libelle: 'Chargebacks', icone: 'currency_exchange', chemin: '/chargeback', lot: 7 },
   { code: 'REPORTING', libelle: 'Pilotage & réglementaire', icone: 'insights', chemin: '/reporting', lot: 8 },

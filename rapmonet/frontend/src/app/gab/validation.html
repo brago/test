@@ -1,0 +1,59 @@
+<h1>Validation des appros et arrêtés</h1>
+<p class="aide">Validation à quatre yeux : un appro ou un arrêté est validé par une autre personne que celle qui l'a saisi ou modifié.
+  Ouvrez la fiche pour vérifier le billetage et le contrôle avec le journal avant de valider.</p>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+<h2>Approvisionnements à valider ({{ appros().length }})</h2>
+@if (appros().length === 0) { <p class="discret">Aucun approvisionnement en attente.</p> } @else {
+  <table class="billetage">
+    <tr><th>Référence</th><th>Date</th><th>GAB</th><th>Gabiste</th><th class="nombre">Montant (XOF)</th><th>Journal</th><th>Saisi par</th><th></th></tr>
+    @for (a of appros(); track a.id) {
+      <tr>
+        <td><a [routerLink]="['/gab/appros']" [queryParams]="{ id: a.id }">{{ a.reference }}</a></td>
+        <td>{{ a.dateAppro | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ a.terminal }} <span class="discret">{{ a.libelleGab }}</span></td>
+        <td>{{ a.gabiste }}</td>
+        <td class="nombre">{{ a.montant | number }}</td>
+        <td>
+          @switch (a.controleJournal?.statut) {
+            @case ('CONCORDANT') { <span class="etiquette vert" [matTooltip]="a.controleJournal!.message">Conforme</span> }
+            @case ('ECART') { <span class="etiquette rouge" [matTooltip]="a.controleJournal!.message">Écart</span> }
+            @default { <span class="etiquette gris" [matTooltip]="a.controleJournal?.message ?? ''">Pas de journal</span> }
+          }
+        </td>
+        <td>{{ a.saisiPar }}</td>
+        <td class="actions-ligne">
+          <button mat-flat-button (click)="decider('appros', a.id, a.reference, 'validation')" [disabled]="auteur(a)"
+                  [matTooltip]="auteur(a) ? 'Vous l\'avez saisi ou modifié : une autre personne doit valider' : ''">Valider</button>
+          <button mat-button (click)="decider('appros', a.id, a.reference, 'annulation')">Annuler</button>
+        </td>
+      </tr>
+    }
+  </table>
+}
+
+<h2>Arrêtés à valider ({{ arretes().length }})</h2>
+@if (arretes().length === 0) { <p class="discret">Aucun arrêté en attente.</p> } @else {
+  <table class="billetage">
+    <tr><th>Référence</th><th>Date</th><th>GAB</th><th class="nombre">(5) Journal</th><th class="nombre">(6) Physique</th>
+      <th class="nombre">Écart</th><th class="nombre">Écart comptable</th><th>Saisi par</th><th></th></tr>
+    @for (a of arretes(); track a.id) {
+      <tr>
+        <td><a [routerLink]="['/gab/arretes']" [queryParams]="{ id: a.id }">{{ a.reference }}</a></td>
+        <td>{{ a.dateArrete | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ a.terminal }} <span class="discret">{{ a.libelleGab }}</span></td>
+        <td class="nombre">{{ a.montantJournal | number }}</td>
+        <td class="nombre">{{ a.montantPhysique | number }}</td>
+        <td class="nombre" [class.ecart-neg]="a.ecartPhysiqueJournal < 0" [class.ecart-pos]="a.ecartPhysiqueJournal > 0">{{ a.ecartPhysiqueJournal | number }}</td>
+        <td class="nombre">{{ a.ecartPhysiqueComptable === null ? '–' : (a.ecartPhysiqueComptable | number) }}</td>
+        <td>{{ a.saisiPar }}</td>
+        <td class="actions-ligne">
+          <button mat-flat-button (click)="decider('arretes', a.id, a.reference, 'validation')" [disabled]="auteur(a)"
+                  [matTooltip]="auteur(a) ? 'Vous l\'avez saisi ou modifié : une autre personne doit valider' : ''">Valider</button>
+          <button mat-button (click)="decider('arretes', a.id, a.reference, 'annulation')">Annuler</button>
+        </td>
+      </tr>
+    }
+  </table>
+}

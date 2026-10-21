@@ -23,6 +23,13 @@ public final class ActionsAudit {
     public static final String EJOURNAL_ANNULATION = "EJOURNAL_ANNULATION";
     public static final String BATCH_EJOURNAL = "BATCH_EJOURNAL";
     public static final String PARAMETRAGE_BATCH = "PARAMETRAGE_BATCH";
+    public static final String PARAMETRAGE_GAB = "PARAMETRAGE_GAB";
+    public static final String GAB_APPRO_SAISIE = "GAB_APPRO_SAISIE";
+    public static final String GAB_APPRO_VALIDATION = "GAB_APPRO_VALIDATION";
+    public static final String GAB_APPRO_ANNULATION = "GAB_APPRO_ANNULATION";
+    public static final String GAB_ARRETE_SAISIE = "GAB_ARRETE_SAISIE";
+    public static final String GAB_ARRETE_VALIDATION = "GAB_ARRETE_VALIDATION";
+    public static final String GAB_ARRETE_ANNULATION = "GAB_ARRETE_ANNULATION";
     public static final String EXPORT = "EXPORT";
 
     private ActionsAudit() {

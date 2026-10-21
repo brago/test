@@ -1,0 +1,229 @@
+<div class="entete">
+  <h1>Approvisionnements GAB</h1>
+  <div class="boutons">
+    <button mat-stroked-button (click)="exporter('xlsx')" [disabled]="total() === 0"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')" [disabled]="total() === 0"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+    @if (peutSaisir) { <button mat-flat-button (click)="nouveau()"><mat-icon>add</mat-icon> Nouvel appro</button> }
+  </div>
+</div>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur() && !formulaire()) { <p class="erreur"><mat-icon>error</mat-icon> {{ erreur() }}</p> }
+
+@if (formulaire(); as f) {
+  <mat-card appearance="outlined" class="formulaire">
+    <mat-card-header><mat-card-title>{{ f.id ? 'Modifier l\'appro' : 'Nouvel approvisionnement' }}</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="enregistrer()">
+        <div class="grille">
+          <mat-form-field appearance="outline">
+            <mat-label>GAB</mat-label>
+            <mat-select name="terminal" [(ngModel)]="f.terminal" (selectionChange)="preparer()" required>
+              @for (g of gabs(); track g.terminalId) {
+                @if (g.actif) { <mat-option [value]="g.terminalId">{{ g.terminalId }} – {{ g.libelle }}</mat-option> }
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date de l'appro</mat-label>
+            <input matInput [matDatepicker]="pJour" name="jour" [(ngModel)]="f.jour" (dateChange)="preparer()" required />
+            <mat-datepicker-toggle matIconSuffix [for]="pJour" />
+            <mat-datepicker #pJour />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Heure</mat-label>
+            <input matInput type="time" name="heure" [(ngModel)]="f.heure" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Gabiste (nom et prénoms)</mat-label>
+            <input matInput name="gabiste" [(ngModel)]="f.gabiste" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Référence</mat-label>
+            <input matInput name="ref" [(ngModel)]="f.referenceExterne" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>N° bon de chargement</mat-label>
+            <input matInput name="bon" [(ngModel)]="f.numeroBon" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="pleine">
+            <mat-label>Commentaire</mat-label>
+            <textarea matInput name="commentaire" [(ngModel)]="f.commentaire" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+
+        @if (cassettes().length) {
+          <h3>Billetage</h3>
+          <table class="billetage">
+            <tr><th>Cassette</th><th>Coupure</th><th>Nombre de billets</th><th class="nombre">Montant (XOF)</th></tr>
+            @for (c of cassettes(); track c.cassette) {
+              <tr>
+                <td>Cassette {{ c.cassette }} <span class="discret">type {{ c.type }}</span></td>
+                <td class="nombre">{{ c.coupure | number }}</td>
+                <td><input type="number" min="0" [name]="'n' + c.cassette" [(ngModel)]="f.billets[c.cassette]" (ngModelChange)="modifie()" /></td>
+                <td class="nombre">{{ (f.billets[c.cassette] || 0) * c.coupure | number }}</td>
+              </tr>
+            }
+            <tr class="total"><td colspan="3">Total général</td><td class="nombre">{{ totalSaisi() | number }}</td></tr>
+          </table>
+
+          <h3>Journal du GAB ce jour-là</h3>
+          @if (passages().length === 0) {
+            <p class="discret">Aucun ajout d'espèces dans les journaux intégrés pour ce GAB à cette date (le journal est
+              intégré chaque nuit : le contrôle sera refait à la consultation de l'appro).</p>
+          }
+          @for (p of passages(); track p.dateHeure) {
+            <table class="billetage">
+              <tr><th>Passage de {{ p.dateHeure | date: 'HH:mm' }}</th>
+                @for (t of types(); track t) { <th class="nombre">{{ coupureDuType(t) | number }} <span class="discret">({{ cassettesDuType(t).join('+') }})</span></th> }
+                <th></th></tr>
+              <tr class="journal"><td>Billets ajoutés (journal)</td>
+                @for (t of types(); track t) { <td class="nombre">{{ p.ajoutes![t - 1] }}</td> }
+                <td><button mat-button type="button" (click)="reprendre(p)" matTooltip="Recopier les nombres du journal dans le billetage">Reprendre</button></td></tr>
+              <tr><td>Billets saisis</td>
+                @for (t of types(); track t) {
+                  <td class="nombre" [class.ecart-neg]="saisiParType()[t - 1] !== p.ajoutes![t - 1]">{{ saisiParType()[t - 1] }}</td>
+                }
+                <td></td></tr>
+            </table>
+            @for (t of types(); track t) {
+              @if (cassettesDuType(t).length > 1) {
+                <p class="discret">Les cassettes {{ cassettesDuType(t).join(' et ') }} ont le même type : le journal donne leur total
+                  ({{ p.ajoutes![t - 1] }} billets de {{ coupureDuType(t) | number }}), à répartir dans le billetage.</p>
+              }
+            }
+          }
+        }
+
+        @if (erreur(); as x) { <p class="erreur"><mat-icon>error</mat-icon> {{ x }}</p> }
+        <div class="actions">
+          <button mat-button type="button" (click)="formulaire.set(null)">Annuler</button>
+          <button mat-flat-button type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (selection(); as a) {
+  <mat-card appearance="outlined" class="detail">
+    <mat-card-header>
+      <mat-card-title>Appro {{ a.reference }} – GAB {{ a.terminal }} <span class="etiquette {{ a.statut }}">{{ statuts[a.statut] }}</span></mat-card-title>
+      <mat-card-subtitle>{{ a.libelleGab }} · {{ a.dateAppro | date: 'dd/MM/yyyy HH:mm' }} · gabiste {{ a.gabiste }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <table class="billetage">
+        <tr><th>Cassette</th><th class="nombre">Coupure</th><th class="nombre">Billets</th><th class="nombre">Montant (XOF)</th></tr>
+        @for (b of a.billetage; track b.cassette) {
+          <tr><td>{{ b.cassette }} <span class="discret">type {{ b.type }}</span></td><td class="nombre">{{ b.coupure | number }}</td>
+            <td class="nombre">{{ b.nombre }}</td><td class="nombre">{{ b.montant | number }}</td></tr>
+        }
+        <tr class="total"><td colspan="3">Total</td><td class="nombre">{{ a.montant | number }}</td></tr>
+      </table>
+      @if (a.controleJournal; as c) {
+        <div class="controle {{ c.statut }}">
+          <mat-icon>{{ c.statut === 'CONCORDANT' ? 'verified' : c.statut === 'ECART' ? 'report' : 'help_outline' }}</mat-icon> {{ c.message }}
+        </div>
+      }
+      <p class="discret">
+        Saisi par {{ a.saisiPar }} le {{ a.saisiLe | date: 'dd/MM/yyyy HH:mm' }}
+        @if (a.modifiePar !== a.saisiPar) { · modifié par {{ a.modifiePar }} }
+        @if (a.decidePar) { · {{ a.statut === 'VALIDE' ? 'validé' : 'annulé' }} par {{ a.decidePar }} le {{ a.decideLe | date: 'dd/MM/yyyy HH:mm' }} }
+        @if (a.motif) { · motif : {{ a.motif }} }
+        @if (a.arrete) { · arrêté {{ a.arrete }} }
+        @if (a.numeroBon) { · bon {{ a.numeroBon }} }
+        @if (a.commentaire) { · {{ a.commentaire }} }
+      </p>
+    </mat-card-content>
+    <mat-card-actions class="actions">
+      <button mat-button (click)="rapport(a)"><mat-icon>picture_as_pdf</mat-icon> Rapport d'appro</button>
+      @if (peutSaisir && a.statut === 'SAISI') { <button mat-button (click)="modifier(a)"><mat-icon>edit</mat-icon> Modifier</button> }
+      @if (peutValider && a.statut !== 'ANNULE' && !a.arrete) {
+        <button mat-button (click)="decider(a, 'annulation')"><mat-icon>block</mat-icon> Annuler</button>
+      }
+      @if (peutValider && a.statut === 'SAISI') {
+        <button mat-flat-button (click)="decider(a, 'validation')" [disabled]="!peutDecider(a)"
+                [matTooltip]="peutDecider(a) ? '' : 'Validation à quatre yeux : une autre personne que celle qui a saisi doit valider'">
+          <mat-icon>task_alt</mat-icon> Valider</button>
+      }
+      <button mat-button (click)="selection.set(null)">Fermer</button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+<form class="filtres" (ngSubmit)="rechercher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>GAB</mat-label>
+    <mat-select [(ngModel)]="terminal" name="terminal">
+      <mat-option value="">Tous les GAB</mat-option>
+      @for (g of gabs(); track g.terminalId) { <mat-option [value]="g.terminalId">{{ g.terminalId }} – {{ g.libelle }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Statut</mat-label>
+    <mat-select [(ngModel)]="statut" name="statut">
+      <mat-option value="">Tous</mat-option>
+      <mat-option value="SAISI">À valider</mat-option>
+      <mat-option value="VALIDE">Validé</mat-option>
+      <mat-option value="ANNULE">Annulé</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+</form>
+
+<div class="tableau">
+  <table mat-table [dataSource]="lignes()">
+    <ng-container matColumnDef="reference">
+      <th mat-header-cell *matHeaderCellDef>Référence</th>
+      <td mat-cell *matCellDef="let a"><a href="javascript:void(0)" (click)="ouvrir(a.id)">{{ a.reference }}</a></td>
+    </ng-container>
+    <ng-container matColumnDef="dateAppro">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let a">{{ a.dateAppro | date: 'dd/MM/yyyy HH:mm' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="terminal">
+      <th mat-header-cell *matHeaderCellDef>GAB</th>
+      <td mat-cell *matCellDef="let a">{{ a.terminal }} <span class="discret">{{ a.libelleGab }}</span></td>
+    </ng-container>
+    <ng-container matColumnDef="gabiste">
+      <th mat-header-cell *matHeaderCellDef>Gabiste</th>
+      <td mat-cell *matCellDef="let a">{{ a.gabiste }}</td>
+    </ng-container>
+    <ng-container matColumnDef="montant">
+      <th mat-header-cell *matHeaderCellDef class="nombre">Montant (XOF)</th>
+      <td mat-cell *matCellDef="let a" class="nombre">{{ a.montant | number }}</td>
+    </ng-container>
+    <ng-container matColumnDef="controle">
+      <th mat-header-cell *matHeaderCellDef>Journal</th>
+      <td mat-cell *matCellDef="let a">
+        @switch (a.controleJournal?.statut) {
+          @case ('CONCORDANT') { <mat-icon class="ok" [matTooltip]="a.controleJournal.message">verified</mat-icon> }
+          @case ('ECART') { <mat-icon class="erreur" [matTooltip]="a.controleJournal.message">report</mat-icon> }
+          @default { <mat-icon class="discret" [matTooltip]="a.controleJournal?.message ?? ''">help_outline</mat-icon> }
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="statut">
+      <th mat-header-cell *matHeaderCellDef>Statut</th>
+      <td mat-cell *matCellDef="let a"><span class="etiquette {{ a.statut }}">{{ statuts[a.statut] }}</span></td>
+    </ng-container>
+    <ng-container matColumnDef="arrete">
+      <th mat-header-cell *matHeaderCellDef>Arrêté</th>
+      <td mat-cell *matCellDef="let a">{{ a.arrete }}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+    <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+  </table>
+</div>
+<mat-paginator [length]="total()" [pageIndex]="page()" [pageSize]="taille()" [pageSizeOptions]="[25, 50, 100]" (page)="changerPage($event)" />

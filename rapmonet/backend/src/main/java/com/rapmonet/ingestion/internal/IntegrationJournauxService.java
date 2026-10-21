@@ -1,6 +1,7 @@
 package com.rapmonet.ingestion.internal;
 
 import com.rapmonet.commun.web.RessourceIntrouvableException;
+import com.rapmonet.ingestion.CoupuresGab;
 import com.rapmonet.ingestion.IntegrationJournaux;
 import com.rapmonet.ingestion.RapportIntegration.AnomalieLis;
 import com.rapmonet.ingestion.ejournal.EvenementGab;
@@ -13,6 +14,7 @@ import com.rapmonet.ingestion.moteur.Anomalie;
 import com.rapmonet.ingestion.moteur.Gravite;
 import com.rapmonet.securite.ActionsAudit;
 import com.rapmonet.securite.JournalAudit;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Service;
@@ -48,7 +50,10 @@ class IntegrationJournauxService implements IntegrationJournaux {
     private final JsonMapper json;
     private final JournalAudit audit;
 
-    IntegrationJournauxService(JdbcClient jdbc, JsonMapper json, JournalAudit audit) {
+    private final ObjectProvider<CoupuresGab> coupuresGab;
+
+    IntegrationJournauxService(JdbcClient jdbc, JsonMapper json, JournalAudit audit, ObjectProvider<CoupuresGab> coupuresGab) {
+        this.coupuresGab = coupuresGab;
         this.jdbc = jdbc;
         this.json = json;
         this.audit = audit;
@@ -63,7 +68,6 @@ class IntegrationJournauxService implements IntegrationJournaux {
         ResultatLectureJournal lecture = new LecteurJournalNcr(format)
                 .lire(LecteurJournalNcr.lignes(new String(contenu, StandardCharsets.ISO_8859_1)));
         List<Anomalie> anomalies = new ArrayList<>(lecture.anomalies());
-        List<Long> coupures = coupures(anomalies);
 
         jdbc.sql("select nom, integre_le from ej_fichier where empreinte_sha256 = ?").param(empreinte)
                 .query((rs, n) -> "Fichier déjà intégré (« %s », le %s).".formatted(
@@ -77,6 +81,7 @@ class IntegrationJournauxService implements IntegrationJournaux {
                     + "ni nom de fichier de la forme <TerminalID>_AAAAMMJJ.jrn)."));
         }
         controlerDates(nom, lecture, anomalies, format);
+        List<Long> coupures = coupures(terminal, anomalies);
 
         List<LocalDate> dates = lecture.operations().stream().map(OperationGab::dateHeure).filter(Objects::nonNull)
                 .map(LocalDateTime::toLocalDate).sorted().toList();
@@ -229,8 +234,15 @@ class IntegrationJournauxService implements IntegrationJournaux {
         return s.billetsPris() ? "DISTRIBUE" : "NON_PRIS";
     }
 
-    /** Valeur des billets de type 1 à 4 (paramètre ejournal.coupures, 0 = type non chargé). */
-    private List<Long> coupures(List<Anomalie> anomalies) {
+    /** Valeur des billets de type 1 à 4 : profil du GAB s'il est paramétré, sinon paramètre ejournal.coupures. */
+    private List<Long> coupures(String terminal, List<Anomalie> anomalies) {
+        CoupuresGab gab = coupuresGab.getIfAvailable();
+        if (gab != null && terminal != null) {
+            var duGab = gab.coupuresParType(terminal);
+            if (duGab.isPresent()) {
+                return duGab.get();
+            }
+        }
         String valeur = jdbc.sql("select valeur from parametre_application where cle = 'ejournal.coupures'")
                 .query(String.class).optional().orElse("");
         List<Long> coupures = lireCoupures(valeur);

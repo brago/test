@@ -34,6 +34,12 @@ public interface ConsultationJournaux {
                      List<Map<String, List<Integer>>> releves, Map<String, Integer> especesAjoutees, String texte) {
     }
 
+    /** Montant des retraits distribués (billets pris) par le GAB entre deux instants (après le premier instant, jusqu'au second inclus). */
+    long montantDistribue(String terminal, LocalDateTime apres, LocalDateTime jusqua);
+
+    /** Nombre de jours de la période pour lesquels un journal du GAB est intégré (au moins une session). */
+    int joursCouverts(String terminal, LocalDate du, LocalDate au);
+
     PageResultat<Operation> rechercher(Critere critere, int page, int taille);
 
     long compter(Critere critere);
