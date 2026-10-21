@@ -56,7 +56,13 @@ export const MENU: EntreeMenu[] = [
     ],
   },
   { code: 'RAPPROCHEMENT', libelle: 'Rapprochements', icone: 'compare_arrows', chemin: '/rapprochement', lot: 6 },
-  { code: 'CHARGEBACK', libelle: 'Chargebacks', icone: 'currency_exchange', chemin: '/chargeback', lot: 7 },
+  {
+    code: 'CHARGEBACK', libelle: 'Chargebacks', icone: 'currency_exchange', lot: 7,
+    enfants: [
+      { code: 'CHARGEBACK_EMISSION', libelle: 'Émission', icone: 'call_made', chemin: '/chargeback/emission', lot: 7 },
+      { code: 'CHARGEBACK_ACQUISITION', libelle: 'Acquisition', icone: 'call_received', chemin: '/chargeback/acquisition', lot: 7 },
+    ],
+  },
   { code: 'REPORTING', libelle: 'Pilotage & réglementaire', icone: 'insights', chemin: '/reporting', lot: 8 },
 ];
 

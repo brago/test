@@ -6,7 +6,7 @@ import { sessionOuverte, sessionRequise } from './core/auth.guard';
 const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit',
-  '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation'];
+  '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition'];
 
 export const routes: Routes = [
   { path: 'connexion', title: 'Connexion – RAPMONET', loadComponent: () => import('./pages/connexion/connexion').then((m) => m.Connexion) },
@@ -61,6 +61,14 @@ export const routes: Routes = [
       {
         path: 'parametrage/vss', title: 'Paramétrage VSS – RAPMONET', data: { menu: 'PARAMETRAGE_VSS' },
         loadComponent: () => import('./parametrage/types-rapports-vss').then((m) => m.TypesRapportsVss),
+      },
+      {
+        path: 'chargeback/emission', title: 'Chargebacks émission – RAPMONET', data: { menu: 'CHARGEBACK_EMISSION', sens: 'emission' },
+        loadComponent: () => import('./chargeback/suivi-chargebacks').then((m) => m.SuiviChargebacks),
+      },
+      {
+        path: 'chargeback/acquisition', title: 'Chargebacks acquisition – RAPMONET', data: { menu: 'CHARGEBACK_ACQUISITION', sens: 'acquisition' },
+        loadComponent: () => import('./chargeback/suivi-chargebacks').then((m) => m.SuiviChargebacks),
       },
       {
         path: 'parametrage/gab', title: 'Paramétrage GAB – RAPMONET', data: { menu: 'PARAMETRAGE_GAB' },

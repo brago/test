@@ -1,0 +1,184 @@
+<div class="entete">
+  <h1>Chargebacks {{ emission ? 'émission' : 'acquisition' }}</h1>
+  <div class="boutons">
+    <button mat-stroked-button (click)="exporter('xlsx')" [disabled]="total() === 0"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')" [disabled]="total() === 0"><mat-icon>print</mat-icon> Imprimer</button>
+    <button mat-stroked-button (click)="archiver()"><mat-icon>inventory_2</mat-icon> Archiver régularisés / rejetés</button>
+  </div>
+</div>
+<p class="aide">
+  @if (emission) {
+    Chargebacks émis sur les transactions des cartes de la banque (BIN déclarés), relus dans les fichiers LIS du GIM :
+    couverture reçue, éventuelle représentation de l'acquéreur.
+  } @else {
+    Chargebacks reçus sur les transactions faites sur les GAB de la banque par des cartes d'autres banques.
+    « Journal GAB » montre si les billets ont été pris, pour décider de représenter ou d'accepter.
+  }
+</p>
+@if (!binsParametres()) {
+  <p class="alerte"><mat-icon>warning</mat-icon> Aucun BIN de la banque n'est déclaré : tous les chargebacks sont classés en acquisition.
+    <a routerLink="/parametrage/gab">Déclarer les BIN</a></p>
+}
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+<form class="filtres" (ngSubmit)="rechercher()">
+  <mat-form-field appearance="outline" class="large">
+    <mat-label>ARN ou RRN</mat-label>
+    <input matInput name="reference" [(ngModel)]="reference" />
+    <mat-hint>La période est alors ignorée</mat-hint>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Journée du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-button-toggle-group name="regul" [(ngModel)]="regularisation" aria-label="Régularisation">
+    <mat-button-toggle value="NON">Non régularisés</mat-button-toggle>
+    <mat-button-toggle value="OUI">Régularisés</mat-button-toggle>
+    <mat-button-toggle value="REJET">Rejetés</mat-button-toggle>
+    <mat-button-toggle value="">Tous</mat-button-toggle>
+  </mat-button-toggle-group>
+  <mat-checkbox name="archives" [(ngModel)]="archives">Archives</mat-checkbox>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+</form>
+
+<div class="disposition" [class.avec-detail]="selection()">
+  <div class="tableau">
+    <table mat-table [dataSource]="lignes()">
+      <ng-container matColumnDef="regularisation">
+        <th mat-header-cell *matHeaderCellDef>Régul.</th>
+        <td mat-cell *matCellDef="let d"><span class="etiquette {{ d.regularisation }}" [matTooltip]="d.commentaire ?? ''">{{ d.regularisation === 'NON' ? 'Non' : d.regularisation === 'OUI' ? 'Oui' : 'Rejet' }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="journeeChargeback">
+        <th mat-header-cell *matHeaderCellDef>Date chbk</th>
+        <td mat-cell *matCellDef="let d">{{ d.journeeChargeback | date: 'dd/MM/yyyy' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="carte">
+        <th mat-header-cell *matHeaderCellDef>Carte</th>
+        <td mat-cell *matCellDef="let d" class="mono">{{ d.carte }}</td>
+      </ng-container>
+      <ng-container matColumnDef="rrn">
+        <th mat-header-cell *matHeaderCellDef>RRN</th>
+        <td mat-cell *matCellDef="let d" class="mono">{{ d.rrn }}</td>
+      </ng-container>
+      <ng-container matColumnDef="arn">
+        <th mat-header-cell *matHeaderCellDef>ARN</th>
+        <td mat-cell *matCellDef="let d" class="mono petit">{{ d.arn }}</td>
+      </ng-container>
+      <ng-container matColumnDef="autorisation">
+        <th mat-header-cell *matHeaderCellDef>Auto.</th>
+        <td mat-cell *matCellDef="let d" class="mono">{{ d.autorisation }}</td>
+      </ng-container>
+      <ng-container matColumnDef="dateTransaction">
+        <th mat-header-cell *matHeaderCellDef>Date trx</th>
+        <td mat-cell *matCellDef="let d">{{ d.dateTransaction | date: 'dd/MM/yyyy' }} <span class="discret">{{ heure(d.heureTransaction) }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="terminal">
+        <th mat-header-cell *matHeaderCellDef>Terminal</th>
+        <td mat-cell *matCellDef="let d">{{ d.terminal }}</td>
+      </ng-container>
+      <ng-container matColumnDef="montant">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Montant</th>
+        <td mat-cell *matCellDef="let d" class="nombre">{{ d.montant | number }}</td>
+      </ng-container>
+      <ng-container matColumnDef="motif">
+        <th mat-header-cell *matHeaderCellDef>Motif</th>
+        <td mat-cell *matCellDef="let d" class="mono">{{ d.motif }}</td>
+      </ng-container>
+      <ng-container matColumnDef="situation">
+        <th mat-header-cell *matHeaderCellDef>Situation</th>
+        <td mat-cell *matCellDef="let d"><span class="etat {{ d.etat }}" [matTooltip]="d.situation">{{ libelleEtat(d) }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="jours">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Jours</th>
+        <td mat-cell *matCellDef="let d" class="nombre" [class.depasse]="d.etat === 'DELAI_ECOULE'">{{ d.joursEcoules }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonnes()"></tr>
+      <tr mat-row *matRowDef="let row; columns: colonnes()" (click)="ouvrir(row)" [class.choisie]="selection()?.id === row.id"></tr>
+    </table>
+    @if (total() === 0) { <p class="aide">Aucun chargeback pour ces critères.</p> }
+    <mat-paginator [length]="total()" [pageIndex]="page()" [pageSize]="taille()" [pageSizeOptions]="[25, 50, 100]" (page)="changerPage($event)" />
+  </div>
+
+  @if (selection(); as d) {
+    <mat-card appearance="outlined" class="cycle">
+      <div class="bandeau">
+        <div>
+          <div class="porteur">PORTEUR = {{ d.carte }} / ARN = {{ d.arn }} / TERMINAL = {{ d.terminal }} {{ d.marchand ? '/ ' + d.marchand : '' }}
+            &lt;&lt; {{ d.libelleTc | uppercase }} &gt;&gt;</div>
+          <div class="discret">{{ d.montant | number }} {{ d.devise === '952' ? 'XOF' : d.devise }} · transaction du {{ d.dateTransaction | date: 'dd/MM/yyyy' }}
+            · RRN {{ d.rrn }} · autorisation {{ d.autorisation }} · motif {{ d.motif }}</div>
+        </div>
+        <div class="duree" [class.depasse]="d.etat === 'DELAI_ECOULE'" matTooltip="Jours depuis la journée LIS du chargeback ; échéance {{ d.echeance | date: 'dd/MM/yyyy' }}">
+          <span>Durée (jours)</span><strong>{{ d.joursEcoules }}</strong>
+        </div>
+      </div>
+      <h3>Cycle de vie</h3>
+      <table class="etapes">
+        <tr><th>Étape</th><th>Situation</th></tr>
+        @for (l of d.cycle ?? []; track $index) {
+          <tr [class.alerte-ligne]="l.alerte"><td>{{ l.etape | uppercase }}</td><td>{{ l.situation }}</td></tr>
+        }
+      </table>
+      @if (d.operations?.length) {
+        <details>
+          <summary>Opérations LIS de ce cycle ({{ d.operations!.length }})</summary>
+          <table class="etapes">
+            <tr><th>Journée</th><th>TC</th><th>Usage</th><th class="nombre">Montant</th><th>Motif</th><th>Message</th><th>Fichier</th></tr>
+            @for (o of d.operations; track $index) {
+              <tr><td>{{ o.journee | date: 'dd/MM/yyyy' }}</td><td>{{ o.tc }} – {{ o.libelle }}</td><td>{{ o.usage }}</td>
+                <td class="nombre">{{ o.montant | number }}</td><td>{{ o.motif }}</td><td>{{ o.message }}</td><td class="discret">{{ o.fichier }}</td></tr>
+            }
+          </table>
+        </details>
+      }
+
+      <p class="discret">Régularisation : <strong>{{ libelleRegul(d.regularisation) }}</strong>
+        @if (d.regularisePar) { par {{ d.regularisePar }} le {{ d.regulariseLe | date: 'dd/MM/yyyy HH:mm' }} }
+        @if (d.commentaire) { – {{ d.commentaire }} }
+        @if (d.archive) { · archivé }</p>
+
+      @if (decision(); as x) {
+        <div class="decision">
+          <mat-button-toggle-group name="statut" [(ngModel)]="x.statut">
+            <mat-button-toggle value="OUI">Régularisé</mat-button-toggle>
+            <mat-button-toggle value="REJET">Rejeté</mat-button-toggle>
+            <mat-button-toggle value="NON">Non régularisé</mat-button-toggle>
+          </mat-button-toggle-group>
+          <mat-form-field appearance="outline" class="commentaire">
+            <mat-label>Commentaire (écriture passée, motif du rejet…)</mat-label>
+            <input matInput name="commentaire" [(ngModel)]="x.commentaire" />
+          </mat-form-field>
+          <button mat-flat-button (click)="enregistrerDecision(d)">Enregistrer</button>
+          <button mat-button (click)="decision.set(null)">Annuler</button>
+        </div>
+      }
+
+      @if (journal(); as j) {
+        <div class="journal" [class.pris]="j.billetsPris">
+          <p><mat-icon>{{ j.billetsPris ? 'payments' : 'info' }}</mat-icon> {{ j.conclusion }}</p>
+          @if (j.recherche) { <p class="discret">Recherche : {{ j.recherche }}</p> }
+          @for (o of j.operations; track o.id) {
+            <p class="discret">{{ o.dateHeure | date: 'dd/MM/yyyy HH:mm:ss' }} · {{ o.carte }} · {{ o.montant | number }} {{ o.devise }}
+              · réponse {{ o.codeReponse }} · {{ libellesStatutGab[o.statut] }} · ticket {{ o.reference }}</p>
+          }
+          @if (j.session; as s) { <pre class="extrait">{{ s.texte }}</pre> }
+        </div>
+      }
+
+      <div class="actions">
+        @if (!d.archive) { <button mat-stroked-button (click)="regulariser(d)"><mat-icon>task_alt</mat-icon> Régulariser</button> }
+        @if (!emission) { <button mat-stroked-button (click)="voirJournal(d)"><mat-icon>receipt_long</mat-icon> Visualiser journal GAB</button> }
+        <button mat-button (click)="selection.set(null)">Fermer</button>
+      </div>
+    </mat-card>
+  }
+</div>

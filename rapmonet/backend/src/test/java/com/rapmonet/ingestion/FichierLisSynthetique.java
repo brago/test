@@ -8,7 +8,7 @@ import java.util.List;
  * Fabrique un fichier LIS synthétique conforme à la spécification LIS 3.038
  * (aucune donnée réelle) : en-tête, cinq sous-fichiers, retraits TC 07 dans le FL, fin.
  */
-final class FichierLisSynthetique {
+public final class FichierLisSynthetique {
 
     private final List<StringBuilder> lignes = new ArrayList<>();
 
@@ -23,6 +23,80 @@ final class FichierLisSynthetique {
 
     private static void ecrire(StringBuilder l, int position, String valeur) {
         l.replace(position - 1, position - 1 + valeur.length(), valeur);
+    }
+
+    /**
+     * Opération de la famille présentation / chargeback / redressement (même structure de TCR 0 et 1).
+     *
+     * @param tc              05, 07, 15, 17, 25, 37…
+     * @param usage           1 = première présentation ou premier chargeback, 2 = représentation ou second chargeback
+     * @param dateTransaction JJMMAA
+     */
+    public record Operation(String tc, String usage, String carte, long montant, String arn, String rrn, String terminal,
+                            String dateTransaction, String motif, String message, String fid, String rid) {
+    }
+
+    /** Fichier dont le sous-fichier GIM local (FL) contient les opérations données. */
+    public static byte[] creer(String jjmmaa, String numeroFichier, List<Operation> operations) {
+        FichierLisSynthetique f = new FichierLisSynthetique();
+        f.entete(jjmmaa, numeroFichier);
+        for (String[] sf : SOUS_FICHIERS) {
+            int debut = f.lignes.size();
+            f.nouvelle(sf[0], "0");
+            if (sf[0].equals("98")) {
+                for (Operation o : operations) {
+                    StringBuilder tcr0 = f.nouvelle(o.tc(), "0");
+                    ecrire(tcr0, 26, "GAB SYNTHETIQUE");
+                    ecrire(tcr0, 67, "6011");
+                    ecrire(tcr0, 75, o.terminal());
+                    ecrire(tcr0, 83, o.usage());
+                    if (o.message() != null) {
+                        ecrire(tcr0, 87, o.message());
+                    }
+                    if (o.motif() != null) {
+                        ecrire(tcr0, 137, o.motif());
+                        ecrire(tcr0, 141, "000001");
+                    }
+                    ecrire(tcr0, 148, "3");
+                    ecrire(tcr0, 149, o.carte());
+                    StringBuilder tcr1 = f.nouvelle(o.tc(), "1");
+                    ecrire(tcr1, 10, o.dateTransaction());
+                    ecrire(tcr1, 16, "123456");
+                    ecrire(tcr1, 24, o.arn());
+                    ecrire(tcr1, 47, o.fid());
+                    ecrire(tcr1, 56, "0");
+                    ecrire(tcr1, 57, "%012d".formatted(o.montant()));
+                    ecrire(tcr1, 69, o.rid());
+                    ecrire(tcr1, 79, "%012d".formatted(o.montant()));
+                    ecrire(tcr1, 146, o.rrn());
+                    ecrire(tcr1, 158, "120000");
+                    ecrire(tcr1, 164, "952");
+                    ecrire(tcr1, 167, "952");
+                }
+            }
+            StringBuilder fin = f.nouvelle(sf[1], "0");
+            ecrire(fin, 10, "%06d".formatted(f.lignes.size() - debut));
+        }
+        return f.terminer();
+    }
+
+    private static final String[][] SOUS_FICHIERS = {{"92", "93"}, {"94", "95"}, {"96", "97"}, {"98", "99"}, {"80", "81"}};
+
+    private void entete(String jjmmaa, String numeroFichier) {
+        StringBuilder entete = nouvelle("90", "0");
+        ecrire(entete, 10, "000343");
+        ecrire(entete, 16, jjmmaa);
+        ecrire(entete, 22, numeroFichier);
+        ecrire(entete, 26, "3.038");
+        ecrire(entete, 41, "101010");
+    }
+
+    private byte[] terminer() {
+        StringBuilder fin = nouvelle("91", "0");
+        ecrire(fin, 10, "%06d".formatted(lignes.size()));
+        StringBuilder texte = new StringBuilder();
+        lignes.forEach(l -> texte.append(l).append("\r\n"));
+        return texte.toString().getBytes(StandardCharsets.ISO_8859_1);
     }
 
     /**

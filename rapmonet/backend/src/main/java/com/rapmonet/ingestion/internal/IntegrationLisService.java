@@ -3,6 +3,7 @@ package com.rapmonet.ingestion.internal;
 import com.rapmonet.commun.web.RegleMetierException;
 import com.rapmonet.commun.web.RessourceIntrouvableException;
 import com.rapmonet.ingestion.FichierLis;
+import com.rapmonet.ingestion.FichiersLisIntegres;
 import com.rapmonet.ingestion.IntegrationLis;
 import com.rapmonet.ingestion.RapportIntegration;
 import com.rapmonet.ingestion.RapportIntegration.AnomalieLis;
@@ -17,6 +18,7 @@ import com.rapmonet.parametrage.FormatFichier;
 import com.rapmonet.parametrage.FormatsFichiers;
 import com.rapmonet.securite.ActionsAudit;
 import com.rapmonet.securite.JournalAudit;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -53,9 +55,11 @@ class IntegrationLisService implements IntegrationLis {
     private final JsonMapper json;
     private final EmpreinteCarte empreinte;
     private final JournalAudit audit;
+    private final ApplicationEventPublisher evenements;
 
     IntegrationLisService(FormatsFichiers formats, JdbcClient jdbc, JdbcTemplate jdbcTemplate, JsonMapper json,
-                          EmpreinteCarte empreinte, JournalAudit audit) {
+                          EmpreinteCarte empreinte, JournalAudit audit, ApplicationEventPublisher evenements) {
+        this.evenements = evenements;
         this.empreinte = empreinte;
         this.audit = audit;
         this.formats = formats;
@@ -106,6 +110,10 @@ class IntegrationLisService implements IntegrationLis {
         audit.enregistrer(ActionsAudit.LIS_INTEGRATION, noms, integre
                 ? rapports.stream().map(r -> r.typeLis() + " " + r.journee() + " : " + r.nbTransactions() + " transactions").toList().toString()
                 : "Rejeté : " + bloquantes + " anomalie(s) bloquante(s)", integre);
+        if (integre) {
+            evenements.publishEvent(new FichiersLisIntegres(rapports.stream().map(RapportFichier::id).toList(),
+                    rapports.stream().map(RapportFichier::journee).distinct().toList()));
+        }
         return new RapportIntegration(integre, rapports);
     }
 

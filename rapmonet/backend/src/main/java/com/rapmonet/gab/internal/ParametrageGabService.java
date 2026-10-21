@@ -2,6 +2,7 @@ package com.rapmonet.gab.internal;
 
 import com.rapmonet.commun.web.RegleMetierException;
 import com.rapmonet.commun.web.RessourceIntrouvableException;
+import com.rapmonet.gab.BinsBanque;
 import com.rapmonet.ingestion.CoupuresGab;
 import com.rapmonet.securite.ActionsAudit;
 import com.rapmonet.securite.JournalAudit;
@@ -26,7 +27,7 @@ import java.util.regex.Pattern;
 /** Paramétrage des GAB, de leurs profils (cassettes et coupures) et des BIN cartes. */
 @Service
 @Transactional
-public class ParametrageGabService implements CoupuresGab {
+public class ParametrageGabService implements CoupuresGab, BinsBanque {
 
     /** Cassette d'un profil : lettre A à D, valeur du billet, type de billet NCR (1 à 4). */
     public record Cassette(String cassette, long coupure, int type) {
@@ -214,6 +215,27 @@ public class ParametrageGabService implements CoupuresGab {
                 .params(bin, obligatoire(b.libelle(), "Le libellé du produit"), b.typeCarte(), utilisateur).update();
         audit.enregistrerPour(utilisateur, ActionsAudit.PARAMETRAGE_GAB, "BIN " + bin, b.libelle() + " (" + b.typeCarte() + ")", true);
         return new Bin(bin, b.libelle().strip(), b.typeCarte());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean carteDeLaBanque(String carte) {
+        if (carte == null || carte.length() < 6) {
+            return false;
+        }
+        // Carte masquée (6 premiers + 4 derniers chiffres) : seuls les 6 premiers chiffres du BIN sont comparables.
+        String c = carte.strip();
+        boolean masquee = c.length() > 6 && !Character.isDigit(c.charAt(6));
+        String sql = masquee
+                ? "select count(*) from bin_carte where left(bin, 6) = left(?, 6)"
+                : "select count(*) from bin_carte where ? like bin || '%'";
+        return jdbc.sql(sql).param(c).query(Integer.class).single() > 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean binsParametres() {
+        return jdbc.sql("select count(*) from bin_carte").query(Integer.class).single() > 0;
     }
 
     public void supprimerBin(String bin, String utilisateur) {

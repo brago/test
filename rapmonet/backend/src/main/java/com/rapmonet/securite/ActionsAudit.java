@@ -30,6 +30,8 @@ public final class ActionsAudit {
     public static final String GAB_ARRETE_SAISIE = "GAB_ARRETE_SAISIE";
     public static final String GAB_ARRETE_VALIDATION = "GAB_ARRETE_VALIDATION";
     public static final String GAB_ARRETE_ANNULATION = "GAB_ARRETE_ANNULATION";
+    public static final String CHARGEBACK_REGULARISATION = "CHARGEBACK_REGULARISATION";
+    public static final String CHARGEBACK_ARCHIVAGE = "CHARGEBACK_ARCHIVAGE";
     public static final String EXPORT = "EXPORT";
 
     private ActionsAudit() {
