@@ -27,7 +27,7 @@ class SystemeController {
             return new InfoSysteme.BaseDeDonnees(meta.getDatabaseProductName(), meta.getDatabaseProductVersion(), null);
         });
         String schema = jdbc.queryForObject(
-                "select max(version) from flyway_schema_history where success", String.class);
+                "select version from flyway_schema_history where success and version is not null order by installed_rank desc limit 1", String.class);
         return new InfoSysteme("RAPMONET", version,
                 new InfoSysteme.BaseDeDonnees(base.produit(), base.version(), schema));
     }

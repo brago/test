@@ -157,7 +157,7 @@ class IntegrationJournauxIntegrationTest {
         mvc.perform(multipart("/api/ingestion/ejournal").file(fichier(NOM, journal())).with(csrf()))
                 .andExpect(jsonPath("$[0].anomalies", hasSize(0)));
 
-        // Cassettes 1 à 4 = 10 000, 5 000, 2 000, 1 000 XOF : le montant des billets égale celui du ticket.
+        // Billets de type 1, 2, 3 = 10 000, 5 000, 2 000 XOF ; type 4 non chargé : le montant des billets égale celui du ticket.
         assertThat(jdbc.queryForObject("select count(*) from ej_operation where montant_billets is not null", Integer.class))
                 .isEqualTo(19);
         assertThat(jdbc.queryForObject("select count(*) from ej_operation where montant_billets <> montant", Integer.class))
@@ -184,7 +184,7 @@ class IntegrationJournauxIntegrationTest {
                     .andExpect(jsonPath("$.total", greaterThan(0)))
                     .andExpect(jsonPath("$.elements[0].ecartBillets", lessThan(0)));
         } finally {
-            jdbc.update("update parametre_application set valeur = '10000,5000,2000,1000' where cle = 'ejournal.coupures'");
+            jdbc.update("update parametre_application set valeur = '10000,5000,2000,0' where cle = 'ejournal.coupures'");
         }
     }
 }

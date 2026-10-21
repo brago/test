@@ -139,7 +139,7 @@
           @if (s.compteurs; as c) {
             <table class="compteurs">
               <tr><th></th>@for (t of types; track t) { <th>{{ t }}</th> }</tr>
-              @if (s.coupures) { <tr><td>Coupure (XOF)</td>@for (t of types; track $index) { <td>{{ s.coupures[$index] | number }}</td> }</tr> }
+              @if (s.coupures) { <tr><td>Coupure (XOF)</td>@for (t of types; track $index) { <td>@if (s.coupures[$index]) { {{ s.coupures[$index] | number }} } @else { <span class="discret">non chargé</span> }</td> }</tr> }
               @if (s.billetsPresentes) {
                 <tr class="fort"><td>Présentés</td>@for (v of s.billetsPresentes; track $index) { <td>{{ v }}</td> }</tr>
                 @if (s.coupures) {

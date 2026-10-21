@@ -229,7 +229,7 @@ class IntegrationJournauxService implements IntegrationJournaux {
         return s.billetsPris() ? "DISTRIBUE" : "NON_PRIS";
     }
 
-    /** Valeur des billets des cassettes de type 1 à 4 (paramètre ejournal.coupures). */
+    /** Valeur des billets de type 1 à 4 (paramètre ejournal.coupures, 0 = type non chargé). */
     private List<Long> coupures(List<Anomalie> anomalies) {
         String valeur = jdbc.sql("select valeur from parametre_application where cle = 'ejournal.coupures'")
                 .query(String.class).optional().orElse("");
@@ -266,7 +266,8 @@ class IntegrationJournauxService implements IntegrationJournaux {
         List<String> l = new ArrayList<>();
         for (int i = 0; i < billets.size(); i++) {
             if (billets.get(i) > 0) {
-                l.add(billets.get(i) + " × " + montantTexte(coupures.get(i)));
+                l.add(billets.get(i) + " × " + (coupures.get(i) == 0 ? "type " + (i + 1) + " non chargé"
+                        : montantTexte(coupures.get(i))));
             }
         }
         return l.isEmpty() ? "aucun billet" : String.join(" + ", l);

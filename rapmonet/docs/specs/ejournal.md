@@ -85,12 +85,24 @@ Règles :
 
 ## Valeur des billets (coupures)
 
-La ligne `DENOMINATION 5 10 20 50` du journal (bloc CASH TOTAL) **n'est pas fiable** : elle est imprimée
-telle quelle quelle que soit la monnaie chargée. Les journaux de production (confirmés par l'utilisateur)
-montrent que les cassettes de type 1 à 4 contiennent des billets de **10 000, 5 000, 2 000 et 1 000 XOF** :
-avec ces valeurs, billets présentés × coupures = montant du ticket pour 308 retraits sur 308.
+La ligne `DENOMINATION 5 10 20 50` du journal (bloc CASH TOTAL) et les valeurs du bloc `CASSETTE INFORMATION`
+(GBP 5 / 10 / 20) **ne sont pas fiables** : configuration NCR par défaut, imprimée quelle que soit la monnaie chargée.
 
-- Paramètre `ejournal.coupures` = `10000,5000,2000,1000` (une valeur par type de cassette).
+Les nombres de billets du journal (`NOTES PRESENTED`, compteurs `CASH TOTAL` TYPE1…TYPE4) sont donnés **par type
+de billet**, pas par cassette physique. Configuration des GAB (confirmée par l'utilisateur et par le bloc
+`CASSETTE INFORMATION`) :
+
+| Cassette | Type | Billet |
+|---|---|---|
+| TOP | 1 | 10 000 XOF |
+| SECOND | 1 | 10 000 XOF |
+| THIRD | 2 | 5 000 XOF |
+| FOURTH | 3 | 2 000 XOF |
+| – | 4 | non chargé (billets de 1 000 non utilisés) |
+
+Avec ces valeurs, billets présentés × coupures = montant du ticket pour 308 retraits sur 308.
+
+- Paramètre `ejournal.coupures` = `10000,5000,2000,0` (une valeur par type de billet, 0 = type non chargé).
   Un paramétrage par GAB viendra avec le module GAB (lot 5) si certains GAB sont chargés autrement.
 - `ej_operation.montant_billets` : valeur des billets présentés pour le retrait approuvé de la session.
 - **Contrôle** : si cette valeur diffère du montant du ticket → avertissement sur le fichier
