@@ -1,0 +1,39 @@
+.entete { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.entete button { margin-left: 8px; }
+.filtres { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.filtres mat-form-field { width: 160px; }
+.filtres mat-form-field.court { width: 130px; }
+.disposition { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 8px; }
+.disposition.avec-detail { grid-template-columns: minmax(0, 1fr) 460px; }
+@media (max-width: 1200px) { .disposition.avec-detail { grid-template-columns: 1fr; } }
+.tableau { overflow: auto; max-height: 62vh; border: 1px solid var(--mat-sys-outline-variant); border-radius: 8px; }
+table { width: 100%; }
+td, th { white-space: nowrap; padding: 0 8px !important; }
+.nombre { text-align: right; }
+.mono { font-family: 'Roboto Mono', monospace; font-size: 12px; }
+.discret { color: var(--mat-sys-on-surface-variant); font-size: 12px; }
+.cliquable { cursor: pointer; }
+.cliquable:hover { background: var(--mat-sys-surface-container-high); }
+.selection { background: var(--mat-sys-secondary-container); }
+.vide { padding: 16px !important; color: var(--mat-sys-on-surface-variant); }
+.ko { color: var(--mat-sys-error); }
+.alerte { color: #b26a00; font-size: 20px; vertical-align: middle; }
+.statut { padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.statut.DISTRIBUE, .statut.APPROUVE { background: #dcf3e3; color: #1b6b35; }
+.statut.NON_PRIS { background: #fdebd0; color: #8a4b00; }
+.statut.REFUSE { background: #fde0dd; color: #a4251b; }
+.statut.INCONNU { background: #e6e6e6; color: #444; }
+.extrait, .evenement { padding: 12px 16px; align-self: start; }
+.evenement { margin: 12px 0; max-width: 900px; }
+.titre-extrait { display: flex; justify-content: space-between; align-items: center; }
+.titre-extrait h3 { margin: 0; }
+.journal { background: #1e1e1e; color: #e6e6e6; padding: 12px; border-radius: 6px; font-size: 12px; line-height: 1.35;
+  max-height: 55vh; overflow: auto; white-space: pre; }
+.incidents { display: flex; flex-direction: column; gap: 2px; color: #8a4b00; font-size: 13px; }
+.incidents span { display: flex; align-items: center; gap: 6px; }
+.incidents mat-icon { font-size: 18px; width: 18px; height: 18px; }
+table.compteurs { border-collapse: collapse; margin: 8px 0; font-size: 12px; width: auto; }
+table.compteurs th, table.compteurs td { border: 1px solid var(--mat-sys-outline-variant); padding: 2px 8px !important; text-align: right; }
+table.compteurs td:first-child { text-align: left; }
+table.compteurs tr.fort td { font-weight: 600; }
+.puce { background: var(--mat-sys-secondary-container); border-radius: 12px; padding: 2px 10px; font-size: 12px; margin-right: 6px; }

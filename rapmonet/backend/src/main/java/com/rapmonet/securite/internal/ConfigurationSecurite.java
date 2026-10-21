@@ -57,6 +57,8 @@ class ConfigurationSecurite {
                         .requestMatchers("/api/exploration/lis/**").hasAuthority(menu("EXPLORATION_LIS"))
                         .requestMatchers("/api/ingestion/vss/**").hasAuthority(menu("CHARGEMENT_VSS"))
                         .requestMatchers("/api/exploration/vss/**").hasAuthority(menu("EXPLORATION_VSS"))
+                        .requestMatchers("/api/ingestion/ejournal/**").hasAuthority(menu("CHARGEMENT_EJOURNAL"))
+                        .requestMatchers("/api/exploration/ejournal/**").hasAuthority(menu("EXPLORATION_EJOURNAL"))
                         .requestMatchers(HttpMethod.GET, "/api/parametrage/**").hasAuthority(u)
                         .requestMatchers("/api/parametrage/vss/**").hasAuthority(menu("PARAMETRAGE_VSS"))
                         .requestMatchers("/api/parametrage/**").hasAuthority(menu("PARAMETRAGE_LIS"))

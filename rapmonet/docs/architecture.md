@@ -62,7 +62,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 1 | Sécurité : connexion, blocage après 3 échecs, utilisateurs, profils, audit ; exports Excel / PDF | ✅ Fait (voir ADR 0002) |
 | 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`) ; écrans de modification du paramétrage à venir |
 | 3 | Rapports VSS de VISA (fichiers VX / EP-747) : chargement, consultation, export, paramétrage | ✅ Fait (voir `docs/specs/vss.md`) |
-| 4 | E-journaux NCR + Amplitude (BKHIS, MOHISDET) + ACD | Attente specs |
+| 4 | E-journaux NCR ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
 | 5 | GAB : paramétrage, appros, arrêtés, validation, rapports | À faire |
 | 6 | Rapprochements + gestion des écarts | Attente règles |
 | 7 | Chargebacks | À faire |

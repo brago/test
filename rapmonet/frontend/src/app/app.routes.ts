@@ -4,7 +4,7 @@ import { sessionOuverte, sessionRequise } from './core/auth.guard';
 
 /** Écrans réalisés ; les autres entrées du menu affichent la page « À venir ». */
 const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
-  '/ingestion/vss', '/exploration/vss', '/parametrage/vss',
+  '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit'];
 
 export const routes: Routes = [
@@ -40,6 +40,14 @@ export const routes: Routes = [
       {
         path: 'exploration', title: 'Exploration LIS – RAPMONET', data: { menu: 'EXPLORATION_LIS' },
         loadComponent: () => import('./exploration/exploration-lis').then((m) => m.ExplorationLis),
+      },
+      {
+        path: 'ingestion/ejournal', title: 'Chargement des journaux GAB – RAPMONET', data: { menu: 'CHARGEMENT_EJOURNAL' },
+        loadComponent: () => import('./ingestion/chargement-ejournal').then((m) => m.ChargementEjournal),
+      },
+      {
+        path: 'exploration/ejournal', title: 'Journaux GAB – RAPMONET', data: { menu: 'EXPLORATION_EJOURNAL' },
+        loadComponent: () => import('./exploration/exploration-ejournal').then((m) => m.ExplorationEjournal),
       },
       {
         path: 'ingestion/vss', title: 'Chargement VSS – RAPMONET', data: { menu: 'CHARGEMENT_VSS' },

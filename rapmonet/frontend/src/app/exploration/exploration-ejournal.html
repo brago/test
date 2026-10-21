@@ -1,0 +1,176 @@
+<div class="entete">
+  <h1>Journaux GAB</h1>
+  <div>
+    <button mat-stroked-button (click)="exporter('xlsx')" [disabled]="total() === 0"><mat-icon>grid_on</mat-icon> Excel</button>
+    <button mat-stroked-button (click)="exporter('pdf')" [disabled]="total() === 0"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
+  </div>
+</div>
+@if (erreur(); as e) { <p class="ko">{{ e }}</p> }
+
+<form class="filtres" (ngSubmit)="rechercher()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>GAB</mat-label>
+    <mat-select [(ngModel)]="terminal" name="terminal">
+      <mat-option value="">Tous les GAB</mat-option>
+      @for (t of terminaux(); track t) { <mat-option [value]="t">{{ t }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Opération</mat-label>
+    <mat-select [(ngModel)]="type" name="type">
+      <mat-option value="">Toutes</mat-option>
+      <mat-option value="RETRAIT">Retrait</mat-option>
+      <mat-option value="SOLDE">Demande de solde</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Statut</mat-label>
+    <mat-select [(ngModel)]="statut" name="statut">
+      <mat-option value="">Tous</mat-option>
+      @for (s of ['DISTRIBUE', 'APPROUVE', 'NON_PRIS', 'REFUSE', 'INCONNU']; track s) {
+        <mat-option [value]="s">{{ libellesStatut[s] }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="court">
+    <mat-label>Code réponse</mat-label>
+    <input matInput [(ngModel)]="codeReponse" name="codeReponse" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="court">
+    <mat-label>Carte (4 derniers)</mat-label>
+    <input matInput [(ngModel)]="carte" name="carte" maxlength="4" />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Compte</mat-label>
+    <input matInput [(ngModel)]="compte" name="compte" />
+  </mat-form-field>
+  <button mat-flat-button type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+</form>
+
+<mat-tab-group animationDuration="0ms">
+  <mat-tab label="Opérations ({{ total() }})">
+    @if (chargement()) { <mat-progress-bar mode="indeterminate" /> }
+    <div class="disposition" [class.avec-detail]="session()">
+      <div>
+        <div class="tableau">
+          <table mat-table [dataSource]="lignes()">
+            <ng-container matColumnDef="dateHeure">
+              <th mat-header-cell *matHeaderCellDef>Date et heure</th>
+              <td mat-cell *matCellDef="let o">{{ o.dateHeure | date: 'dd/MM/yy HH:mm:ss' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="terminal">
+              <th mat-header-cell *matHeaderCellDef>GAB</th>
+              <td mat-cell *matCellDef="let o">{{ o.terminal }}</td>
+            </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Opération</th>
+              <td mat-cell *matCellDef="let o">{{ o.type === 'RETRAIT' ? 'Retrait' : 'Solde' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="carte">
+              <th mat-header-cell *matHeaderCellDef>Carte</th>
+              <td mat-cell *matCellDef="let o" class="mono">{{ o.carte }}</td>
+            </ng-container>
+            <ng-container matColumnDef="montant">
+              <th mat-header-cell *matHeaderCellDef class="nombre">Montant</th>
+              <td mat-cell *matCellDef="let o" class="nombre">@if (o.montant !== null) { {{ o.montant | number }} {{ o.devise }} }</td>
+            </ng-container>
+            <ng-container matColumnDef="reponse">
+              <th mat-header-cell *matHeaderCellDef>Réponse</th>
+              <td mat-cell *matCellDef="let o" [matTooltip]="o.libelleReponse ?? ''">{{ o.codeReponse }}
+                @if (o.codeReponse !== '00') { <span class="discret">{{ o.libelleReponse }}</span> }</td>
+            </ng-container>
+            <ng-container matColumnDef="statut">
+              <th mat-header-cell *matHeaderCellDef>Statut</th>
+              <td mat-cell *matCellDef="let o"><span class="statut {{ o.statut }}">{{ libellesStatut[o.statut] }}</span></td>
+            </ng-container>
+            <ng-container matColumnDef="compte">
+              <th mat-header-cell *matHeaderCellDef>Compte</th>
+              <td mat-cell *matCellDef="let o" class="mono">{{ o.compte }}</td>
+            </ng-container>
+            <ng-container matColumnDef="billets">
+              <th mat-header-cell *matHeaderCellDef>Billets</th>
+              <td mat-cell *matCellDef="let o" class="mono">@if (o.type === 'RETRAIT' && o.billetsPresentes) { {{ o.billetsPresentes.join(' · ') }} }</td>
+            </ng-container>
+            <ng-container matColumnDef="incidents">
+              <th mat-header-cell *matHeaderCellDef>Incidents</th>
+              <td mat-cell *matCellDef="let o">
+                @if (o.incidents.length) { <mat-icon class="alerte" [matTooltip]="o.incidents.join(' ; ')">warning</mat-icon> }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="colonnes; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: colonnes" class="cliquable" (click)="ouvrir(row)" [class.selection]="selection() === row.id"></tr>
+            <tr class="mat-row" *matNoDataRow><td class="mat-cell vide" [attr.colspan]="colonnes.length">Aucune opération.</td></tr>
+          </table>
+        </div>
+        <mat-paginator [length]="total()" [pageIndex]="page()" [pageSize]="taille()" [pageSizeOptions]="[25, 50, 100, 500]"
+                       (page)="changerPage($event)" showFirstLastButtons />
+      </div>
+
+      @if (session(); as s) {
+        <mat-card appearance="outlined" class="extrait">
+          <div class="titre-extrait">
+            <h3>Extrait du journal</h3>
+            <button mat-icon-button (click)="session.set(null); selection.set(null)" aria-label="Fermer"><mat-icon>close</mat-icon></button>
+          </div>
+          <p class="discret">GAB {{ s.terminal }} · {{ s.date | date: 'dd/MM/yyyy' }} {{ s.heureDebut }} · {{ s.nomFichier }}</p>
+          @if (s.incidents.length) {
+            <p class="incidents">@for (i of s.incidents; track i) { <span><mat-icon>warning</mat-icon> {{ i }}</span> }</p>
+          }
+          @if (s.compteurs; as c) {
+            <table class="compteurs">
+              <tr><th></th>@for (t of types; track t) { <th>{{ t }}</th> }</tr>
+              <tr><td>Coupure</td>@for (v of c.coupures; track $index) { <td>{{ v }}</td> }</tr>
+              @if (s.billetsPresentes) { <tr class="fort"><td>Présentés</td>@for (v of s.billetsPresentes; track $index) { <td>{{ v }}</td> }</tr> }
+              <tr><td>Distribués (cumul)</td>@for (v of c.distribues; track $index) { <td>{{ v }}</td> }</tr>
+              <tr><td>Rejetés (cumul)</td>@for (v of c.rejetes; track $index) { <td>{{ v }}</td> }</tr>
+              <tr><td>Restants</td>@for (v of c.restants; track $index) { <td>{{ v }}</td> }</tr>
+            </table>
+          }
+          <pre class="journal">{{ s.texte }}</pre>
+        </mat-card>
+      }
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Passages superviseur ({{ evenements().length }})">
+    @if (evenements().length === 0) { <p class="vide">Aucun passage en mode superviseur sur la période.</p> }
+    @for (e of evenements(); track e.id) {
+      <mat-card appearance="outlined" class="evenement">
+        <div class="titre-extrait">
+          <h3>GAB {{ e.terminal }} – {{ e.dateHeure | date: 'dd/MM/yyyy HH:mm' }}</h3>
+          <button mat-button (click)="evenementOuvert.set(evenementOuvert() === e.id ? null : e.id)">
+            {{ evenementOuvert() === e.id ? 'Masquer' : 'Voir' }} le journal
+          </button>
+        </div>
+        <p>@for (a of e.actions; track a) { <span class="puce">{{ libellesAction[a] ?? a }}</span> }</p>
+        @for (r of e.releves; track $index) {
+          <table class="compteurs">
+            <tr><th>Relevé {{ $index + 1 }}</th>@for (t of types; track t) { <th>{{ t }}</th> }</tr>
+            @for (k of ['CASSETTE', 'REJECTED', 'REMAINING', 'DISPENSED', 'TOTAL']; track k) {
+              @if (r[k]) { <tr><td>{{ k }}</td>@for (v of r[k]; track $index) { <td>{{ v }}</td> }</tr> }
+            }
+          </table>
+        }
+        @if (e.actions.includes('AJOUT_ESPECES')) {
+          <table class="compteurs">
+            <tr><th>Billets ajoutés</th>@for (t of types; track t) { <th>{{ t }}</th> }</tr>
+            <tr><td></td>@for (t of types; track t) { <td>{{ e.especesAjoutees[t] }}</td> }</tr>
+          </table>
+        }
+        @if (evenementOuvert() === e.id) { <pre class="journal">{{ e.texte }}</pre> }
+      </mat-card>
+    }
+  </mat-tab>
+</mat-tab-group>

@@ -1,0 +1,133 @@
+<h1>Chargement des journaux GAB</h1>
+<p class="aide">
+  Journaux électroniques des GAB NCR, nommés <code>&lt;TerminalID&gt;_AAAAMMJJ…jrn</code>. Vous pouvez en sélectionner
+  plusieurs à la fois (tous les GAB). Chaque fichier est intégré indépendamment ; une opération déjà présente dans un
+  autre journal (journaux qui se chevauchent) n'est pas enregistrée deux fois.
+</p>
+
+<mat-card appearance="outlined" class="selection">
+  <mat-card-content>
+    <div class="ligne-fichier">
+      <span class="type">Journaux</span>
+      <button mat-stroked-button (click)="choix.click()"><mat-icon>folder_open</mat-icon> Parcourir</button>
+      <input #choix type="file" multiple hidden (change)="choisir($event)" />
+      <span class="nom">
+        @switch (selection().length) {
+          @case (0) { Aucun fichier }
+          @case (1) { {{ selection()[0].name }} }
+          @default { {{ selection().length }} fichiers }
+        }
+      </span>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button (click)="integrer()" [disabled]="enCours() || !selection().length"><mat-icon>play_arrow</mat-icon> Intégrer</button>
+  </mat-card-actions>
+  @if (enCours()) { <mat-progress-bar mode="indeterminate" /> }
+</mat-card>
+
+@if (erreur(); as e) { <p class="ko"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@for (r of resultats(); track $index) {
+  <mat-card appearance="outlined" class="fichier">
+    <mat-card-header>
+      <mat-card-title>
+        @if (r.integre) { <span class="ok"><mat-icon>check_circle</mat-icon> {{ r.nom }}</span> }
+        @else { <span class="ko"><mat-icon>block</mat-icon> {{ r.nom }} refusé</span> }
+      </mat-card-title>
+      @if (r.integre) {
+        <mat-card-subtitle>
+          GAB {{ r.terminal }} · du {{ r.dateDebut | date: 'dd/MM/yyyy' }} au {{ r.dateFin | date: 'dd/MM/yyyy' }} ·
+          {{ r.nbSessions }} sessions · {{ r.nbOperations }} opérations
+          @if (r.nbDoublons) { ({{ r.nbDoublons }} déjà présentes) }
+          · {{ r.nbRetraitsApprouves }} retraits approuvés pour {{ r.montantRetraits | number }} XOF
+          @if (r.nbEvenements) { · {{ r.nbEvenements }} passage(s) superviseur }
+        </mat-card-subtitle>
+      }
+    </mat-card-header>
+    @if (r.anomalies.length) {
+      <mat-card-content>
+        @for (a of r.anomalies; track $index) {
+          <p [class.ko]="a.gravite === 'BLOQUANTE'">{{ a.gravite === 'BLOQUANTE' ? 'Bloquante' : 'Avertissement' }}@if (a.ligne) { (ligne {{ a.ligne }}) } : {{ a.message }}</p>
+        }
+      </mat-card-content>
+    }
+  </mat-card>
+}
+
+<h2>Journaux intégrés</h2>
+@if (fichiers().length === 0) {
+  <p class="aide">Aucun journal intégré.</p>
+} @else {
+  <div class="tableau">
+    <table mat-table [dataSource]="fichiers()">
+      <ng-container matColumnDef="terminal">
+        <th mat-header-cell *matHeaderCellDef>GAB</th>
+        <td mat-cell *matCellDef="let f">{{ f.terminal }}</td>
+      </ng-container>
+      <ng-container matColumnDef="periode">
+        <th mat-header-cell *matHeaderCellDef>Période</th>
+        <td mat-cell *matCellDef="let f">{{ f.dateDebut | date: 'dd/MM/yyyy' }}@if (f.dateFin !== f.dateDebut) { – {{ f.dateFin | date: 'dd/MM/yyyy' }} }</td>
+      </ng-container>
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef>Fichier</th>
+        <td mat-cell *matCellDef="let f" class="discret">{{ f.nom }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbSessions">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Sessions</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbSessions }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbOperations">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Opérations</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbOperations }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbDoublons">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Doublons</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbDoublons }}</td>
+      </ng-container>
+      <ng-container matColumnDef="retraits">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Retraits OK</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbRetraitsApprouves }}</td>
+      </ng-container>
+      <ng-container matColumnDef="montant">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Montant (XOF)</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.montantRetraits | number }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbEvenements">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Superv.</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbEvenements }}</td>
+      </ng-container>
+      <ng-container matColumnDef="nbAvertissements">
+        <th mat-header-cell *matHeaderCellDef class="nombre">Avert.</th>
+        <td mat-cell *matCellDef="let f" class="nombre">{{ f.nbAvertissements }}</td>
+      </ng-container>
+      <ng-container matColumnDef="integre">
+        <th mat-header-cell *matHeaderCellDef>Intégré</th>
+        <td mat-cell *matCellDef="let f">{{ f.integreLe | date: 'dd/MM/yyyy HH:mm' }} <span class="discret">{{ f.integrePar }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let f" class="actions">
+          <a mat-icon-button routerLink="/exploration/ejournal" [queryParams]="{ terminal: f.terminal, du: f.dateDebut, au: f.dateFin }" matTooltip="Voir les opérations"><mat-icon>local_atm</mat-icon></a>
+          <button mat-icon-button (click)="voirAnomalies(f)" matTooltip="Voir les anomalies"><mat-icon>report</mat-icon></button>
+          <button mat-icon-button (click)="annuler(f)" matTooltip="Annuler l'intégration"><mat-icon>delete</mat-icon></button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+      <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+    </table>
+  </div>
+}
+
+@if (anomaliesAffichees(); as a) {
+  <mat-card appearance="outlined" class="fichier">
+    <mat-card-header>
+      <mat-card-title>Anomalies – {{ a.fichier.nom }}</mat-card-title>
+      <button mat-icon-button class="fermer" (click)="anomaliesAffichees.set(null)"><mat-icon>close</mat-icon></button>
+    </mat-card-header>
+    <mat-card-content>
+      @if (a.anomalies.length === 0) { <p class="ok">Aucune anomalie.</p> }
+      @for (x of a.anomalies; track $index) { <p>{{ x.gravite === 'BLOQUANTE' ? 'Bloquante' : 'Avertissement' }} · {{ x.message }}</p> }
+    </mat-card-content>
+  </mat-card>
+}

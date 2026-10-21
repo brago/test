@@ -35,6 +35,7 @@ export const MENU: EntreeMenu[] = [
     enfants: [
       { code: 'CHARGEMENT_LIS', libelle: 'Fichiers LIS', icone: 'drive_folder_upload', chemin: '/ingestion', lot: 2 },
       { code: 'CHARGEMENT_VSS', libelle: 'Fichiers VSS (VX)', icone: 'credit_card', chemin: '/ingestion/vss', lot: 3 },
+      { code: 'CHARGEMENT_EJOURNAL', libelle: 'Journaux GAB', icone: 'receipt_long', chemin: '/ingestion/ejournal', lot: 4 },
     ],
   },
   {
@@ -42,6 +43,7 @@ export const MENU: EntreeMenu[] = [
     enfants: [
       { code: 'EXPLORATION_LIS', libelle: 'Données LIS', icone: 'table_view', chemin: '/exploration', lot: 2 },
       { code: 'EXPLORATION_VSS', libelle: 'Rapports VSS', icone: 'summarize', chemin: '/exploration/vss', lot: 3 },
+      { code: 'EXPLORATION_EJOURNAL', libelle: 'Journaux GAB', icone: 'local_atm', chemin: '/exploration/ejournal', lot: 4 },
     ],
   },
   { code: 'GAB', libelle: 'GAB : appros & arrêtés', icone: 'atm', chemin: '/gab', lot: 5 },
