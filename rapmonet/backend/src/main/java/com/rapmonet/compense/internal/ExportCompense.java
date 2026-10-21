@@ -60,7 +60,7 @@ public final class ExportCompense {
             texte(row, 1, l.commercant());
             texte(row, 2, l.compte());
             nombre(row, 3, l.montant(), st.entier);
-            nombre(row, 4, l.cci().doubleValue(), st.decimal);
+            nombre(row, 4, l.frais(), st.entier);
             nombre(row, 5, l.commission(), st.entier);
             texte(row, 6, t.parametres().compteCommission());
             nombre(row, 7, l.taf(), st.entier);
@@ -70,7 +70,7 @@ public final class ExportCompense {
         Row tot = s.createRow(r);
         texte(tot, 0, "TOTAUX").setCellStyle(st.gras);
         nombre(tot, 3, lignes.stream().mapToLong(Ligne::montant).sum(), st.totalEntier);
-        nombre(tot, 4, lignes.stream().mapToDouble(l -> l.cci().doubleValue()).sum(), st.totalDecimal);
+        nombre(tot, 4, lignes.stream().mapToLong(Ligne::frais).sum(), st.totalEntier);
         nombre(tot, 5, lignes.stream().mapToLong(Ligne::commission).sum(), st.totalEntier);
         nombre(tot, 7, lignes.stream().mapToLong(Ligne::taf).sum(), st.totalEntier);
         int[] largeurs = {16, 40, 16, 14, 14, 14, 16, 10, 16, 12};
@@ -181,9 +181,7 @@ public final class ExportCompense {
         final CellStyle entete;
         final CellStyle gras;
         final CellStyle entier;
-        final CellStyle decimal;
         final CellStyle totalEntier;
-        final CellStyle totalDecimal;
 
         Styles(XSSFWorkbook c) {
             Font blanc = c.createFont();
@@ -205,14 +203,9 @@ public final class ExportCompense {
             var format = c.createDataFormat();
             entier = c.createCellStyle();
             entier.setDataFormat(format.getFormat("#,##0"));
-            decimal = c.createCellStyle();
-            decimal.setDataFormat(format.getFormat("#,##0.00"));
             totalEntier = c.createCellStyle();
             totalEntier.cloneStyleFrom(entier);
             totalEntier.setFont(grasF);
-            totalDecimal = c.createCellStyle();
-            totalDecimal.cloneStyleFrom(decimal);
-            totalDecimal.setFont(grasF);
         }
     }
 }

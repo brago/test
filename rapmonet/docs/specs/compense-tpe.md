@@ -20,12 +20,17 @@ les comptes des commerçants). RAPMONET reprend ses règles à l'identique ; vé
 | Rubrique | Règle |
 |---|---|
 | Compte à débiter | VISA → ACQ VISA ; Mastercard → ACQ MCI ; GIM → ACQ GIM, ou EMIS ONUS si on-us |
-| CCI (commission TTC) | montant × taux du commerçant pour le réseau |
-| Frais prélevés au commerçant | CCI arrondie à l'unité |
-| COMM ACQUI (HT) | arrondi(CCI / (1 + taux TAF)), taux TAF 0,17 paramétrable |
-| TAF | arrondi(CCI − COMM ACQUI) |
+| Commission TTC | montant × taux du commerçant pour le réseau (valeur exacte, avec décimales) |
+| CCI = frais prélevés au commerçant | commission TTC arrondie à l'unité |
+| COMM ACQUI (HT) | arrondi(commission TTC / (1 + taux TAF)), taux TAF 0,17 paramétrable |
+| TAF | arrondi(commission TTC − COMM ACQUI) |
 
-Arrondi « demi vers le haut » (fonction ARRONDI d'Excel). Frais = commission + TAF (vérifié par test).
+Arrondi « demi vers le haut » (fonction ARRONDI d'Excel). CCI = commission + TAF (vérifié par test).
+
+Le franc CFA n'a pas de décimales : la CCI est affichée et exportée **arrondie à l'unité** (demande de la banque ;
+la macro l'affichait avec décimales, ex. 217,5 → 218). Commission et TAF restent calculées sur la valeur exacte,
+comme la macro : les calculer sur la CCI arrondie changerait 4 lignes sur 49 de la journée de référence
+(1 F déplacé entre commission et TAF).
 
 ## Écritures (macro comptable, format d'import Amplitude)
 

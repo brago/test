@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * Frais d'un achat, comme la macro Excel : CCI = montant × taux (commission TTC) ; frais prélevés au
- * commerçant = CCI arrondie ; commission HT = CCI / (1 + taux de TAF) arrondie ; TAF = CCI − commission, arrondie.
- * Arrondi à l'unité, demi vers le haut (fonction ARRONDI d'Excel).
+ * Frais d'un achat, comme la macro Excel : montant × taux = commission TTC ; commission HT = TTC / (1 + taux de TAF)
+ * arrondie ; TAF = TTC − commission, arrondie. Arrondi à l'unité, demi vers le haut (fonction ARRONDI d'Excel).
+ *
+ * <p>Le franc CFA n'a pas de décimales : la CCI est arrondie à l'unité et vaut les frais prélevés au commerçant
+ * (commission + TAF). Commission et TAF restent calculées sur la valeur non arrondie, comme la macro.
  */
 public record CalculFrais(BigDecimal cci, long frais, long commission, long taf) {
 
@@ -14,7 +16,8 @@ public record CalculFrais(BigDecimal cci, long frais, long commission, long taf)
         BigDecimal cci = BigDecimal.valueOf(montant).multiply(taux);
         long commission = arrondi(cci.divide(BigDecimal.ONE.add(tauxTaf), 10, RoundingMode.HALF_UP));
         long taf = arrondi(cci.subtract(BigDecimal.valueOf(commission)));
-        return new CalculFrais(cci.setScale(4, RoundingMode.HALF_UP), arrondi(cci), commission, taf);
+        long frais = arrondi(cci);
+        return new CalculFrais(BigDecimal.valueOf(frais), frais, commission, taf);
     }
 
     private static long arrondi(BigDecimal v) {

@@ -52,7 +52,7 @@
               <td>{{ l.reseau }}@if (l.onUs) { <span class="etiquette">on-us</span> }</td>
               <td>{{ l.dateTransaction | date: 'dd/MM/yy' }}</td><td class="mono">{{ l.terminal }}</td><td>{{ l.commercant }}</td>
               <td class="mono">{{ l.compte }}</td><td class="nombre">{{ l.montant | number }}</td>
-              <td class="nombre">{{ l.taux | percent: '1.2-3' }}</td><td class="nombre">{{ l.cci | number: '1.0-3' }}</td>
+              <td class="nombre">{{ l.taux | percent: '1.2-3' }}</td><td class="nombre">{{ l.cci | number: '1.0-0' }}</td>
               <td class="nombre">{{ l.commission | number }}</td><td class="nombre">{{ l.taf | number }}</td>
               <td class="mono">{{ l.autorisation }}</td>
               <td>@if (l.anomalie) { <mat-icon class="erreur" [matTooltip]="l.anomalie">error</mat-icon> }</td>
@@ -91,12 +91,12 @@
                     <th class="nombre">COMM ACQUI</th><th>CPTE COM</th><th class="nombre">TAF</th><th>CPTE TAF</th><th>C_AUTHO</th></tr>
                   @for (l of lignesDe(t.lignes, r.code); track l.achatId) {
                     <tr><td class="mono">{{ l.compteDebit }}</td><td>{{ l.commercant }}</td><td class="mono">{{ l.compte }}</td>
-                      <td class="nombre">{{ l.montant | number }}</td><td class="nombre">{{ l.cci | number: '1.0-3' }}</td>
+                      <td class="nombre">{{ l.montant | number }}</td><td class="nombre">{{ l.cci | number: '1.0-0' }}</td>
                       <td class="nombre">{{ l.commission | number }}</td><td class="mono">{{ t.parametres.compteCommission }}</td>
                       <td class="nombre">{{ l.taf | number }}</td><td class="mono">{{ t.parametres.compteTaf }}</td><td class="mono">{{ l.autorisation }}</td></tr>
                   }
                   <tr class="total"><td>TOTAUX</td><td></td><td></td><td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'montant') | number }}</td>
-                    <td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'cci') | number: '1.0-3' }}</td>
+                    <td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'cci') | number: '1.0-0' }}</td>
                     <td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'commission') | number }}</td><td></td>
                     <td class="nombre">{{ somme(lignesDe(t.lignes, r.code), 'taf') | number }}</td><td></td><td></td></tr>
                 </table>

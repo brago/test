@@ -14,18 +14,18 @@ class CalculFraisTest {
     @Test
     void commissionEtTafCommeLaMacro() {
         var a = CalculFrais.calculer(21750, new BigDecimal("0.01"), TAF);
-        assertThat(a.cci()).isEqualByComparingTo("217.5");
+        assertThat(a.cci()).isEqualByComparingTo("218");
         assertThat(a.frais()).isEqualTo(218);
         assertThat(a.commission()).isEqualTo(186);
         assertThat(a.taf()).isEqualTo(32);
 
         var b = CalculFrais.calculer(13950, new BigDecimal("0.0125"), TAF);
-        assertThat(b.cci()).isEqualByComparingTo("174.375");
+        assertThat(b.cci()).isEqualByComparingTo("174");
         assertThat(b.commission()).isEqualTo(149);
         assertThat(b.taf()).isEqualTo(25);
 
         var c = CalculFrais.calculer(20301, new BigDecimal("0.02"), TAF);
-        assertThat(c.cci()).isEqualByComparingTo("406.02");
+        assertThat(c.cci()).isEqualByComparingTo("406");
         assertThat(c.commission()).isEqualTo(347);
         assertThat(c.taf()).isEqualTo(59);
     }
@@ -36,6 +36,8 @@ class CalculFraisTest {
             for (String taux : new String[]{"0.01", "0.0125", "0.015", "0.02", "0.025"}) {
                 var f = CalculFrais.calculer(montant, new BigDecimal(taux), TAF);
                 assertThat(f.commission() + f.taf()).as("%d à %s", montant, taux).isEqualTo(f.frais());
+                assertThat(f.cci().scale()).as("CCI sans décimales").isLessThanOrEqualTo(0);
+                assertThat(f.cci().longValueExact()).isEqualTo(f.frais());
             }
         }
     }

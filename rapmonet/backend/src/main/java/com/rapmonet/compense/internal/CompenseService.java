@@ -282,7 +282,7 @@ public class CompenseService {
                         rs.getString("terminal_id"), rs.getString("commercant"), rs.getString("compte_commercant"),
                         rs.getString("compte_debit"), rs.getString("carte"), rs.getString("autorisation"), rs.getString("rrn"),
                         rs.getString("arn"), rs.getObject("date_transaction", LocalDate.class), rs.getString("heure_transaction"),
-                        rs.getLong("montant"), rs.getBigDecimal("taux"), rs.getBigDecimal("cci"), rs.getLong("frais"),
+                        rs.getLong("montant"), rs.getBigDecimal("taux"), BigDecimal.valueOf(rs.getLong("frais")), rs.getLong("frais"),
                         rs.getLong("commission"), rs.getLong("taf"), null))
                 .list();
         Parametres p = t.parametres();
