@@ -12,8 +12,13 @@ doit correspondre à un retrait réellement distribué.
 
 - **Retraits du journal** : opérations RETRAIT au statut DISTRIBUE.
 - **Cartes de la banque (on-us)** : compte client imprimé sur le ticket, ou carte d'un BIN déclaré. Elles ne passent
-  pas par le GIM ; elles sont comptées à part et seront rapprochées avec Amplitude. Constat sur le GAB 10001001 :
-  318 retraits sur 322 des cartes 459847 portent un compte, aucune autre carte n'en porte.
+  pas par le GIM ; elles sont comptées à part et seront rapprochées avec Amplitude. Sur le GAB 10001001,
+  318 retraits sur 322 des cartes 459847 portent un compte, aucune autre carte n'en porte : la banque a confirmé que
+  les cartes 459847 sont les siennes. Le préfixe 459847 est découpé dans la table GIM en trois sous-plages
+  ivoiriennes (45984700, 45984750, 45984780) : la sous-plage de la banque reste à préciser.
+
+Les fichiers LIS « BACI » reçus (2023) viennent d'une **autre banque** : ils servent aux tests de lecture, pas à
+déduire les BIN de la banque.
 - **Avis LIS** : TC 49 code 6011 des fichiers PR, date de transaction dans la période (élargie d'un jour pour les
   retraits proches de minuit).
 
