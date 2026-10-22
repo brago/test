@@ -7,7 +7,7 @@ module `rapprochement` (`RapprochementGabLis`), sur `ingestion.ConsultationJourn
 ## Principe
 
 Un retrait d'une carte d'une autre banque distribué par un GAB de la banque est payé à la banque par le GIM :
-il doit figurer dans un avis d'acquisition des fichiers LIS PR (TC 49, code commerçant 6011). Inversement, un avis
+il doit figurer dans un avis d'acquisition LIS (TC 49, code commerçant 6011). Inversement, un avis
 doit correspondre à un retrait réellement distribué.
 
 - **Retraits du journal** : opérations RETRAIT au statut DISTRIBUE.
@@ -15,11 +15,13 @@ doit correspondre à un retrait réellement distribué.
   pas par le GIM ; elles sont comptées à part et seront rapprochées avec Amplitude. Sur le GAB 10001001,
   318 retraits sur 322 des cartes 459847 portent un compte, aucune autre carte n'en porte : la banque a confirmé que
   les cartes 459847 sont les siennes. Le préfixe 459847 est découpé dans la table GIM en trois sous-plages
-  ivoiriennes (45984700, 45984750, 45984780) : la sous-plage de la banque reste à préciser.
+  ivoiriennes (45984700, 45984750, 45984780) : les trois apparaissent dans les présentations du fichier SW de la
+  BHCI du 29/12/2025 (1 818, 65 et 43 opérations), le préfixe entier est donc celui de la banque.
 
 Les fichiers LIS « BACI » reçus (2023) viennent d'une **autre banque** : ils servent aux tests de lecture, pas à
 déduire les BIN de la banque.
-- **Avis LIS** : TC 49 code 6011 des fichiers PR, date de transaction dans la période (élargie d'un jour pour les
+- **Avis LIS** : TC 49 code 6011 des fichiers SW **et** PR. Une banque en processing les reçoit dans le PR ;
+  la BHCI, en switching avec le GIM, les reçoit dans le SW (son PR est en général vide). Date de transaction dans la période (élargie d'un jour pour les
   retraits proches de minuit).
 
 ## Appariement

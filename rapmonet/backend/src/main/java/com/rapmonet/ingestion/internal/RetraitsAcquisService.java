@@ -32,7 +32,7 @@ class RetraitsAcquisService implements RetraitsAcquis {
                             a->>'LIS_TRANSACTION_TIME' as heure, a->>'LIS_CARD_ACCEPTOR_TERMINAL_IDENTIFICATION' as terminal,
                             a->>'LIS_DESTINATION_AMOUNT' as montant
                         from lis_transaction t join lis_fichier f on f.id = t.fichier_id, lateral (select t.attributs as a) x
-                        where f.type_lis = 'PR' and t.tc = '49' and a->>'LIS_MERCHANT_CATEGORY_CODE' = '6011'
+                        where t.tc = '49' and a->>'LIS_MERCHANT_CATEGORY_CODE' = '6011'
                           and a->>'LIS_TRANSACTION_DATE' between ? and ?
                           and (? = '' or trim(a->>'LIS_CARD_ACCEPTOR_TERMINAL_IDENTIFICATION') = ?)
                         order by f.id, t.numero""")
@@ -48,7 +48,7 @@ class RetraitsAcquisService implements RetraitsAcquis {
 
     @Override
     public Optional<LocalDate> derniereJournee() {
-        return jdbc.sql("select max(journee) from lis_fichier where type_lis = 'PR'").query(LocalDate.class).optional();
+        return jdbc.sql("select max(journee) from lis_fichier").query(LocalDate.class).optional();
     }
 
     private static String vide(String s) {

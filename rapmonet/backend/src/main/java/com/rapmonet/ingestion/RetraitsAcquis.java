@@ -5,7 +5,11 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-/** Retraits faits sur les GAB de la banque avec des cartes d'autres banques, lus dans les avis d'acquisition LIS (TC 49, code commerçant 6011). */
+/**
+ * Retraits faits sur les GAB de la banque avec des cartes d'autres banques, lus dans les avis d'acquisition LIS
+ * (TC 49, code commerçant 6011). Une banque en processing les reçoit dans le fichier PR ; une banque en switching
+ * avec le GIM (cas de la BHCI) les reçoit dans le fichier SW : les deux sont lus.
+ */
 public interface RetraitsAcquis {
 
     /**
@@ -19,6 +23,6 @@ public interface RetraitsAcquis {
     /** Avis dont la date de transaction est dans la période, éventuellement pour un seul terminal. */
     List<Avis> avis(LocalDate du, LocalDate au, String terminal);
 
-    /** Dernière journée des fichiers LIS acquisition (PR) intégrés. */
+    /** Dernière journée des fichiers LIS intégrés (SW ou PR). */
     Optional<LocalDate> derniereJournee();
 }

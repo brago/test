@@ -91,18 +91,22 @@ class RapprochementGabLisIntegrationTest {
         return c.substring(0, 6) + "000000" + c.substring(c.length() - 4);
     }
 
-    private void lis(LocalDate journee, List<AvisAcquisition> avis) {
-        byte[] pr = FichierLisSynthetique.creer(JJMMAA.format(journee), "001", List.of(), avis);
-        var r = lis.integrer(List.of(new IntegrationLis.FichierRecu("LIS_IN_TEST_PR_" + journee.getDayOfYear() + "_01",
-                TypeLis.PR, pr)), "test");
+    private void lis(LocalDate journee, TypeLis type, List<AvisAcquisition> avis) {
+        byte[] contenu = FichierLisSynthetique.creer(JJMMAA.format(journee), "001", List.of(), avis);
+        var r = lis.integrer(List.of(new IntegrationLis.FichierRecu("LIS_IN_TEST_" + type + "_" + journee.getDayOfYear() + "_01",
+                type, contenu)), "test");
         assertThat(r.integre()).as(r.toString()).isTrue();
     }
 
     private void scenario(int joursApres) throws Exception {
+        scenario(joursApres, TypeLis.PR);
+    }
+
+    private void scenario(int joursApres, TypeLis type) throws Exception {
         List<Retrait> r = journal();
         LocalDate jour = r.get(0).dateHeure().toLocalDate();
         Retrait a = r.get(0), b = r.get(1);
-        lis(jour.plusDays(joursApres), List.of(
+        lis(jour.plusDays(joursApres), type, List.of(
                 // Même heure à 3 minutes près.
                 AvisAcquisition.retrait(carte(a), a.montant(), "99990001", JJMMAA.format(jour),
                         HHMMSS.format(a.dateHeure().plusMinutes(3)), "A1B2C3"),
@@ -184,6 +188,17 @@ class RapprochementGabLisIntegrationTest {
                 .andExpect(jsonPath("$.synthese.enAttente").value(jdbc.queryForObject("select count(*) from ej_operation"
                         + " where type = 'RETRAIT' and statut = 'DISTRIBUE' and coalesce(compte, '') = ''", Integer.class) - 2))
                 .andExpect(jsonPath("$.synthese.nonRemontes").value(0));
+    }
+
+    @Test
+    void banqueEnSwitchingAvisDansLeFichierSw() throws Exception {
+        // Banque en switching avec le GIM : les TC 49 arrivent dans le fichier SW, le PR est vide.
+        scenario(5, TypeLis.SW);
+        LocalDate jour = jdbc.queryForObject("select min(date_heure)::date from ej_operation", LocalDate.class);
+        mvc.perform(get("/api/rapprochement/gab-lis").param("du", jour.toString()).param("au", jour.toString()))
+                .andExpect(jsonPath("$.synthese.avisLis").value(4))
+                .andExpect(jsonPath("$.synthese.rapproches").value(2))
+                .andExpect(jsonPath("$.synthese.avisSansRetrait").value(1));
     }
 
     @Test
