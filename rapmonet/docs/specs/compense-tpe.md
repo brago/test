@@ -4,6 +4,13 @@ Source : classeur « TRAITEMENT COMPENSE TPE » (macro VBA `GenererFeuillesCompt
 les comptes des commerçants). RAPMONET reprend ses règles à l'identique ; vérifié sur une journée réelle :
 49 lignes de pièce sur 49 identiques (comptes, CCI, commission, TAF).
 
+## Périmètre
+
+La **BHCI n'a pas de TPE déployés chez des commerçants** (confirmé par la banque) : ses fichiers LIS ne contiennent
+aucun achat TPE (TC 49 hors 6011) et la compense TPE ne la concerne pas aujourd'hui. Le module est conservé pour
+un futur parc de TPE (ou une autre banque acquéreuse) ; il a été validé sur la macro Excel et le référentiel
+commerçants transmis. Pour la BHCI, le menu peut être retiré des profils.
+
 ## Données
 
 - **Achats** : avis d'acquisition LIS (TC 49) dont le code commerçant n'est pas 6011 (retraits GAB), d'une journée LIS.
