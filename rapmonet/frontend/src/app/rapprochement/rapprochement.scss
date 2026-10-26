@@ -30,3 +30,11 @@ table.mat-mdc-table { width: 100%; }
 .formulaire .ligne { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
 .formulaire mat-form-field.large { flex: 1; min-width: 320px; }
 .actions { display: flex; justify-content: flex-end; gap: 8px; }
+.formulaire .ligne.cases { align-items: center; gap: 4px 20px; }
+.formulaire .ligne + .ligne { margin-top: 8px; }
+.formulaire mat-form-field.court { width: 180px; }
+table.comparaison { border-collapse: collapse; margin: 8px 0; min-width: 560px; }
+table.comparaison th, table.comparaison td { padding: 6px 12px; border-bottom: 1px solid var(--mat-sys-outline-variant); text-align: left; }
+table.comparaison th.nombre, table.comparaison td.nombre { text-align: right; }
+.ecart-plus { font-weight: 600; color: #8a4b00; }
+.historique { border-left: 3px solid var(--mat-sys-outline-variant); padding: 4px 12px; margin-bottom: 10px; max-width: 1100px; }

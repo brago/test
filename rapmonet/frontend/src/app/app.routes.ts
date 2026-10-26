@@ -8,7 +8,7 @@ const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit', '/securite/politique',
   '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
   '/reporting/kpi', '/reporting/reglementaire', '/compense/traitements', '/compense/commercants', '/compense/validation',
-  '/rapprochement/gab-lis'];
+  '/rapprochement/gab-lis', '/rapprochement/regles'];
 
 export const routes: Routes = [
   { path: 'connexion', title: 'Connexion – RAPMONET', loadComponent: () => import('./pages/connexion/connexion').then((m) => m.Connexion) },
@@ -93,6 +93,10 @@ export const routes: Routes = [
       {
         path: 'reporting/reglementaire', title: 'Réglementaire – RAPMONET', data: { menu: 'REPORTING_REGLEMENTAIRE' },
         loadComponent: () => import('./reporting/reglementaire').then((m) => m.Reglementaire),
+      },
+      {
+        path: 'rapprochement/regles', title: 'Règles de rapprochement – RAPMONET', data: { menu: 'RAPPROCHEMENT_REGLES' },
+        loadComponent: () => import('./rapprochement/regles-rapprochement').then((m) => m.ReglesRapprochement),
       },
       {
         path: 'rapprochement/gab-lis', title: 'Rapprochement GAB / LIS – RAPMONET', data: { menu: 'RAPPROCHEMENT_GAB_LIS' },

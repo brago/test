@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../core/auth.service';
 import { messageErreur } from '../core/erreurs';
 import { dateIso } from '../core/format';
 import { Telechargement } from '../core/telechargement';
@@ -22,7 +24,7 @@ const LIBELLES_TRAITEMENT: Record<string, string> = { A_TRAITER: 'À traiter', J
 @Component({
   selector: 'app-rapprochement-gab-lis',
   imports: [DatePipe, DecimalPipe, FormsModule, MatButtonModule, MatButtonToggleModule, MatCardModule, MatDatepickerModule,
-    MatFormFieldModule, MatIconModule, MatInputModule, MatSelectModule, MatTableModule, MatTooltipModule],
+    MatFormFieldModule, MatIconModule, MatInputModule, MatSelectModule, MatTableModule, MatTooltipModule, RouterLink],
   templateUrl: './rapprochement-gab-lis.html',
   styleUrl: './rapprochement.scss',
 })
@@ -30,6 +32,7 @@ export class RapprochementGabLis {
   private readonly service = inject(RapprochementService);
   private readonly telechargement = inject(Telechargement);
   protected readonly libellesTraitement = LIBELLES_TRAITEMENT;
+  protected readonly peutRegler = inject(AuthService).peut('RAPPROCHEMENT_REGLES');
 
   protected du: Date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   protected au: Date = new Date();

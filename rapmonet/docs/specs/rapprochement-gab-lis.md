@@ -26,13 +26,31 @@ déduire les BIN de la banque.
 
 ## Appariement
 
-Même terminal, même carte (6 premiers + 4 derniers chiffres), même montant, et :
-- heure du ticket et heure de l'avis à moins de la tolérance (`rapprochement.gab_lis.tolerance_minutes`, 120) ;
-- ou, à un jour près, référence du ticket égale au code d'autorisation, au numéro de bordereau ou à la fin du RRN
-  de l'avis (prioritaire).
+Même terminal, puis les règles paramétrées (écran *Rapprochements › Règles de rapprochement*, menu
+`RAPPROCHEMENT_REGLES`, classe `ReglesGabLis`, paramètres `rapprochement.gab_lis.*`) :
+
+| Règle | Défaut | Bornes |
+|---|---|---|
+| Même carte (6 premiers + 4 derniers chiffres) | oui | |
+| Écart de montant toléré | 0 XOF | 0 à 100 000 |
+| Écart horaire toléré entre ticket et avis | 120 min | 0 à 1 440 |
+| Délai de remontée des LIS (avant « non remonté ») | 3 jours | 0 à 30 |
+| Rapprochement sur la référence du ticket, quelle que soit l'heure | oui | |
+| Champs LIS comparés à la référence | autorisation, bordereau, fin du RRN | au moins un si la référence est utilisée |
+| Fenêtre de la référence | 1 jour | 0 à 7 |
+
+Sans comparaison de la carte ni de la référence, la tolérance horaire est plafonnée à 30 minutes (deux retraits
+différents de même montant pourraient être appariés). Entre plusieurs avis possibles : référence identique d'abord,
+puis montant exact, puis écart horaire le plus faible. Quand les montants diffèrent, le montant LIS est affiché à côté
+du montant du ticket.
+
+**Simulation** : avant d'enregistrer, l'écran compare sur une période les résultats des règles en vigueur et des règles
+proposées, et liste les opérations qui changent de résultat (500 au plus). **Modification** : motif obligatoire,
+historique dans `rapprochement_regle_historique` (avant / après lisibles), action d'audit `RAPPROCHEMENT_REGLES`.
+Les écarts déjà traités gardent leur traitement (clé stable de l'opération).
 
 **À confirmer sur des fichiers du même jour** : à quel champ LIS correspond la référence à 6 chiffres du ticket
-(les journaux reçus datent de 2026, les LIS de 2023 ; aucun jour commun).
+(les journaux reçus datent de 2026, les LIS de 2023 ; aucun jour commun). Une fois connu, ne garder que ce champ.
 
 ## Résultats
 

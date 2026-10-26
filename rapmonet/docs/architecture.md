@@ -73,7 +73,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 
 1. Chargement automatique depuis un dossier surveillé (✅ journaux GAB et fichiers LIS, batch quotidien) ou SFTP (à faire : accès SFTP du GIM), refus des doublons (empreinte du fichier).
 2. Lecture directe de BKHIS dans Amplitude si l'accès est possible (sinon import Excel).
-3. Règles de rapprochement paramétrables, avec tolérances.
+3. Règles de rapprochement paramétrables, avec tolérances (✅ GAB ↔ LIS : écran, simulation, historique motivé).
 4. Gestion des écarts : statut, responsable, commentaires, justificatifs (✅ GAB ↔ LIS).
 5. Validation à quatre yeux généralisée (✅ appros et arrêtés GAB).
 6. Prise en charge de Mastercard et d'autres marques de GAB que NCR.

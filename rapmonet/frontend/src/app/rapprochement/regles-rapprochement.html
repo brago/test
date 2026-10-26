@@ -1,0 +1,145 @@
+<div class="entete"><h1>Règles de rapprochement GAB ↔ LIS</h1></div>
+<p class="aide">
+  Un retrait du journal et un avis LIS sont rapprochés s'ils concernent le même GAB et respectent les règles ci-dessous.
+  Avant d'enregistrer, simulez l'effet des nouvelles règles sur une période : rien n'est modifié tant que vous n'avez pas
+  enregistré, avec un motif. Les écarts déjà traités gardent leur traitement.
+</p>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (edition(); as r) {
+  <mat-card appearance="outlined" class="formulaire">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>rule</mat-icon>
+      <mat-card-title>Appariement</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="ligne">
+        <mat-slide-toggle [(ngModel)]="r.memeCarte" (change)="simulation.set(null)">Même carte (6 premiers et 4 derniers chiffres)</mat-slide-toggle>
+      </div>
+      <div class="ligne">
+        <mat-form-field appearance="outline">
+          <mat-label>Écart de montant toléré</mat-label>
+          <input matInput type="number" [(ngModel)]="r.toleranceMontant" (ngModelChange)="simulation.set(null)" min="0" max="100000" />
+          <span matTextSuffix>XOF</span>
+          <mat-hint>0 = montant identique</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Écart horaire toléré</mat-label>
+          <input matInput type="number" [(ngModel)]="r.toleranceMinutes" (ngModelChange)="simulation.set(null)" min="0" max="1440" />
+          <span matTextSuffix>min</span>
+          <mat-hint>Entre l'heure du ticket et celle de l'avis</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Délai de remontée des LIS</mat-label>
+          <input matInput type="number" [(ngModel)]="r.delaiLisJours" (ngModelChange)="simulation.set(null)" min="0" max="30" />
+          <span matTextSuffix>jours</span>
+          <mat-hint>Avant de déclarer un retrait non remonté</mat-hint>
+        </mat-form-field>
+      </div>
+      <div class="ligne">
+        <mat-slide-toggle [(ngModel)]="r.reference" (change)="simulation.set(null)">
+          Rapprocher aussi sur la référence du ticket, quelle que soit l'heure
+        </mat-slide-toggle>
+      </div>
+      @if (r.reference) {
+        <div class="ligne cases">
+          <span class="discret">Référence comparée à :</span>
+          @for (c of champs; track c.code) {
+            <mat-checkbox [checked]="coche(r, c.code)" (change)="basculer(r, c.code, $event.checked)">{{ c.libelle }}</mat-checkbox>
+          }
+          <mat-form-field appearance="outline" class="court">
+            <mat-label>À</mat-label>
+            <input matInput type="number" [(ngModel)]="r.fenetreReferenceJours" (ngModelChange)="simulation.set(null)" min="0" max="7" />
+            <span matTextSuffix>jour(s) près</span>
+          </mat-form-field>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="formulaire">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>science</mat-icon>
+      <mat-card-title>Simulation</mat-card-title>
+      <mat-card-subtitle>Résultats avec les règles en vigueur et avec les règles proposées</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="filtres">
+        <mat-form-field appearance="outline">
+          <mat-label>Du</mat-label>
+          <input matInput [matDatepicker]="pDu" [(ngModel)]="du" />
+          <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+          <mat-datepicker #pDu />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Au</mat-label>
+          <input matInput [matDatepicker]="pAu" [(ngModel)]="au" />
+          <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+          <mat-datepicker #pAu />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>GAB (terminal)</mat-label>
+          <input matInput [(ngModel)]="terminal" placeholder="Tous" />
+        </mat-form-field>
+        <button mat-stroked-button (click)="simuler()" [disabled]="enCours()"><mat-icon>science</mat-icon> Simuler</button>
+      </div>
+      @if (simulation(); as s) {
+        <table class="comparaison">
+          <tr><th></th><th class="nombre">En vigueur</th><th class="nombre">Proposées</th><th class="nombre">Différence</th></tr>
+          @for (l of lignesSynthese; track l.nb) {
+            <tr>
+              <td>{{ l.libelle }}</td>
+              <td class="nombre">{{ valeur(s.actuelle, l.nb) | number }}</td>
+              <td class="nombre">{{ valeur(s.proposee, l.nb) | number }}</td>
+              <td class="nombre" [class.ecart-plus]="valeur(s.proposee, l.nb) !== valeur(s.actuelle, l.nb)">
+                {{ difference(valeur(s.proposee, l.nb) - valeur(s.actuelle, l.nb)) }}</td>
+            </tr>
+          }
+        </table>
+        <p class="discret">{{ s.nbChangements }} opération(s) changent de résultat
+          @if (s.nbChangements > s.changements.length) { (les {{ s.changements.length }} premières sont listées) }</p>
+        @if (s.changements.length) {
+          <div class="tableau">
+            <table class="comparaison">
+              <tr><th>GAB</th><th>Date</th><th>Carte</th><th class="nombre">Montant</th><th>Avant</th><th>Après</th></tr>
+              @for (c of s.changements; track $index) {
+                <tr>
+                  <td>{{ c.terminal }}</td><td>{{ c.date | date: 'dd/MM/yyyy' }}</td><td class="mono">{{ c.carte }}</td>
+                  <td class="nombre">{{ c.montant | number }}</td><td>{{ c.avant ?? '—' }}</td><td><strong>{{ c.apres }}</strong></td>
+                </tr>
+              }
+            </table>
+          </div>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="formulaire">
+    <mat-card-content>
+      <div class="ligne">
+        <mat-form-field appearance="outline" class="large">
+          <mat-label>Motif de la modification</mat-label>
+          <input matInput [(ngModel)]="motif" maxlength="500" placeholder="Ex. : le GIM ajoute 500 XOF de frais au montant des avis" />
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button mat-button (click)="retablir()" [disabled]="!modifie()">Rétablir les règles en vigueur</button>
+        <button mat-flat-button (click)="enregistrer()" [disabled]="enCours() || !modifie() || motif.trim().length < 5">
+          <mat-icon>save</mat-icon> Enregistrer
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
+
+<h2>Historique des modifications</h2>
+@if (historique().length === 0) { <p class="discret">Aucune modification : règles d'origine.</p> }
+@for (h of historique(); track $index) {
+  <div class="historique">
+    <div><strong>{{ h.modifieLe | date: 'dd/MM/yyyy HH:mm' }}</strong> · {{ h.modifiePar ?? '—' }} · {{ h.motif }}</div>
+    <div class="discret">Avant : {{ h.avant }}</div>
+    <div class="discret">Après : {{ h.apres }}</div>
+  </div>
+}

@@ -10,7 +10,7 @@
 <p class="aide">
   Chaque retrait d'une carte d'une autre banque distribué par nos GAB (journal NCR) doit être remonté par le GIM dans un
   avis d'acquisition LIS (TC 49, code 6011), et chaque avis doit correspondre à un retrait du journal. Appariement : même GAB,
-  même carte (6 + 4 chiffres), même montant, heures proches ; à défaut, la référence du ticket égale au code d'autorisation.
+  puis les règles en vigueur (carte, montant, heure, référence du ticket), rappelées sous les résultats.
   Les retraits des cartes de la banque (compte imprimé sur le ticket ou BIN déclaré) seront rapprochés avec Amplitude.
 </p>
 @if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
@@ -81,7 +81,13 @@
   </div>
   <p class="discret">
     Dernière journée LIS acquisition intégrée : {{ s.derniereJourneeLis ? (s.derniereJourneeLis | date: 'dd/MM/yyyy') : 'aucune' }}
-    · tolérance horaire {{ s.toleranceMinutes }} min · écarts à traiter : <strong>{{ s.ecartsATraiter }}</strong>
+    · écarts à traiter : <strong>{{ s.ecartsATraiter }}</strong><br />
+    Règles : {{ s.regles.memeCarte ? 'même carte' : 'carte non comparée' }}
+    · montant {{ s.regles.toleranceMontant ? 'à ' + (s.regles.toleranceMontant | number) + ' XOF près' : 'identique' }}
+    · heure à {{ s.regles.toleranceMinutes }} min près
+    · référence du ticket {{ s.regles.reference ? 'utilisée (' + s.regles.fenetreReferenceJours + ' j)' : 'non utilisée' }}
+    · délai LIS {{ s.regles.delaiLisJours }} j
+    @if (peutRegler) { · <a routerLink="/rapprochement/regles">modifier les règles</a> }
   </p>
 
   <mat-button-toggle-group [value]="vue" (change)="changerVue($event.value)" aria-label="Vue">
@@ -124,7 +130,9 @@
       </ng-container>
       <ng-container matColumnDef="montant">
         <th mat-header-cell *matHeaderCellDef class="nombre">Montant</th>
-        <td mat-cell *matCellDef="let l" class="nombre">{{ l.montant | number }}</td>
+        <td mat-cell *matCellDef="let l" class="nombre">{{ l.montant | number }}
+          @if (l.montantLis !== null && l.montantLis !== l.montant) { <span class="discret">LIS : {{ l.montantLis | number }}</span> }
+        </td>
       </ng-container>
       <ng-container matColumnDef="ecart">
         <th mat-header-cell *matHeaderCellDef class="nombre">Écart</th>

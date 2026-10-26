@@ -68,6 +68,7 @@ export const MENU: EntreeMenu[] = [
     code: 'RAPPROCHEMENT', libelle: 'Rapprochements', icone: 'compare_arrows', lot: 6,
     enfants: [
       { code: 'RAPPROCHEMENT_GAB_LIS', libelle: 'GAB ↔ LIS (retraits confrères)', icone: 'compare_arrows', chemin: '/rapprochement/gab-lis', lot: 6 },
+      { code: 'RAPPROCHEMENT_REGLES', libelle: 'Règles de rapprochement', icone: 'rule', chemin: '/rapprochement/regles', lot: 6 },
     ],
   },
   {

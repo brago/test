@@ -46,6 +46,7 @@ class RapprochementGabLisController {
             new Colonne("Journée LIS", Type.DATE, 5),
             new Colonne("Carte", Type.TEXTE, 7),
             new Colonne("Montant", Type.MONTANT, 5),
+            new Colonne("Montant LIS", Type.MONTANT, 5),
             new Colonne("Écart (min)", Type.ENTIER, 4),
             new Colonne("Traitement", Type.TEXTE, 5),
             new Colonne("Commentaire", Type.TEXTE, 10));
@@ -96,7 +97,7 @@ class RapprochementGabLisController {
         Tableau t = new Tableau(titre, criteres, Securite.login(), COLONNES, ecrire -> r.lignes().forEach(l ->
                 ecrire.accept(Arrays.asList(l.libelleResultat(), l.terminal(), l.date(), l.dateHeureJournal(),
                         l.referenceJournal(), l.dateHeureLis(), l.autorisation(), l.reseau(), l.journeeLis(), l.carte(),
-                        l.montant(), l.ecartMinutes(), libelleTraitement(l.traitement()), l.commentaire()))));
+                        l.montant(), l.montantLis(), l.ecartMinutes(), libelleTraitement(l.traitement()), l.commentaire()))));
         ReponseExport.envoyer(reponse, t, f, "rapprochement_gab_lis");
     }
 
