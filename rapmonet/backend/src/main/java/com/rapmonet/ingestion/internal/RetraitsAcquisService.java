@@ -24,13 +24,15 @@ class RetraitsAcquisService implements RetraitsAcquis {
     @Override
     public List<Avis> avis(LocalDate du, LocalDate au, String terminal) {
         String t = terminal == null ? "" : terminal.strip();
+        // Montant de la transaction en XOF : le montant destination est en devise de la carte (EUR pour une carte
+        // étrangère). Les fichiers sans TRANSACTION_AMOUNT retombent sur le montant destination.
         return jdbc.sql("""
                         select t.id, t.numero, f.journee, f.nom, a->>'LIS_PAYMENT_PRODUCT_INDICATOR' as ppi,
                             a->>'LIS_CARDHOLDER_CARD_NUMBER_INVOLVED_IN_TRANSACTION' as carte,
                             a->>'LIS_AUTHORISATION_CODE' as autorisation, a->>'LIS_RETRIEVAL_REFERENCE_NUMBER' as rrn,
                             a->>'LIS_VOUCHER_NUMBER' as bordereau, a->>'LIS_TRANSACTION_DATE' as date_transaction,
                             a->>'LIS_TRANSACTION_TIME' as heure, a->>'LIS_CARD_ACCEPTOR_TERMINAL_IDENTIFICATION' as terminal,
-                            a->>'LIS_DESTINATION_AMOUNT' as montant
+                            coalesce(a->>'LIS_TRANSACTION_AMOUNT', a->>'LIS_DESTINATION_AMOUNT') as montant
                         from lis_transaction t join lis_fichier f on f.id = t.fichier_id, lateral (select t.attributs as a) x
                         where t.tc = '49' and a->>'LIS_MERCHANT_CATEGORY_CODE' = '6011'
                           and a->>'LIS_TRANSACTION_DATE' between ? and ?

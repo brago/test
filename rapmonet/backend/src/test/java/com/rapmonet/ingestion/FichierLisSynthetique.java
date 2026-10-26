@@ -39,19 +39,29 @@ public final class FichierLisSynthetique {
     /**
      * Avis d'acquisition (TC 49) : transaction d'une carte d'une autre banque sur un GAB ou TPE de la banque.
      *
-     * @param heure        HHMMSS (vide si absent)
-     * @param autorisation code d'autorisation (6 caractères)
+     * @param montant            montant de la transaction en XOF
+     * @param interchange        frais d'interchange en XOF (le GIM n'envoie pas de décimales)
+     * @param heure              HHMMSS (vide si absent)
+     * @param autorisation       code d'autorisation (6 caractères)
+     * @param deviseDestination  devise de la carte (952 XOF ; 978 EUR pour une carte étrangère)
+     * @param montantDestination montant dans cette devise (centimes pour l'euro)
      */
     public record AvisAcquisition(String carte, long montant, String terminal, String mcc, String dateTransaction,
-                                  String marchand, String produit, long interchangeCentimes, String heure,
-                                  String autorisation) {
+                                  String marchand, String produit, long interchange, String heure,
+                                  String autorisation, String deviseDestination, long montantDestination) {
 
         public AvisAcquisition(String carte, long montant, String terminal, String mcc, String dateTransaction,
-                               String marchand, String produit, long interchangeCentimes) {
-            this(carte, montant, terminal, mcc, dateTransaction, marchand, produit, interchangeCentimes, "", "123456");
+                               String marchand, String produit, long interchange, String heure, String autorisation) {
+            this(carte, montant, terminal, mcc, dateTransaction, marchand, produit, interchange, heure, autorisation,
+                    "952", montant);
         }
 
-        /** Carte GIM d'une autre banque (indicateur de produit 3, interchange de 2,50). */
+        public AvisAcquisition(String carte, long montant, String terminal, String mcc, String dateTransaction,
+                               String marchand, String produit, long interchange) {
+            this(carte, montant, terminal, mcc, dateTransaction, marchand, produit, interchange, "", "123456");
+        }
+
+        /** Carte GIM d'une autre banque (indicateur de produit 3, interchange de 250 XOF). */
         public AvisAcquisition(String carte, long montant, String terminal, String mcc, String dateTransaction, String marchand) {
             this(carte, montant, terminal, mcc, dateTransaction, marchand, "3", 250);
         }
@@ -122,13 +132,13 @@ public final class FichierLisSynthetique {
                     ecrire(tcr0, 186, a.terminal());
                     ecrire(tcr0, 202, a.heure());
                     ecrire(tcr0, 208, "952");
-                    ecrire(tcr0, 211, "%012d".formatted(a.montant()));
-                    ecrire(tcr0, 223, "952");
-                    ecrire(tcr0, 226, "0");
-                    ecrire(tcr0, 227, "%012d".formatted(a.interchangeCentimes()));
+                    ecrire(tcr0, 211, "%012d".formatted(a.montantDestination()));
+                    ecrire(tcr0, 223, a.deviseDestination());
+                    ecrire(tcr0, 226, "952".equals(a.deviseDestination()) ? "0" : "2");
+                    ecrire(tcr0, 227, "%012d".formatted(a.interchange()));
                     ecrire(tcr0, 239, "952");
                     ecrire(tcr0, 242, "0");
-                    ecrire(tcr0, 243, a.interchangeCentimes() > 0 ? "C" : " ");
+                    ecrire(tcr0, 243, a.interchange() > 0 ? "C" : " ");
                 }
             }
             StringBuilder fin = f.nouvelle(sf[1], "0");

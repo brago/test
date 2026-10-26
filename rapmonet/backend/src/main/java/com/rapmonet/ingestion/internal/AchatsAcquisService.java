@@ -24,6 +24,8 @@ class AchatsAcquisService implements AchatsAcquis {
 
     @Override
     public List<Achat> achats(LocalDate journee) {
+        // Montant de la transaction en XOF : le montant destination est en devise de la carte (EUR pour une carte
+        // étrangère). Les fichiers sans TRANSACTION_AMOUNT retombent sur le montant destination.
         return jdbc.sql("""
                         select t.id, f.journee, f.nom, a->>'LIS_PAYMENT_PRODUCT_INDICATOR' as ppi,
                             a->>'LIS_CARDHOLDER_CARD_NUMBER_INVOLVED_IN_TRANSACTION' as carte,
@@ -31,7 +33,7 @@ class AchatsAcquisService implements AchatsAcquis {
                             a->>'LIS_RETRIEVAL_REFERENCE_NUMBER' as rrn, a->>'LIS_TRANSACTION_DATE' as date_transaction,
                             a->>'LIS_TRANSACTION_TIME' as heure, a->>'LIS_CARD_ACCEPTOR_TERMINAL_IDENTIFICATION' as terminal,
                             a->>'LIS_MERCHANT_NAME' as marchand, a->>'LIS_MERCHANT_CITY' as ville,
-                            a->>'LIS_DESTINATION_AMOUNT' as montant, a->>'LIS_INTERCHANGE_FEES' as interchange
+                            coalesce(a->>'LIS_TRANSACTION_AMOUNT', a->>'LIS_DESTINATION_AMOUNT') as montant, a->>'LIS_INTERCHANGE_FEES' as interchange
                         from lis_transaction t join lis_fichier f on f.id = t.fichier_id, lateral (select t.attributs as a) x
                         where f.journee = ?""" + " and " + ACHATS + " order by f.id, t.numero")
                 .param(journee)

@@ -24,6 +24,9 @@ commerçants transmis. Pour la BHCI, le menu peut être retiré des profils.
 
 ## Calculs (par achat)
 
+Montant de l'achat : TC 49 `LIS_TRANSACTION_AMOUNT`, en XOF. Le montant destination n'est pas utilisé : pour une carte
+étrangère il est en devise de la carte (centimes d'euro). Frais d'interchange en XOF (voir `lis.md`, « Montants »).
+
 | Rubrique | Règle |
 |---|---|
 | Compte à débiter | VISA → ACQ VISA ; Mastercard → ACQ MCI ; GIM → ACQ GIM, ou EMIS ONUS si on-us |

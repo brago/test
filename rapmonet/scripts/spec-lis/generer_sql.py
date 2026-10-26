@@ -70,7 +70,8 @@ def type_de(f):
     if f['type'] == 'N' and f['lg'] == 6 and ('DATE' in nom or 'JJMMAA' in com) and 'AAMMJJ' not in com:
         return 'DATE_JJMMAA', 0
     if f['type'] == 'N' and NUMERIQUES.search(nom) and 'EXPIRY' not in nom:
-        return 'NUMERIQUE', (2 if re.search(r'9\(\d+\)V99', com) else 0)
+        # « 9(n)V99 » dans la spec, mais le GIM envoie le XOF sans décimales (constaté, voir migration V26).
+        return 'NUMERIQUE', 0
     return 'ALPHA', 0
 
 structures = {}  # (tc, tcr) -> [codes]

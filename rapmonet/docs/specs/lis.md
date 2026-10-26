@@ -34,6 +34,19 @@ des numéros de carte).
 | Longueur ≠ 256, TC/TCR inconnu, TC hors de son sous-fichier, valeur de champ invalide | Avertissement |
 | Nom du fichier incohérent avec le type ou la date d'en-tête | Avertissement |
 
+## Montants (XOF sans décimales)
+
+La spécification annonce « 9(10)V99 » pour plusieurs montants (TC 49 TRANSACTION AMOUNT et INTERCHANGE FEES, TC 46,
+TC 70, TC 73-77, montants « local currency » des TC 05-37), mais le GIM les envoie **sans décimales** : constaté sur
+les fichiers réels d'un adhérent en mode processing (BASN, journée du 27/02/2023, version d'en-tête 3.026) où, lus avec
+deux décimales, les retraits TC 49 valaient 1 000,00 au lieu de 100 000 XOF. Lus sans décimales, tout se recoupe au
+franc près : somme des TC 49 d'une remise = brut du crédit commerçant TC 70 = remise TC 76 ; somme des retraits TC 49
+= remise TC 75 = règlement TC 46. La migration V26 passe ces champs à 0 décimale (trace dans `fmt_modification`) et
+corrige les fichiers déjà intégrés (× 100).
+
+Montant d'un TC 49 : `LIS_TRANSACTION_AMOUNT` (XOF). Le montant destination est dans la devise de la carte : centimes
+d'euro (978, exposant 2) pour une carte VISA ou Mastercard étrangère.
+
 ## Numéros de carte (PCI-DSS)
 
 Les champs « CARDHOLDER CARD NUMBER » sont marqués `confidentiel` dans le paramétrage.

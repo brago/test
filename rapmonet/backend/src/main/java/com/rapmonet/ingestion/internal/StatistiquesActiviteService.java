@@ -20,9 +20,11 @@ class StatistiquesActiviteService implements StatistiquesActivite {
                 case t.sous_fichier when 'FL' then 'GIM' when 'FV' then 'VISA' when 'FM' then 'MASTERCARD' else t.sous_fichier end as reseau,
                 case when a->>'LIS_TRANSACTION_DATE' ~ '^\\d{4}-\\d{2}-\\d{2}$' then (a->>'LIS_TRANSACTION_DATE')::date
                      else f.journee end as jour,
-                case when a->>'LIS_DESTINATION_AMOUNT' ~ '^-?\\d+(\\.\\d+)?$' then (a->>'LIS_DESTINATION_AMOUNT')::numeric
-                     else 0 end as montant
-              from lis_transaction t join lis_fichier f on f.id = t.fichier_id, lateral (select t.attributs as a) x
+                case when m.v ~ '^-?\\d+(\\.\\d+)?$' then m.v::numeric else 0 end as montant
+              from lis_transaction t join lis_fichier f on f.id = t.fichier_id, lateral (select t.attributs as a) x,
+                -- TC 49 : montant de la transaction en XOF (le montant destination est en devise de la carte étrangère).
+                lateral (select coalesce(case when t.tc = '49' then a->>'LIS_TRANSACTION_AMOUNT' end,
+                                         a->>'LIS_DESTINATION_AMOUNT') as v) m
               where %s)
             select entite, max(libelle) as libelle, reseau, to_char(jour, 'YYYY-MM') as mois, count(*) as nombre,
                    coalesce(sum(montant), 0)::bigint as montant
