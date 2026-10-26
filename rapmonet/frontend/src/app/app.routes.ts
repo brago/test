@@ -7,7 +7,7 @@ const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit', '/securite/politique',
   '/parametrage/gab', '/parametrage/application', '/parametrage/conservation', '/gab/activite', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
-  '/reporting/kpi', '/reporting/reglementaire', '/compense/traitements', '/compense/commercants', '/compense/validation',
+  '/reporting/direction', '/reporting/kpi', '/reporting/reglementaire', '/compense/traitements', '/compense/commercants', '/compense/validation',
   '/rapprochement/gab-lis', '/rapprochement/regles', '/reclamations/recherche', '/reclamations/registre'];
 
 export const routes: Routes = [
@@ -93,6 +93,10 @@ export const routes: Routes = [
       {
         path: 'reclamations/registre', title: 'Réclamations – RAPMONET', data: { menu: 'RECLAMATION_SUIVI' },
         loadComponent: () => import('./reclamation/registre').then((m) => m.RegistreReclamations),
+      },
+      {
+        path: 'reporting/direction', title: 'Tableau de bord direction – RAPMONET', data: { menu: 'REPORTING_DIRECTION' },
+        loadComponent: () => import('./reporting/direction').then((m) => m.Direction),
       },
       {
         path: 'reporting/kpi', title: 'Indicateurs – RAPMONET', data: { menu: 'REPORTING_KPI' },

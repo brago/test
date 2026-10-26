@@ -75,6 +75,7 @@ class ConfigurationSecurite {
                         .hasAuthority(menu("CHARGEBACK_EMISSION"))
                         .requestMatchers("/api/chargebacks/acquisition", "/api/chargebacks/acquisition/**")
                         .hasAuthority(menu("CHARGEBACK_ACQUISITION"))
+                        .requestMatchers("/api/reporting/direction", "/api/reporting/direction/**").hasAuthority(menu("REPORTING_DIRECTION"))
                         .requestMatchers("/api/reporting/kpi", "/api/reporting/kpi/**").hasAuthority(menu("REPORTING_KPI"))
                         .requestMatchers("/api/reporting/reglementaire/**").hasAuthority(menu("REPORTING_REGLEMENTAIRE"))
                         .requestMatchers(HttpMethod.POST, "/api/compense/traitements/*/validation",

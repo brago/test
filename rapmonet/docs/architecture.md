@@ -66,7 +66,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports, activité des GAB | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |
 | 6 | Rapprochements + gestion des écarts : GAB ↔ LIS (retraits confrères) ✅ (voir `docs/specs/rapprochement-gab-lis.md`) · E-journal / Amplitude | Amplitude : attente des données |
 | 7 | Chargebacks GIM émission / acquisition : cycle de vie par ARN, délai, régularisation, journal GAB | ✅ Fait (voir `docs/specs/chargeback.md`) ; libellés des motifs à fournir |
-| 8 | KPI GAB / TPE / cartes (graphiques, tableau croisé), base trimestrielle réglementaire | ✅ Fait (voir `docs/specs/reporting.md`) ; formats BCEAO BP4 / VISA et PNB : attente des modèles |
+| 8 | KPI GAB / TPE / cartes (graphiques, tableau croisé), base trimestrielle réglementaire, tableau de bord direction | ✅ Fait (voir `docs/specs/reporting.md`) ; formats BCEAO BP4 / VISA et PNB : attente des modèles |
 | 10 | Réclamations porteurs : recherche transverse (journaux GAB, LIS, chargebacks, rapprochement), registre, suivi, fiche imprimable | ✅ Fait (voir `docs/specs/reclamations.md`) |
 | 9 | Compense TPE : référentiel commerçants (import de la macro), commission / TAF, macro comptable Amplitude, validation à quatre yeux | ✅ Fait (voir `docs/specs/compense-tpe.md`) |
 

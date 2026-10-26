@@ -1,0 +1,61 @@
+<div class="entete">
+  <div>
+    <h1>Tableau de bord direction</h1>
+    @if (tableau(); as t) { <p class="sous-titre">{{ libelleMois(t.mois) }} comparé à {{ libelleMois(t.moisPrecedent) }}</p> }
+  </div>
+  <div class="non-imprimable commandes">
+    <mat-form-field appearance="outline">
+      <mat-label>Mois</mat-label>
+      <mat-select [(ngModel)]="mois" (selectionChange)="charger()">
+        @for (m of choixMois; track m.valeur) { <mat-option [value]="m.valeur">{{ m.libelle }}</mat-option> }
+      </mat-select>
+    </mat-form-field>
+    <button mat-stroked-button (click)="imprimer()"><mat-icon>print</mat-icon> Imprimer / PDF</button>
+  </div>
+</div>
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (tableau(); as t) {
+  <section class="attention">
+    <h2>Points d'attention</h2>
+    @if (t.pointsAttention.length === 0) { <p class="rien"><mat-icon>check_circle</mat-icon> Aucun point d'attention sur le mois.</p> }
+    <ul>
+      @for (p of t.pointsAttention; track $index) {
+        <li [class.info]="p.niveau === 'INFO'">
+          <mat-icon>{{ p.niveau === 'INFO' ? 'info' : 'warning' }}</mat-icon>
+          <span>{{ p.texte }}</span>
+          <a class="non-imprimable" [routerLink]="p.lien">Voir</a>
+        </li>
+      }
+    </ul>
+    @if (t.alertes['CRITIQUE'] || t.alertes['ATTENTION']) {
+      <p class="discret">Alertes en cours dans l'application : {{ t.alertes['CRITIQUE'] ?? 0 }} critique(s), {{ t.alertes['ATTENTION'] ?? 0 }} à traiter dans la journée.</p>
+    }
+  </section>
+
+  <div class="blocs">
+    @for (b of t.blocs; track b.titre) {
+      <section class="bloc">
+        <h2><mat-icon>{{ b.icone }}</mat-icon> {{ b.titre }} <a class="non-imprimable" [routerLink]="b.lien"><mat-icon>open_in_new</mat-icon></a></h2>
+        @for (i of b.indicateurs; track i.libelle) {
+          <div class="indicateur">
+            <div class="libelle">{{ i.libelle }}@if (i.detail) { <span class="discret">{{ i.detail }}</span> }</div>
+            <div class="chiffres">
+              <strong>{{ valeur(i) }}</strong>
+              @if (i.precedent !== null) {
+                <span class="evolution" [class]="tonalite(i)">{{ evolution(i) }}</span>
+                <span class="discret">({{ precedent(i) }})</span>
+              }
+            </div>
+          </div>
+        }
+      </section>
+    }
+    <section class="bloc large">
+      <h2><mat-icon>bar_chart</mat-icon> Montant distribué par les GAB sur douze mois</h2>
+      <app-graphique-barres [points]="tendance()" orientation="colonnes" unite="XOF" titre="Montant distribué par mois" />
+    </section>
+  </div>
+  <p class="discret pied">Évolutions par rapport au mois précédent : vert = favorable, orange = défavorable. Les indicateurs « à date »
+    décrivent la situation au jour de l'édition. Édité le {{ edition.toLocaleDateString('fr-FR') }} – RAPMONET.</p>
+}

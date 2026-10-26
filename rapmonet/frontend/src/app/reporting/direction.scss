@@ -1,0 +1,36 @@
+.entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+h1 { margin-bottom: 0; }
+.sous-titre { margin: 4px 0 0; color: var(--mat-sys-on-surface-variant); font-size: 16px; }
+.commandes { display: flex; gap: 12px; align-items: center; }
+.commandes mat-form-field { width: 200px; }
+.erreur { color: var(--mat-sys-error); display: flex; gap: 8px; align-items: center; }
+.discret { color: var(--mat-sys-on-surface-variant); font-size: 12px; }
+.attention { border: 1px solid #f1c27d; background: #fff8ec; border-radius: 10px; padding: 12px 18px; margin: 12px 0 18px; }
+.attention h2 { font-size: 16px; margin: 0 0 6px; }
+.attention ul { list-style: none; padding: 0; margin: 0; }
+.attention li { display: flex; gap: 8px; align-items: center; padding: 4px 0; color: #8a4b00; }
+.attention li.info { color: var(--mat-sys-on-surface-variant); }
+.attention li mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.attention li a { margin-left: auto; font-size: 13px; }
+.rien { display: flex; gap: 6px; align-items: center; color: #1b6b35; margin: 0; }
+.blocs { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; }
+.bloc { border: 1px solid var(--mat-sys-outline-variant); border-radius: 10px; padding: 12px 18px; break-inside: avoid; }
+.bloc.large { grid-column: 1 / -1; }
+.bloc h2 { font-size: 16px; font-weight: 600; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.bloc h2 a { margin-left: auto; color: inherit; }
+.bloc h2 mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.indicateur { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--mat-sys-outline-variant); }
+.indicateur:first-of-type { border-top: none; }
+.indicateur .libelle { display: flex; flex-direction: column; font-size: 14px; }
+.chiffres { text-align: right; white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; }
+.chiffres strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+.evolution { font-size: 13px; font-weight: 600; padding: 0 6px; border-radius: 8px; }
+.evolution.bon { background: #dcf3e3; color: #1b6b35; }
+.evolution.mauvais { background: #fdebd0; color: #8a4b00; }
+.evolution.neutre { background: #eceff3; color: #444; }
+.pied { margin-top: 16px; }
+@media print {
+  .non-imprimable { display: none !important; }
+  .blocs { grid-template-columns: 1fr 1fr; }
+  .evolution.bon, .evolution.mauvais, .attention { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

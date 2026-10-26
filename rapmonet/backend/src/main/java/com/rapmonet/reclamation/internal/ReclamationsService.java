@@ -24,7 +24,7 @@ import java.util.Set;
  * dans la piste d'audit. Seule la carte masquée est conservée.
  */
 @Service
-public class ReclamationsService {
+public class ReclamationsService implements com.rapmonet.reclamation.IndicateursReclamations {
 
     public static final Map<String, String> OBJETS = new LinkedHashMap<>();
     public static final Map<String, String> CANAUX = new LinkedHashMap<>();
@@ -230,6 +230,25 @@ public class ReclamationsService {
                         select count(*), count(*) filter (where echeance < ?) from reclamation
                         where statut in ('OUVERTE', 'EN_COURS')""")
                 .param(aujourdhui).query((rs, n) -> new long[] { rs.getLong(1), rs.getLong(2) }).single();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.rapmonet.reclamation.IndicateursReclamations.Indicateurs indicateurs(LocalDate du, LocalDate au) {
+        return jdbc.sql("""
+                        select count(*) filter (where cast(cree_le as date) between ? and ?),
+                               coalesce(sum(montant_conteste) filter (where cast(cree_le as date) between ? and ?), 0),
+                               count(*) filter (where cast(cloture_le as date) between ? and ?),
+                               count(*) filter (where statut = 'FONDEE' and cast(cloture_le as date) between ? and ?),
+                               coalesce(avg(extract(epoch from cloture_le - cree_le) / 86400)
+                                   filter (where cast(cloture_le as date) between ? and ?), 0),
+                               count(*) filter (where statut in ('OUVERTE', 'EN_COURS')),
+                               count(*) filter (where statut in ('OUVERTE', 'EN_COURS') and echeance < current_date)
+                        from reclamation""")
+                .params(du, au, du, au, du, au, du, au, du, au)
+                .query((rs, n) -> new com.rapmonet.reclamation.IndicateursReclamations.Indicateurs(rs.getInt(1), rs.getLong(2),
+                        rs.getInt(3), rs.getInt(4), Math.round(rs.getDouble(5) * 10) / 10.0, rs.getInt(6), rs.getInt(7)))
+                .single();
     }
 
     private Resume resume(java.sql.ResultSet rs) throws java.sql.SQLException {

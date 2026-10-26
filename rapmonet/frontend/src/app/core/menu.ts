@@ -91,6 +91,7 @@ export const MENU: EntreeMenu[] = [
   {
     code: 'REPORTING', libelle: 'Pilotage & réglementaire', icone: 'insights', lot: 8,
     enfants: [
+      { code: 'REPORTING_DIRECTION', libelle: 'Tableau de bord direction', icone: 'dashboard', chemin: '/reporting/direction', lot: 8 },
       { code: 'REPORTING_KPI', libelle: 'Indicateurs (KPI)', icone: 'bar_chart', chemin: '/reporting/kpi', lot: 8 },
       { code: 'REPORTING_REGLEMENTAIRE', libelle: 'Réglementaire BCEAO / VISA', icone: 'account_balance', chemin: '/reporting/reglementaire', lot: 8 },
     ],

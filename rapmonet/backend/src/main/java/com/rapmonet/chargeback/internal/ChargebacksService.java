@@ -33,7 +33,7 @@ import java.util.function.Consumer;
  */
 @Service
 @Transactional
-public class ChargebacksService implements com.rapmonet.chargeback.DossiersPorteur {
+public class ChargebacksService implements com.rapmonet.chargeback.DossiersPorteur, com.rapmonet.chargeback.IndicateursChargebacks {
 
     public enum Sens { EMISSION, ACQUISITION }
 
@@ -267,6 +267,22 @@ public class ChargebacksService implements com.rapmonet.chargeback.DossiersPorte
                         d.libelleTc(), d.rrn(), d.carte(), d.terminal(), d.marchand(), d.dateTransaction(), d.montant(),
                         d.motif(), d.journeeChargeback(), d.etat(), d.situation(), d.regularisation(), d.archive()))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.rapmonet.chargeback.IndicateursChargebacks.Indicateurs indicateurs(LocalDate du, LocalDate au) {
+        long[] recus = jdbc.sql("""
+                        select count(*) filter (where sens = 'EMISSION'), coalesce(sum(montant) filter (where sens = 'EMISSION'), 0),
+                               count(*) filter (where sens = 'ACQUISITION'), coalesce(sum(montant) filter (where sens = 'ACQUISITION'), 0)
+                        from chargeback_dossier where journee_chargeback between ? and ?""")
+                .params(du, au).query((rs, n) -> new long[] { rs.getLong(1), rs.getLong(2), rs.getLong(3), rs.getLong(4) }).single();
+        int delai = delai();
+        List<Dossier> enCours = jdbc.sql("select * from chargeback_dossier where not archive").query((rs, n) -> dossier(rs)).list()
+                .stream().map(d -> avecCycle(d, delai, false)).toList();
+        return new com.rapmonet.chargeback.IndicateursChargebacks.Indicateurs((int) recus[0], recus[1], (int) recus[2], recus[3],
+                enCours.size(), enCours.stream().mapToLong(d -> d.montant() == null ? 0 : d.montant()).sum(),
+                (int) enCours.stream().filter(d -> "DELAI_ECOULE".equals(d.etat())).count());
     }
 
     /** Cycle de vie relu dans les LIS : étapes, situation, état et délai. */
