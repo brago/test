@@ -92,6 +92,7 @@ class ConfigurationSecurite {
                         .requestMatchers("/api/parametrage/vss/**").hasAuthority(menu("PARAMETRAGE_VSS"))
                         .requestMatchers("/api/parametrage/**").hasAuthority(menu("PARAMETRAGE_LIS"))
                         .requestMatchers("/api/systeme/**").hasAuthority(u)
+                        .requestMatchers(HttpMethod.GET, "/api/alertes").hasAuthority(u)
                         .requestMatchers("/api/**").denyAll()
                         .anyRequest().permitAll());
         return http.build();

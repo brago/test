@@ -7,6 +7,13 @@
     <span class="sous-titre">Back-office monétique</span>
     <span class="espace"></span>
     @if (auth.utilisateur(); as u) {
+      @if (!u.doitChangerMotDePasse) {
+        <a mat-icon-button routerLink="/accueil" aria-label="Alertes à traiter"
+           [matTooltip]="alertes.aTraiter() ? alertes.aTraiter() + ' alerte(s) à traiter' : 'Aucune alerte à traiter'">
+          <mat-icon [matBadge]="alertes.aTraiter() || null" matBadgeColor="warn" matBadgeSize="small"
+                    aria-hidden="false">notifications</mat-icon>
+        </a>
+      }
       <button mat-button class="utilisateur" [matMenuTriggerFor]="menuUtilisateur">
         <mat-icon>account_circle</mat-icon> {{ u.nom }} <span class="profil">· {{ u.libelleProfil }}</span>
       </button>

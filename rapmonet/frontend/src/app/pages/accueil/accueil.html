@@ -1,6 +1,40 @@
 <h1>Bienvenue dans RAPMONET</h1>
 <p>Chargement des fichiers monétiques, rapprochements et reporting réglementaire.</p>
 
+<mat-card appearance="outlined" class="alertes">
+  <mat-card-header>
+    <mat-card-title>À traiter</mat-card-title>
+    <button mat-icon-button class="rafraichir" (click)="alertes.rafraichir()" aria-label="Actualiser les alertes"><mat-icon>refresh</mat-icon></button>
+  </mat-card-header>
+  <mat-card-content>
+    @if (alertes.erreur()) {
+      <p class="ko"><mat-icon>error</mat-icon> Alertes indisponibles.</p>
+    } @else if (alertes.alertes(); as liste) {
+      @if (liste.length === 0) {
+        <p class="ok"><mat-icon>check_circle</mat-icon> Rien à traiter pour vos menus.</p>
+      } @else {
+        <ul class="liste">
+          @for (a of liste; track a.code) {
+            <li class="alerte {{ a.niveau }}">
+              <mat-icon class="icone" [attr.aria-label]="libellesNiveau[a.niveau]">{{ icones[a.niveau] }}</mat-icon>
+              <div class="texte">
+                <a [routerLink]="a.lien" class="titre">{{ a.titre }}</a>
+                <span class="detail">{{ a.detail }}</span>
+              </div>
+              <div class="chiffres">
+                <strong>{{ a.nombre | number }}</strong>
+                @if (a.montant) { <span>{{ a.montant | number }} XOF</span> }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <p>Calcul des alertes…</p>
+    }
+  </mat-card-content>
+</mat-card>
+
 <mat-card appearance="outlined" class="etat">
   <mat-card-header>
     <mat-card-title>État du système</mat-card-title>
