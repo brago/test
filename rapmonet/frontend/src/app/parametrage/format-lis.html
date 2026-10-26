@@ -3,85 +3,222 @@
   <p class="aide">
     Enregistrements de {{ f.longueurEnregistrement }} caractères. Code TC en position {{ f.zoneTc.position }},
     séquence en position {{ f.zoneSequence.position }}, numéro de TCR en position {{ f.zoneTcr.position }}.
-    En-tête TC {{ f.tcEntete }}, fin TC {{ f.tcFin }}. Source : spécification LIS 3.038 (GIM/HPS).
+    En-tête TC {{ f.tcEntete }}, fin TC {{ f.tcFin }}. Source : spécification LIS 3.038 (GIM/HPS), puis les modifications
+    de l'onglet Historique.
+    @if (peutModifier) {
+      Une modification s'applique aux fichiers intégrés ensuite ; les fichiers déjà intégrés ne sont pas relus.
+      <mat-icon class="mini">verified</mat-icon> : champ lu par les traitements (non retirable),
+      <mat-icon class="mini">lock</mat-icon> : numéro de carte masqué avant stockage.
+    }
   </p>
+  @if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+  @if (erreur(); as e) { <p class="ko"><mat-icon>error</mat-icon> {{ e }}</p> }
 
-  <h2>Sous-fichiers</h2>
-  <div class="sous-fichiers">
-    @for (s of f.sousFichiers; track s.code) {
-      <mat-card appearance="outlined">
-        <mat-card-header>
-          <mat-card-title>{{ s.code }} – {{ s.libelle }}</mat-card-title>
-          <mat-card-subtitle>TC {{ s.tcEntete }} … TC {{ s.tcFin }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>{{ s.description }}</p>
-          <p class="mono">TC : {{ s.tcAutorises.join(', ') }}</p>
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
+  <mat-tab-group animationDuration="0ms">
+    <mat-tab label="Codes transaction">
+      <h2>Sous-fichiers</h2>
+      <div class="sous-fichiers">
+        @for (s of f.sousFichiers; track s.code) {
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>{{ s.code }} – {{ s.libelle }}</mat-card-title>
+              <mat-card-subtitle>TC {{ s.tcEntete }} … TC {{ s.tcFin }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{ s.description }}</p>
+              <p class="mono">TC : {{ s.tcAutorises.join(', ') }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
 
-  <h2>Codes transaction</h2>
-  <mat-form-field appearance="outline" class="recherche">
-    <mat-label>Filtrer (TC, champ…)</mat-label>
-    <input matInput [value]="filtre()" (input)="filtre.set($any($event.target).value)" />
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
+      <div class="entete-tcr">
+        <h2>Codes transaction</h2>
+        @if (peutModifier && !nouveauTc()) {
+          <button mat-stroked-button (click)="ouvrirNouveauTc()"><mat-icon>add</mat-icon> Nouveau TC</button>
+        }
+      </div>
+      @if (nouveauTc(); as n) {
+        <mat-card appearance="outlined" class="formulaire">
+          <mat-card-header><mat-card-title>Nouveau TC annoncé par le GIM</mat-card-title>
+            <mat-card-subtitle>Chaque TCR est créé avec une zone non détaillée de {{ f.longueurEnregistrement - f.positionDonnees + 1 }} caractères, à remplacer par ses champs.</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content class="grille">
+            <mat-form-field appearance="outline"><mat-label>Code TC</mat-label><input matInput [(ngModel)]="n.code" maxlength="10" /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Libellé</mat-label><input matInput [(ngModel)]="n.libelle" /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Numéros de TCR</mat-label><input matInput [(ngModel)]="n.tcrs" /><mat-hint>ex. 0, 1, 2</mat-hint></mat-form-field>
+            <mat-form-field appearance="outline" class="pleine"><mat-label>Description</mat-label><input matInput [(ngModel)]="n.description" /></mat-form-field>
+            <div class="pleine">Sous-fichiers où il peut figurer :
+              @for (s of f.sousFichiers; track s.code) {
+                <mat-checkbox (change)="basculerSousFichier(s.code, $event.checked)">{{ s.code }}</mat-checkbox>
+              }
+            </div>
+            <mat-form-field appearance="outline" class="pleine"><mat-label>Motif</mat-label><input matInput [(ngModel)]="n.motif" maxlength="500" /></mat-form-field>
+            <div class="actions pleine">
+              <button mat-button (click)="nouveauTc.set(null)">Annuler</button>
+              <button mat-flat-button (click)="creerTc()" [disabled]="!n.code || !n.libelle || n.motif.trim().length < 5">Créer le TC</button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+      <mat-form-field appearance="outline" class="recherche">
+        <mat-label>Filtrer (TC, champ…)</mat-label>
+        <input matInput [value]="filtre()" (input)="filtre.set($any($event.target).value)" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
 
-  <mat-accordion multi>
-    @for (t of tcs(); track t.code) {
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title><span class="mono tc">TC {{ t.code }}</span> {{ t.libelle }}</mat-panel-title>
-          <mat-panel-description>
-            {{ t.tcrs.length }} TCR · {{ nbAttributs(t) }} champs
-            @if (t.description) { · {{ t.description }} }
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <ng-template matExpansionPanelContent>
-          @for (r of t.tcrs; track r.code) {
-            <h3>{{ r.libelle }}</h3>
-            @if (r.attributs.length === 0) {
-              <p class="aide">Aucun champ paramétré.</p>
-            } @else {
-              <table mat-table [dataSource]="r.attributs">
-                <ng-container matColumnDef="position">
-                  <th mat-header-cell *matHeaderCellDef>Position</th>
-                  <td mat-cell *matCellDef="let a">{{ a.position }}–{{ a.position + a.taille - 1 }}</td>
-                </ng-container>
-                <ng-container matColumnDef="taille">
-                  <th mat-header-cell *matHeaderCellDef>Taille</th>
-                  <td mat-cell *matCellDef="let a">{{ a.taille }}</td>
-                </ng-container>
-                <ng-container matColumnDef="code">
-                  <th mat-header-cell *matHeaderCellDef>Code</th>
-                  <td mat-cell *matCellDef="let a" class="mono">{{ a.code }}</td>
-                </ng-container>
-                <ng-container matColumnDef="libelle">
-                  <th mat-header-cell *matHeaderCellDef>Champ</th>
-                  <td mat-cell *matCellDef="let a">{{ a.libelle }}</td>
-                </ng-container>
-                <ng-container matColumnDef="type">
-                  <th mat-header-cell *matHeaderCellDef>Type</th>
-                  <td mat-cell *matCellDef="let a">{{ a.type }}@if (a.decimales) { ({{ a.decimales }} déc.) }</td>
-                </ng-container>
-                <ng-container matColumnDef="options">
-                  <th mat-header-cell *matHeaderCellDef></th>
-                  <td mat-cell *matCellDef="let a">
-                    @if (a.confidentiel) { <mat-icon matTooltip="Numéro de carte : masqué avant stockage">lock</mat-icon> }
-                    @if (!a.specifique) { <span class="aide">non stocké</span> }
-                  </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
-                <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
-              </table>
+      <mat-accordion multi>
+        @for (t of tcs(); track t.code) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title><span class="mono tc">TC {{ t.code }}</span> {{ t.libelle }}</mat-panel-title>
+              <mat-panel-description>
+                {{ t.tcrs.length }} TCR · {{ nbAttributs(t) }} champs
+                @if (t.description) { · {{ t.description }} }
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <ng-template matExpansionPanelContent>
+              @if (peutModifier) {
+                @if (tcEdite()?.code === t.code) {
+                  @let e = tcEdite()!;
+                  <div class="grille formulaire">
+                    <mat-form-field appearance="outline"><mat-label>Libellé</mat-label><input matInput [(ngModel)]="e.libelle" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Description</mat-label><input matInput [(ngModel)]="e.description" /></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Motif</mat-label><input matInput [(ngModel)]="e.motif" maxlength="500" /></mat-form-field>
+                    <div class="actions">
+                      <button mat-button (click)="tcEdite.set(null)">Annuler</button>
+                      <button mat-flat-button (click)="enregistrerTc()" [disabled]="e.motif.trim().length < 5">Enregistrer</button>
+                    </div>
+                  </div>
+                } @else {
+                  <button mat-button (click)="modifierTc(t)"><mat-icon>edit</mat-icon> Libellé du TC</button>
+                }
+              }
+              @for (r of t.tcrs; track r.code) {
+                <div class="entete-tcr">
+                  <h3>{{ r.libelle }}</h3>
+                  @if (peutModifier && tcrEdite() !== t.code + '/' + r.code) {
+                    <button mat-stroked-button (click)="tcrEdite.set(t.code + '/' + r.code)"><mat-icon>tune</mat-icon> Modifier la structure</button>
+                  }
+                </div>
+                @if (tcrEdite() === t.code + '/' + r.code) {
+                  <app-edition-tcr [format]="f" [tc]="t.code" [tcr]="r" [dictionnaire]="champs()"
+                                   (termine)="finEditionTcr(t.code, r.code, $event)" />
+                } @else if (r.attributs.length === 0) {
+                  <p class="aide">Aucun champ paramétré.</p>
+                } @else {
+                  <table mat-table [dataSource]="r.attributs">
+                    <ng-container matColumnDef="position">
+                      <th mat-header-cell *matHeaderCellDef>Position</th>
+                      <td mat-cell *matCellDef="let a">{{ a.position }}–{{ a.position + a.taille - 1 }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="taille">
+                      <th mat-header-cell *matHeaderCellDef>Taille</th>
+                      <td mat-cell *matCellDef="let a">{{ a.taille }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="code">
+                      <th mat-header-cell *matHeaderCellDef>Code</th>
+                      <td mat-cell *matCellDef="let a" class="mono">{{ a.code }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="libelle">
+                      <th mat-header-cell *matHeaderCellDef>Champ</th>
+                      <td mat-cell *matCellDef="let a">{{ a.libelle }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="type">
+                      <th mat-header-cell *matHeaderCellDef>Type</th>
+                      <td mat-cell *matCellDef="let a">{{ a.type }}@if (a.decimales) { ({{ a.decimales }} déc.) }</td>
+                    </ng-container>
+                    <ng-container matColumnDef="options">
+                      <th mat-header-cell *matHeaderCellDef></th>
+                      <td mat-cell *matCellDef="let a">
+                        @if (a.confidentiel) { <mat-icon matTooltip="Numéro de carte : masqué avant stockage">lock</mat-icon> }
+                        @if (!a.specifique) { <span class="aide">non stocké</span> }
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+                    <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+                  </table>
+                }
+              }
+            </ng-template>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </mat-tab>
+
+    <mat-tab [label]="'Champs (' + champs().length + ')'">
+      <div class="entete-tcr">
+        <mat-form-field appearance="outline" class="recherche">
+          <mat-label>Filtrer (code, libellé)</mat-label>
+          <input matInput [value]="filtreChamps()" (input)="filtreChamps.set($any($event.target).value)" />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        @if (peutModifier && !champEdite()) {
+          <button mat-stroked-button (click)="ouvrirNouveauChamp()"><mat-icon>add</mat-icon> Nouveau champ</button>
+        }
+      </div>
+      @if (champEdite(); as e) {
+        <mat-card appearance="outlined" class="formulaire">
+          <mat-card-header>
+            <mat-card-title>{{ e.nouveau ? 'Nouveau champ' : 'Champ ' + e.champ.code }}</mat-card-title>
+            @if (e.protege) { <mat-card-subtitle>Lu par les traitements : son type et ses décimales ne peuvent pas changer, il reste stocké.</mat-card-subtitle> }
+          </mat-card-header>
+          <mat-card-content class="grille">
+            @if (e.nouveau) {
+              <mat-form-field appearance="outline"><mat-label>Code</mat-label><input matInput [(ngModel)]="e.champ.code" /><mat-hint>LIS_…, définitif</mat-hint></mat-form-field>
             }
-          }
-        </ng-template>
-      </mat-expansion-panel>
-    }
-  </mat-accordion>
+            <mat-form-field appearance="outline"><mat-label>Libellé</mat-label><input matInput [(ngModel)]="e.champ.libelle" /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Taille</mat-label><input matInput type="number" [(ngModel)]="e.champ.taille" min="1" max="247" /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Type</mat-label>
+              <mat-select [(ngModel)]="e.champ.type" [disabled]="e.protege">@for (t of types; track t) { <mat-option [value]="t">{{ t }}</mat-option> }</mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Décimales implicites</mat-label>
+              <input matInput type="number" [(ngModel)]="e.champ.decimales" min="0" max="6" [disabled]="e.protege" /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Complément</mat-label>
+              <mat-select [(ngModel)]="e.champ.pad">@for (p of pads; track p.code) { <mat-option [value]="p.code">{{ p.libelle }}</mat-option> }</mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="pleine"><mat-label>Description</mat-label><input matInput [(ngModel)]="e.champ.description" /></mat-form-field>
+            <mat-checkbox [(ngModel)]="e.champ.specifique" [disabled]="e.protege || e.champ.confidentiel">Valeur stockée avec la transaction</mat-checkbox>
+            <mat-checkbox [(ngModel)]="e.champ.confidentiel" [disabled]="e.confidentielAvant">Numéro de carte (masqué avant stockage)</mat-checkbox>
+            <mat-form-field appearance="outline" class="pleine"><mat-label>Motif</mat-label><input matInput [(ngModel)]="e.motif" maxlength="500" /></mat-form-field>
+            <div class="actions pleine">
+              <button mat-button (click)="champEdite.set(null)">Annuler</button>
+              <button mat-flat-button (click)="enregistrerChamp()" [disabled]="!e.champ.libelle || e.motif.trim().length < 5">Enregistrer</button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+      <table class="structure">
+        <tr><th>Code</th><th>Champ</th><th>Taille</th><th>Type</th><th>Présent dans (TC/TCR)</th><th></th></tr>
+        @for (c of champsFiltres(); track c.code) {
+          <tr>
+            <td class="mono">{{ c.code }}
+              @if (c.protege) { <mat-icon class="mini" matTooltip="Lu par les traitements">verified</mat-icon> }
+              @if (c.confidentiel) { <mat-icon class="mini" matTooltip="Numéro de carte : masqué avant stockage">lock</mat-icon> }
+            </td>
+            <td>{{ c.libelle }} @if (!c.specifique) { <span class="discret">· non stocké</span> }</td>
+            <td>{{ c.taille }}</td>
+            <td>{{ c.type }}@if (c.decimales) { ({{ c.decimales }} déc.) }</td>
+            <td class="discret">{{ c.utilisations.length ? c.utilisations.join(', ') : 'aucun TCR' }}</td>
+            <td>@if (peutModifier) { <button mat-icon-button (click)="modifierChamp(c)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button> }</td>
+          </tr>
+        }
+      </table>
+      @if (champsFiltres().length === 300) { <p class="discret">300 premiers champs affichés : affinez le filtre.</p> }
+    </mat-tab>
+
+    <mat-tab [label]="'Historique (' + historique().length + ')'">
+      @if (historique().length === 0) { <p class="aide">Aucune modification : paramétrage d'origine (spécification LIS 3.038).</p> }
+      @for (h of historique(); track h.id) {
+        <div class="historique">
+          <div><strong>{{ h.modifieLe | date: 'dd/MM/yyyy HH:mm' }}</strong> · {{ h.modifiePar ?? '—' }} · {{ libelleAction(h.action) }} · {{ h.objet }}</div>
+          <div>Motif : {{ h.motif }}</div>
+          @if (h.avant) { <div class="discret">Avant : <span class="valeur">{{ h.avant }}</span></div> }
+          <div class="discret">Après : <span class="valeur">{{ h.apres }}</span></div>
+        </div>
+      }
+    </mat-tab>
+  </mat-tab-group>
 } @else {
   <p>Chargement du paramétrage…</p>
 }

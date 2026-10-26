@@ -23,6 +23,7 @@ public final class ActionsAudit {
     public static final String VSS_INTEGRATION = "VSS_INTEGRATION";
     public static final String VSS_ANNULATION = "VSS_ANNULATION";
     public static final String PARAMETRAGE_VSS = "PARAMETRAGE_VSS";
+    public static final String PARAMETRAGE_FORMAT = "PARAMETRAGE_FORMAT";
     public static final String EJOURNAL_INTEGRATION = "EJOURNAL_INTEGRATION";
     public static final String EJOURNAL_ANNULATION = "EJOURNAL_ANNULATION";
     public static final String BATCH_EJOURNAL = "BATCH_EJOURNAL";

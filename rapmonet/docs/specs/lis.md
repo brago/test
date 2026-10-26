@@ -56,3 +56,24 @@ numéro en clair.
 - Historique dans `batch_execution` (traitement `LIS`), action d'audit `BATCH_LIS`. Une exécution en erreur ou avec rejets lève une alerte (menu « Fichiers LIS »).
 - Mécanique commune avec le batch des journaux GAB : `ingestion.internal.BatchDossier`.
 - Reste à faire : récupération directe sur le serveur SFTP du GIM (attente des accès).
+
+## Modification du paramétrage à l'écran
+
+Écran *Paramétrage › Format LIS* (consultation pour tous ; modification avec le menu `PARAMETRAGE_LIS`), classe
+`parametrage.internal.EditionFormats` :
+
+- **Champs** (dictionnaire) : libellé, description, taille, type, décimales, complément, stockage ; création de champs
+  `LIS_…`. Le code d'un champ ne change jamais (il est la clé des valeurs déjà intégrées).
+- **Structure d'un TCR** : liste ordonnée des champs, positions recalculées ; au plus 247 caractères (positions 10 à 256).
+  Bouton « Tester sur un fichier LIS » : le fichier est lu **dans le navigateur** (jamais envoyé), les 5 premières
+  lignes du TC / TCR sont décodées avec la structure proposée, numéros de carte masqués.
+- **TC** : libellé et description ; création d'un TC annoncé par le GIM (TCR initialisés avec une zone non détaillée
+  de 247 caractères `LIS_RESERVE_247`, à remplacer par ses champs), rattaché aux sous-fichiers choisis.
+
+Garde-fous : champs **protégés** (`fmt_attribut.protege`, les 32 champs lus par les traitements : carte, montants,
+dates, RRN, autorisation, terminal…) jamais retirés d'un TCR, toujours stockés, type et décimales figés ; un champ
+**confidentiel** (numéro de carte) le reste ; agrandir un champ est refusé si un TCR qui le contient déborderait.
+
+Chaque modification exige un motif, est historisée (`fmt_modification`, avant / après lisibles, onglet Historique) et
+tracée dans l'audit (`PARAMETRAGE_FORMAT`). Elle s'applique aux fichiers intégrés ensuite ; les fichiers déjà intégrés
+ne sont pas relus.

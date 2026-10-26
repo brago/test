@@ -1,0 +1,76 @@
+<div class="edition">
+  <div class="jauge" [class.ko]="occupe() > capacite()">
+    <strong>{{ occupe() }} / {{ capacite() }}</strong> caractères (positions {{ format().positionDonnees }} à {{ format().longueurEnregistrement }})
+    @if (occupe() < capacite()) { · {{ capacite() - occupe() }} caractère(s) non décrit(s) en fin de ligne }
+    @if (occupe() > capacite()) { · <span class="ko">dépassement de {{ occupe() - capacite() }} caractère(s)</span> }
+  </div>
+  @if (protegesRetires().length) {
+    <p class="ko"><mat-icon>block</mat-icon> Champs lus par les traitements, à conserver : {{ protegesRetires().join(', ') }}</p>
+  }
+  <table class="structure">
+    <tr><th>Position</th><th>Taille</th><th>Code</th><th>Champ</th><th></th></tr>
+    @for (l of lignes(); track l.champ.code; let i = $index) {
+      <tr>
+        <td>{{ l.debut }}–{{ l.fin }}</td>
+        <td>{{ l.champ.taille }}</td>
+        <td class="mono">{{ l.champ.code }}
+          @if (l.champ.protege) { <mat-icon class="mini" matTooltip="Lu par les traitements : ne peut pas être retiré">verified</mat-icon> }
+          @if (l.champ.confidentiel) { <mat-icon class="mini" matTooltip="Numéro de carte : masqué avant stockage">lock</mat-icon> }
+        </td>
+        <td>{{ l.champ.libelle }}</td>
+        <td class="boutons">
+          <button mat-icon-button (click)="deplacer(i, -1)" [disabled]="i === 0" matTooltip="Monter"><mat-icon>arrow_upward</mat-icon></button>
+          <button mat-icon-button (click)="deplacer(i, 1)" [disabled]="i === lignes().length - 1" matTooltip="Descendre"><mat-icon>arrow_downward</mat-icon></button>
+          <button mat-icon-button (click)="retirer(i)" [disabled]="l.champ.protege" matTooltip="Retirer du TCR"><mat-icon>remove_circle_outline</mat-icon></button>
+        </td>
+      </tr>
+    }
+  </table>
+
+  <div class="ajout">
+    <mat-form-field appearance="outline">
+      <mat-label>Ajouter un champ (code ou libellé)</mat-label>
+      <input matInput [ngModel]="ajout()" (ngModelChange)="ajout.set($event)" [attr.list]="'champs-' + tc() + '-' + tcr().code" />
+      <datalist [id]="'champs-' + tc() + '-' + tcr().code">
+        @for (c of disponibles(); track c.code) { <option [value]="c.code">{{ c.libelle }} ({{ c.taille }})</option> }
+      </datalist>
+    </mat-form-field>
+    <button mat-stroked-button (click)="ajouter(ajout().trim().toUpperCase())"><mat-icon>add</mat-icon> Ajouter en fin</button>
+    <span class="discret">Champ absent du dictionnaire : créez-le d'abord dans l'onglet « Champs ».</span>
+  </div>
+
+  <div class="test">
+    <button mat-stroked-button (click)="choix.click()"><mat-icon>science</mat-icon> Tester sur un fichier LIS</button>
+    <input #choix type="file" hidden (change)="tester($event)" />
+    <span class="discret">Le fichier est lu dans votre navigateur, il n'est pas envoyé. Numéros de carte masqués.</span>
+  </div>
+  @if (apercu(); as a) {
+    <p class="discret">{{ a.fichier }} : {{ a.nb }} ligne(s) TC {{ tc() }} / TCR {{ tcr().code }}
+      @if (a.nb > 5) { (5 premières affichées) }</p>
+    @if (a.lignes.length) {
+      <div class="defilement">
+        <table class="structure apercu">
+          <tr>@for (l of lignes(); track l.champ.code) { <th class="mono">{{ l.champ.code }}</th> }</tr>
+          @for (v of a.lignes; track $index) {
+            <tr>@for (x of v; track $index) { <td class="mono">{{ x }}</td> }</tr>
+          }
+        </table>
+      </div>
+    }
+  }
+
+  <div class="ajout">
+    <mat-form-field appearance="outline" class="motif">
+      <mat-label>Motif (ex. bulletin GIM, version de la spécification)</mat-label>
+      <input matInput [(ngModel)]="motif" maxlength="500" />
+    </mat-form-field>
+  </div>
+  @if (erreur(); as e) { <p class="ko"><mat-icon>error</mat-icon> {{ e }}</p> }
+  <div class="actions">
+    <button mat-button (click)="termine.emit(false)">Annuler</button>
+    <button mat-flat-button (click)="enregistrer()"
+            [disabled]="enCours() || !modifie() || occupe() > capacite() || protegesRetires().length > 0 || motif.trim().length < 5">
+      <mat-icon>save</mat-icon> Enregistrer la structure
+    </button>
+  </div>
+</div>
