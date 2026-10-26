@@ -60,7 +60,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 |---|---|---|
 | 0 | Socle : backend, frontend, base, tests, intégration continue | ✅ Fait |
 | 1 | Sécurité : connexion, blocage après 3 échecs, utilisateurs, profils, audit ; exports Excel / PDF | ✅ Fait (voir ADR 0002) |
-| 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`), chargement automatique quotidien ✅, modification du paramétrage à l'écran ✅ |
+| 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`), chargement automatique quotidien ✅, modification du paramétrage à l'écran ✅, paramètres de l'application à l'écran ✅ |
 | 3 | Rapports VSS de VISA (fichiers VX / EP-747) : chargement, consultation, export, paramétrage | ✅ Fait (voir `docs/specs/vss.md`) |
 | 4 | E-journaux NCR ✅, intégration automatique quotidienne à 04:00 ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
 | 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports, activité des GAB | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |

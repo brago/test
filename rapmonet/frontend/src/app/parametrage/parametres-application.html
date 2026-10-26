@@ -1,0 +1,74 @@
+<h1>Paramètres de l'application</h1>
+<p class="aide">
+  Réglages enregistrés en base. Ceux qui n'ont pas d'écran dédié se modifient ici (valeur contrôlée, motif obligatoire,
+  historique) ; les autres s'affichent en lecture avec le lien vers leur écran. Une modification s'applique dès le
+  traitement suivant.
+</p>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+
+@for (g of groupes(); track g.nom) {
+  <mat-card appearance="outlined" class="formulaire groupe-parametres">
+    <mat-card-header>
+      <mat-card-title>{{ g.nom }}</mat-card-title>
+      @if (!g.modifiable && g.ecran) {
+        <mat-card-subtitle>Modifiables dans l'écran <a [routerLink]="g.ecran.lienEcran">{{ g.ecran.gerePar }}</a></mat-card-subtitle>
+      }
+    </mat-card-header>
+    <mat-card-content>
+      <table class="structure parametres">
+        @for (p of g.params; track p.cle) {
+          <tr>
+            <td class="libelle">
+              <strong>{{ p.libelle }}</strong>
+              @if (p.description && p.description !== p.libelle) { <div class="discret">{{ p.description }}</div> }
+              @if (p.modifiable) { <div class="discret mono">{{ p.cle }}</div> }
+            </td>
+            <td class="valeur">
+              @if (edition()?.cle === p.cle) {
+                @let e = edition()!;
+                <div class="edition-parametre">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Valeur</mat-label>
+                    @switch (p.type) {
+                      @case ('ENTIER') { <input matInput type="number" [(ngModel)]="e.valeur" [min]="p.min" [max]="p.max" /> }
+                      @case ('HEURE') { <input matInput type="time" [(ngModel)]="e.valeur" /> }
+                      @default { <input matInput [(ngModel)]="e.valeur" /> }
+                    }
+                    <mat-hint>{{ aide(p) }}</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="motif">
+                    <mat-label>Motif</mat-label>
+                    <input matInput [(ngModel)]="e.motif" maxlength="500" />
+                  </mat-form-field>
+                  <button mat-button (click)="edition.set(null)">Annuler</button>
+                  <button mat-flat-button (click)="enregistrer(p)" [disabled]="e.motif.trim().length < 5">Enregistrer</button>
+                </div>
+                @if (erreur(); as x) { <p class="ko"><mat-icon>error</mat-icon> {{ x }}</p> }
+              } @else {
+                <code>{{ p.valeur }}</code>
+                @if (p.exemple) { <div class="discret">{{ p.exemple }}</div> }
+                @if (p.modifiePar) { <div class="discret">modifié par {{ p.modifiePar }} le {{ p.modifieLe | date: 'dd/MM/yyyy HH:mm' }}</div> }
+              }
+            </td>
+            <td class="bouton">
+              @if (p.modifiable && edition()?.cle !== p.cle) {
+                <button mat-icon-button (click)="modifier(p)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+              } @else if (!p.modifiable && p.lienEcran) {
+                <a mat-icon-button [routerLink]="p.lienEcran" [matTooltip]="'Modifier dans « ' + p.gerePar + ' »'"><mat-icon>open_in_new</mat-icon></a>
+              }
+            </td>
+          </tr>
+        }
+      </table>
+    </mat-card-content>
+  </mat-card>
+}
+
+<h2>Historique des modifications</h2>
+@if (historique().length === 0) { <p class="aide">Aucune modification faite depuis cet écran.</p> }
+@for (h of historique(); track h.id) {
+  <div class="historique">
+    <div><strong>{{ h.modifieLe | date: 'dd/MM/yyyy HH:mm' }}</strong> · {{ h.modifiePar ?? '—' }} · {{ libelle(h.cle) }}</div>
+    <div><code>{{ h.avant }}</code> → <code>{{ h.apres }}</code> · {{ h.motif }}</div>
+  </div>
+}

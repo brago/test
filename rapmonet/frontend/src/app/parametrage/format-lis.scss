@@ -29,3 +29,11 @@ table.apercu td, table.apercu th { white-space: nowrap; }
 .historique { border-left: 3px solid var(--mat-sys-outline-variant); padding: 4px 12px; margin-bottom: 10px; }
 .historique .valeur { font-family: 'Roboto Mono', monospace; font-size: 11px; word-break: break-all; }
 table.structure td:first-child { white-space: nowrap; }
+.groupe-parametres { max-width: 1100px; }
+table.parametres td { padding: 8px; vertical-align: top; }
+table.parametres { table-layout: fixed; }
+table.parametres td.libelle { width: 50%; }
+table.parametres td.bouton { width: 48px; text-align: right; }
+.edition-parametre { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: flex-start; }
+.edition-parametre mat-form-field { width: 200px; }
+.edition-parametre mat-form-field.motif { width: 280px; }

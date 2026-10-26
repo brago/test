@@ -6,7 +6,7 @@ import { sessionOuverte, sessionRequise } from './core/auth.guard';
 const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit', '/securite/politique',
-  '/parametrage/gab', '/gab/activite', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
+  '/parametrage/gab', '/parametrage/application', '/gab/activite', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
   '/reporting/kpi', '/reporting/reglementaire', '/compense/traitements', '/compense/commercants', '/compense/validation',
   '/rapprochement/gab-lis', '/rapprochement/regles'];
 
@@ -113,6 +113,10 @@ export const routes: Routes = [
       {
         path: 'parametrage/gab', title: 'Paramétrage GAB – RAPMONET', data: { menu: 'PARAMETRAGE_GAB' },
         loadComponent: () => import('./gab/parametrage-gab').then((m) => m.ParametrageGab),
+      },
+      {
+        path: 'parametrage/application', title: 'Paramètres de l\'application – RAPMONET', data: { menu: 'PARAMETRAGE_APPLICATION' },
+        loadComponent: () => import('./parametrage/parametres-application').then((m) => m.ParametresApplication),
       },
       {
         path: 'gab/activite', title: 'Activité des GAB – RAPMONET', data: { menu: 'GAB_ACTIVITE' },
