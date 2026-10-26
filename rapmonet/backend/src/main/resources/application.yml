@@ -20,7 +20,7 @@ spring:
   application:
     name: rapmonet
   datasource:
-    url: ${RAPMONET_DB_URL:jdbc:postgresql://localhost:5432/rapmonet}
+    url: ${RAPMONET_DB_URL:jdbc:postgresql://${RAPMONET_DB_HOST:localhost}:${RAPMONET_DB_PORT:5432}/${RAPMONET_DB_NAME:rapmonet}}
     username: ${RAPMONET_DB_USER:rapmonet}
     password: ${RAPMONET_DB_PASSWORD:rapmonet}
   jpa:
@@ -33,7 +33,9 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+  # Derrière un proxy HTTPS (hébergeur, reverse proxy de la banque)
+  forward-headers-strategy: framework
   servlet:
     session:
       timeout: 30m

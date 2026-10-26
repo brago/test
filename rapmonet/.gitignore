@@ -13,3 +13,5 @@ donnees-reelles/
 # Dossiers de dépôt / archive du batch des journaux GAB (données réelles)
 donnees/
 backend/donnees/
+# Secrets de déploiement
+.env

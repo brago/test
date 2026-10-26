@@ -1,0 +1,39 @@
+# Déploiement de démonstration de RAPMONET sur Render (https://render.com) :
+# Render › New › Blueprint › choisir ce dépôt et la branche. Voir rapmonet/docs/deploiement.md.
+# Données de démonstration uniquement : ne jamais charger de fichiers bancaires réels sur un hébergeur externe.
+services:
+  - type: web
+    name: rapmonet-demo
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: claude/confident-thompson-5vua28
+    dockerfilePath: ./rapmonet/Dockerfile
+    dockerContext: ./rapmonet
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: RAPMONET_DB_HOST
+        fromDatabase: { name: rapmonet-demo-base, property: host }
+      - key: RAPMONET_DB_PORT
+        fromDatabase: { name: rapmonet-demo-base, property: port }
+      - key: RAPMONET_DB_NAME
+        fromDatabase: { name: rapmonet-demo-base, property: database }
+      - key: RAPMONET_DB_USER
+        fromDatabase: { name: rapmonet-demo-base, property: user }
+      - key: RAPMONET_DB_PASSWORD
+        fromDatabase: { name: rapmonet-demo-base, property: password }
+      - key: RAPMONET_ADMIN_MOT_DE_PASSE
+        generateValue: true
+      - key: RAPMONET_CLE_CHIFFREMENT
+        generateValue: true
+      - key: RAPMONET_CLE_EMPREINTE_CARTE
+        generateValue: true
+      - key: RAPMONET_FUSEAU_HORAIRE
+        value: Africa/Abidjan
+
+databases:
+  - name: rapmonet-demo-base
+    plan: free
+    region: frankfurt
+    databaseName: rapmonet
+    user: rapmonet

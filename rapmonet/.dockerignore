@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/.angular
+**/target
+**/donnees
+donnees-reelles
+**/*.7z
+**/LIS_IN_*

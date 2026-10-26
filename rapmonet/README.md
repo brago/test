@@ -10,6 +10,11 @@ reporting réglementaire. Version Java web améliorée de MONETICA V2.
 | Base de données | PostgreSQL 16+ |
 | Frontend | Angular 21, Angular Material |
 
+## Déploiement
+
+Démonstration en ligne (Render) ou installation sur un serveur avec Docker : voir
+[`docs/deploiement.md`](docs/deploiement.md). Jeu de données fictif pour tester : [`demo/`](demo/README.md).
+
 ## Prérequis
 
 - **Java 21** (JDK)

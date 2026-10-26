@@ -1,0 +1,39 @@
+# Démarrage complet (base + application) sur un serveur ou un poste :  docker compose up -d --build
+# Puis ouvrir http://<serveur>:8080 — compte « admin », mot de passe RAPMONET_ADMIN_MOT_DE_PASSE (à changer à la 1re connexion).
+# Définir les secrets dans un fichier .env à côté de ce fichier (jamais versionné), voir .env.exemple.
+services:
+  base:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rapmonet
+      POSTGRES_USER: rapmonet
+      POSTGRES_PASSWORD: ${RAPMONET_DB_PASSWORD:?définir RAPMONET_DB_PASSWORD dans .env}
+    volumes:
+      - base:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rapmonet"]
+      interval: 5s
+      retries: 20
+
+  application:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      base:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      RAPMONET_DB_HOST: base
+      RAPMONET_DB_PASSWORD: ${RAPMONET_DB_PASSWORD}
+      RAPMONET_ADMIN_MOT_DE_PASSE: ${RAPMONET_ADMIN_MOT_DE_PASSE:?définir RAPMONET_ADMIN_MOT_DE_PASSE dans .env}
+      RAPMONET_CLE_CHIFFREMENT: ${RAPMONET_CLE_CHIFFREMENT:?définir RAPMONET_CLE_CHIFFREMENT dans .env}
+      RAPMONET_CLE_EMPREINTE_CARTE: ${RAPMONET_CLE_EMPREINTE_CARTE:?définir RAPMONET_CLE_EMPREINTE_CARTE dans .env}
+      RAPMONET_FUSEAU_HORAIRE: Africa/Abidjan
+    volumes:
+      - donnees:/app/donnees
+
+volumes:
+  base:
+  donnees:
