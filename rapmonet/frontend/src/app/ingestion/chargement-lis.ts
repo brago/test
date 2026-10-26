@@ -7,13 +7,15 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BatchEjournal } from './batch-ejournal';
+import { API_BATCH_LIS } from '../core/ejournal';
 import { AnomalieLis, FichierLis, LisService, RapportIntegration } from './lis.service';
 
 /** Chargement des fichiers LIS (SW et PR) d'une journée et historique des intégrations. */
 @Component({
   selector: 'app-chargement-lis',
   imports: [
-    DatePipe, DecimalPipe, KeyValuePipe,
+    DatePipe, DecimalPipe, KeyValuePipe, BatchEjournal,
     MatButtonModule, MatCardModule, MatIconModule, MatTableModule, MatChipsModule, MatProgressBarModule, MatTooltipModule,
   ],
   templateUrl: './chargement-lis.html',
@@ -21,6 +23,7 @@ import { AnomalieLis, FichierLis, LisService, RapportIntegration } from './lis.s
 })
 export class ChargementLis {
   private readonly service = inject(LisService);
+  protected readonly apiBatch = API_BATCH_LIS;
 
   protected readonly sw = signal<File | null>(null);
   protected readonly pr = signal<File | null>(null);
@@ -77,7 +80,7 @@ export class ChargementLis {
     });
   }
 
-  private recharger(): void {
+  protected recharger(): void {
     this.service.lister().subscribe((f) => this.fichiers.set(f));
   }
 }

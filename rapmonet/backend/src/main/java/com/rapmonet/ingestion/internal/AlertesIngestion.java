@@ -4,6 +4,7 @@ import com.rapmonet.alertes.Alerte;
 import com.rapmonet.alertes.Alerte.Niveau;
 import com.rapmonet.alertes.SourceAlertes;
 import com.rapmonet.ingestion.BatchJournaux;
+import com.rapmonet.ingestion.BatchLis;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +23,12 @@ class AlertesIngestion implements SourceAlertes {
     private static final DateTimeFormatter JJ = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final BatchJournaux batch;
+    private final BatchLis batchLis;
     private final JdbcClient jdbc;
 
-    AlertesIngestion(BatchJournaux batch, JdbcClient jdbc) {
+    AlertesIngestion(BatchJournaux batch, BatchLis batchLis, JdbcClient jdbc) {
         this.batch = batch;
+        this.batchLis = batchLis;
         this.jdbc = jdbc;
     }
 
@@ -41,6 +44,17 @@ class AlertesIngestion implements SourceAlertes {
                 l.add(new Alerte("BATCH_JOURNAUX_REJETS", Niveau.ATTENTION, "Journaux GAB rejetés par le batch",
                         "Exécution du " + JJ.format(e.debut()) + " : voir la raison de chaque rejet dans l'historique.",
                         e.nbRejetes(), null, "CHARGEMENT_EJOURNAL", "/ingestion/ejournal"));
+            }
+        });
+        batchLis.etat().dernieresExecutions().stream().findFirst().ifPresent(e -> {
+            if ("ERREUR".equals(e.statut())) {
+                l.add(new Alerte("BATCH_LIS_ERREUR", Niveau.CRITIQUE, "Chargement automatique des LIS en erreur",
+                        "Dernière exécution le " + JJ.format(e.debut()) + (e.message() == null ? "" : " : " + e.message()),
+                        1, null, "CHARGEMENT_LIS", "/ingestion"));
+            } else if (e.nbRejetes() > 0) {
+                l.add(new Alerte("BATCH_LIS_REJETS", Niveau.ATTENTION, "Fichiers LIS rejetés par le chargement automatique",
+                        "Exécution du " + JJ.format(e.debut()) + " : voir la raison de chaque rejet dans l'historique.",
+                        e.nbRejetes(), null, "CHARGEMENT_LIS", "/ingestion"));
             }
         });
         LocalDate derniere = jdbc.sql("select max(journee) from lis_fichier").query(LocalDate.class).optional().orElse(null);

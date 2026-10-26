@@ -4,6 +4,10 @@
   Les fichiers sont contrôlés puis intégrés ensemble : si l'un d'eux est rejeté, aucun n'est intégré.
 </p>
 
+<app-batch-ejournal [api]="apiBatch" fichiersTraites="fichiers LIS" libelleObjet="Type et journée"
+  classementArchive="classés par mois de journée" provenance="fichiers LIS reçus du GIM" (termine)="recharger()" />
+
+<h2>Intégration manuelle</h2>
 <mat-card appearance="outlined" class="selection">
   <mat-card-content>
     <div class="ligne-fichier">

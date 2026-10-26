@@ -47,3 +47,12 @@ numéro en clair.
 - Structures non extraites automatiquement : TC 01, 02, 04, 41, 47, 55, 56, 57, 60, 61, 63, 67, 72.
 - Variantes Visa du TC 46 (§7.50 à 7.59, sous-fichier FV) : dépendent de REPORT GROUP / SUBGROUP.
 - Rapprochement LIS / core banking (lot 6) à partir des attributs ARN, RRN, autorisation, terminal, montant, date.
+
+## Chargement automatique
+
+- Les fichiers LIS déposés dans le dossier d'entrée (`lis.batch.repertoire_entree`, par défaut `donnees/lis/entree`) sont intégrés chaque jour à l'heure `lis.batch.heure` (08:00 par défaut), ou sur demande (« Lancer maintenant » sur l'écran de chargement LIS).
+- Le type est lu dans le nom du fichier (`…_SW_<jjjjj>…` ou `…_PR_<jjjjj>…`) ; sans type, le fichier est rejeté. Chaque fichier est intégré seul, avec les mêmes contrôles que l'intégration manuelle.
+- Fichier intégré ou déjà intégré : déplacé dans l'archive, classé par mois de journée (`aaaa-mm`). Fichier refusé : déplacé dans le dossier de rejet avec un fichier `.erreur.txt` donnant le motif.
+- Historique dans `batch_execution` (traitement `LIS`), action d'audit `BATCH_LIS`. Une exécution en erreur ou avec rejets lève une alerte (menu « Fichiers LIS »).
+- Mécanique commune avec le batch des journaux GAB : `ingestion.internal.BatchDossier`.
+- Reste à faire : récupération directe sur le serveur SFTP du GIM (attente des accès).

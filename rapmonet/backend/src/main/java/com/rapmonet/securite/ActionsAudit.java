@@ -22,6 +22,7 @@ public final class ActionsAudit {
     public static final String EJOURNAL_INTEGRATION = "EJOURNAL_INTEGRATION";
     public static final String EJOURNAL_ANNULATION = "EJOURNAL_ANNULATION";
     public static final String BATCH_EJOURNAL = "BATCH_EJOURNAL";
+    public static final String BATCH_LIS = "BATCH_LIS";
     public static final String PARAMETRAGE_BATCH = "PARAMETRAGE_BATCH";
     public static final String PARAMETRAGE_GAB = "PARAMETRAGE_GAB";
     public static final String GAB_APPRO_SAISIE = "GAB_APPRO_SAISIE";

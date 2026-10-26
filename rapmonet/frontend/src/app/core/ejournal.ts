@@ -53,6 +53,9 @@ export interface EtatBatch {
   configuration: ConfigurationBatch; prochaineExecution: string | null; enCours: boolean; nbFichiersEnAttente: number;
   dernieresExecutions: ExecutionBatch[];
 }
+export const API_BATCH_JOURNAUX = '/api/ingestion/ejournal/batch';
+export const API_BATCH_LIS = '/api/ingestion/lis/batch';
+
 export const LIBELLES_STATUT_BATCH: Record<string, string> = {
   EN_COURS: 'En cours', TERMINE: 'Terminé', TERMINE_AVEC_REJETS: 'Terminé avec rejets', ERREUR: 'Erreur', INTERROMPU: 'Interrompu',
 };
@@ -108,16 +111,17 @@ export class EjournalService {
     return this.http.get<EvenementGab[]>('/api/exploration/ejournal/evenements', { params: params(c) });
   }
 
-  etatBatch(): Observable<EtatBatch> {
-    return this.http.get<EtatBatch>('/api/ingestion/ejournal/batch');
+  /** Traitements automatiques : `api` vaut `/api/ingestion/ejournal/batch` ou `/api/ingestion/lis/batch`. */
+  etatBatch(api = API_BATCH_JOURNAUX): Observable<EtatBatch> {
+    return this.http.get<EtatBatch>(api);
   }
 
-  modifierBatch(c: ConfigurationBatch): Observable<ConfigurationBatch> {
-    return this.http.put<ConfigurationBatch>('/api/ingestion/ejournal/batch/configuration', c);
+  modifierBatch(c: ConfigurationBatch, api = API_BATCH_JOURNAUX): Observable<ConfigurationBatch> {
+    return this.http.put<ConfigurationBatch>(`${api}/configuration`, c);
   }
 
-  lancerBatch(): Observable<{ id: number }> {
-    return this.http.post<{ id: number }>('/api/ingestion/ejournal/batch/executions', null);
+  lancerBatch(api = API_BATCH_JOURNAUX): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${api}/executions`, null);
   }
 
   terminaux(): Observable<string[]> {

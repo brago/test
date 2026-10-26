@@ -9,12 +9,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
- * Déclenche chaque jour le batch des journaux GAB à l'heure paramétrée. La vérification a lieu
- * chaque minute : un changement d'heure ou d'activation dans l'écran s'applique immédiatement, et
- * une exécution manquée (serveur arrêté) est rattrapée au redémarrage, dans les 6 heures.
- * Désactivable par la propriété {@code rapmonet.batch.planification-active=false} (tests).
+ * Déclenche chaque jour les batchs (journaux GAB, fichiers LIS) à l'heure paramétrée. La vérification a lieu
+ * chaque minute : un changement d'heure ou d'activation dans l'écran s'applique immédiatement, et une exécution
+ * manquée (serveur arrêté) est rattrapée au redémarrage, dans les 6 heures.
+ * Désactivable par la propriété rapmonet.batch.planification-active=false (tests).
  */
 @Configuration
 @EnableScheduling
@@ -23,23 +24,25 @@ class PlanificationBatchJournaux {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlanificationBatchJournaux.class);
 
-    private final BatchJournauxService batch;
+    private final List<BatchDossier> batchs;
 
-    PlanificationBatchJournaux(BatchJournauxService batch) {
-        this.batch = batch;
+    PlanificationBatchJournaux(BatchJournauxService journaux, BatchLisService lis) {
+        this.batchs = List.of(journaux, lis);
     }
 
     @Scheduled(cron = "0 * * * * *")
     void verifier() {
-        try {
-            if (batch.executionPlanifieeDue(Instant.now())) {
-                LOG.info("Démarrage du batch des journaux GAB");
-                batch.executer("PLANIFIE", BatchJournauxService.UTILISATEUR_BATCH);
+        for (BatchDossier batch : batchs) {
+            try {
+                if (batch.executionPlanifieeDue(Instant.now())) {
+                    LOG.info("Démarrage du batch des {}", batch.libelle());
+                    batch.executer("PLANIFIE", BatchDossier.UTILISATEUR_BATCH);
+                }
+            } catch (RegleMetierException e) {
+                LOG.info("Batch des {} non lancé : {}", batch.libelle(), e.getMessage());
+            } catch (RuntimeException e) {
+                LOG.error("Batch des {} : erreur de planification", batch.libelle(), e);
             }
-        } catch (RegleMetierException e) {
-            LOG.info("Batch des journaux GAB non lancé : {}", e.getMessage());
-        } catch (RuntimeException e) {
-            LOG.error("Batch des journaux GAB : erreur de planification", e);
         }
     }
 }

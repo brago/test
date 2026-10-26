@@ -60,7 +60,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 |---|---|---|
 | 0 | Socle : backend, frontend, base, tests, intégration continue | ✅ Fait |
 | 1 | Sécurité : connexion, blocage après 3 échecs, utilisateurs, profils, audit ; exports Excel / PDF | ✅ Fait (voir ADR 0002) |
-| 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`) ; écrans de modification du paramétrage à venir |
+| 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`), chargement automatique quotidien ✅ ; écrans de modification du paramétrage à venir |
 | 3 | Rapports VSS de VISA (fichiers VX / EP-747) : chargement, consultation, export, paramétrage | ✅ Fait (voir `docs/specs/vss.md`) |
 | 4 | E-journaux NCR ✅, intégration automatique quotidienne à 04:00 ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
 | 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |
@@ -71,7 +71,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 
 ## Améliorations prévues par rapport à MONETICA V2
 
-1. Chargement automatique depuis un dossier surveillé (✅ journaux GAB, batch quotidien) ou SFTP, refus des doublons (empreinte du fichier).
+1. Chargement automatique depuis un dossier surveillé (✅ journaux GAB et fichiers LIS, batch quotidien) ou SFTP (à faire : accès SFTP du GIM), refus des doublons (empreinte du fichier).
 2. Lecture directe de BKHIS dans Amplitude si l'accès est possible (sinon import Excel).
 3. Règles de rapprochement paramétrables, avec tolérances.
 4. Gestion des écarts : statut, responsable, commentaires, justificatifs (✅ GAB ↔ LIS).

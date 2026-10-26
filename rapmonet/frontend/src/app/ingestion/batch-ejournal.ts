@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, output, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,11 +10,11 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
-  ConfigurationBatch, EjournalService, EtatBatch, ExecutionBatch, LIBELLES_RESULTAT_BATCH, LIBELLES_STATUT_BATCH,
+  API_BATCH_JOURNAUX, ConfigurationBatch, EjournalService, EtatBatch, ExecutionBatch, LIBELLES_RESULTAT_BATCH, LIBELLES_STATUT_BATCH,
 } from '../core/ejournal';
 import { messageErreur } from '../core/erreurs';
 
-/** Intégration automatique quotidienne des journaux déposés dans un dossier. */
+/** Intégration automatique quotidienne des fichiers déposés dans un dossier (journaux GAB ou fichiers LIS). */
 @Component({
   selector: 'app-batch-ejournal',
   imports: [DatePipe, FormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule,
@@ -22,8 +22,19 @@ import { messageErreur } from '../core/erreurs';
   templateUrl: './batch-ejournal.html',
   styleUrl: './batch-ejournal.scss',
 })
-export class BatchEjournal {
+export class BatchEjournal implements OnInit {
   private readonly service = inject(EjournalService);
+
+  /** Adresse de l'API du traitement automatique. */
+  readonly api = input(API_BATCH_JOURNAUX);
+  /** Fichiers traités, au pluriel (« journaux », « fichiers LIS »). */
+  readonly fichiersTraites = input('journaux');
+  /** Titre de la colonne de l'objet intégré (GAB, ou type et journée pour un LIS). */
+  readonly libelleObjet = input('GAB');
+  /** Classement des fichiers archivés. */
+  readonly classementArchive = input('classés par GAB et par mois');
+  /** Provenance des fichiers déposés dans le dossier d'entrée. */
+  readonly provenance = input('dépôt des GAB');
 
   /** Émis à la fin d'une exécution, pour rafraîchir la liste des journaux intégrés. */
   readonly termine = output<void>();
@@ -37,8 +48,11 @@ export class BatchEjournal {
   private suivi: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
-    this.recharger();
     inject(DestroyRef).onDestroy(() => this.arreterSuivi());
+  }
+
+  ngOnInit(): void {
+    this.recharger();
   }
 
   protected modifier(): void {
@@ -50,7 +64,7 @@ export class BatchEjournal {
     const c = this.edition();
     if (!c) return;
     this.erreur.set(null);
-    this.service.modifierBatch(c).subscribe({
+    this.service.modifierBatch(c, this.api()).subscribe({
       next: () => {
         this.edition.set(null);
         this.recharger();
@@ -61,7 +75,7 @@ export class BatchEjournal {
 
   protected lancer(): void {
     this.erreur.set(null);
-    this.service.lancerBatch().subscribe({
+    this.service.lancerBatch(this.api()).subscribe({
       next: (r) => {
         this.ouverte.set(r.id);
         this.recharger();
@@ -79,7 +93,7 @@ export class BatchEjournal {
   }
 
   private recharger(): void {
-    this.service.etatBatch().subscribe({
+    this.service.etatBatch(this.api()).subscribe({
       next: (e) => {
         const etaitEnCours = this.etat()?.enCours;
         this.etat.set(e);
