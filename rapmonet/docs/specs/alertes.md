@@ -34,3 +34,4 @@ Seuils (7 jours, 3 jours, 60 jours) : constantes des sources, à rendre paramét
 
 Envoi par e-mail (résumé quotidien) dès qu'un serveur SMTP de la banque est disponible.
 - `GAB_ACTIVITE_ANORMALE` (attention, menu GAB_ACTIVITE) : GAB signalés la veille par l'activité des GAB (refus élevés, inactivité, cartes capturées).
+- `RECLAMATIONS_EN_RETARD` (attention) et `RECLAMATIONS_A_TRAITER` (info), menu RECLAMATION_SUIVI : réclamations porteurs non closes, échéance dépassée ou non.

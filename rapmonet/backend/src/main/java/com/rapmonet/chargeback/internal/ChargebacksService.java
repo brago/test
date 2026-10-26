@@ -33,7 +33,7 @@ import java.util.function.Consumer;
  */
 @Service
 @Transactional
-public class ChargebacksService {
+public class ChargebacksService implements com.rapmonet.chargeback.DossiersPorteur {
 
     public enum Sens { EMISSION, ACQUISITION }
 
@@ -223,6 +223,50 @@ public class ChargebacksService {
                 rs.getString("reference_chargeback"), rs.getObject("journee_chargeback", LocalDate.class), null, null, 0, null,
                 rs.getString("regularisation"), rs.getString("commentaire"), rs.getString("regularise_par"),
                 rs.getObject("regularise_le", OffsetDateTime.class), rs.getBoolean("archive"), null, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.rapmonet.chargeback.DossiersPorteur.DossierPorteur> dossiers(String debutCarte, String finCarte,
+            String empreinte, String reference, LocalDate du, LocalDate au) {
+        List<Object> p = new ArrayList<>();
+        StringBuilder w = new StringBuilder(" where 1 = 1");
+        boolean critere = false;
+        if (empreinte != null) {
+            w.append(" and carte_empreinte = ?");
+            p.add(empreinte);
+            critere = true;
+        } else if (debutCarte != null && finCarte != null) {
+            w.append(" and regexp_replace(coalesce(carte, ''), '\\D', '', 'g') = ?");
+            p.add(debutCarte + finCarte);
+            critere = true;
+        }
+        if (reference != null && !reference.isBlank()) {
+            w.append(" and (arn = ? or rrn = ? or autorisation = ?)");
+            p.add(reference.strip());
+            p.add(reference.strip());
+            p.add(reference.strip());
+            critere = true;
+        }
+        if (!critere) {
+            return List.of();
+        }
+        if (du != null) {
+            w.append(" and coalesce(date_transaction, journee_chargeback) >= ?");
+            p.add(du);
+        }
+        if (au != null) {
+            w.append(" and coalesce(date_transaction, journee_chargeback) <= ?");
+            p.add(au);
+        }
+        int delai = delai();
+        return jdbc.sql("select * from chargeback_dossier" + w + " order by journee_chargeback desc limit 200").params(p)
+                .query((rs, n) -> dossier(rs)).list().stream()
+                .map(d -> avecCycle(d, delai, false))
+                .map(d -> new com.rapmonet.chargeback.DossiersPorteur.DossierPorteur(d.id(), d.sens().name(), d.arn(),
+                        d.libelleTc(), d.rrn(), d.carte(), d.terminal(), d.marchand(), d.dateTransaction(), d.montant(),
+                        d.motif(), d.journeeChargeback(), d.etat(), d.situation(), d.regularisation(), d.archive()))
+                .toList();
     }
 
     /** Cycle de vie relu dans les LIS : étapes, situation, état et délai. */

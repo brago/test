@@ -1,0 +1,102 @@
+<div class="non-imprimable">
+  <div class="entete">
+    <h1>Registre des réclamations</h1>
+    @if (peutRechercher) { <a mat-stroked-button routerLink="/reclamations/recherche"><mat-icon>person_search</mat-icon> Nouvelle recherche porteur</a> }
+  </div>
+  @if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+  <form class="filtres" (ngSubmit)="charger()">
+    <mat-button-toggle-group [(ngModel)]="statut" name="statut" (change)="charger()">
+      <mat-button-toggle value="A_TRAITER">À traiter</mat-button-toggle>
+      <mat-button-toggle value="FONDEE">Fondées</mat-button-toggle>
+      <mat-button-toggle value="NON_FONDEE">Non fondées</mat-button-toggle>
+      <mat-button-toggle value="">Toutes</mat-button-toggle>
+    </mat-button-toggle-group>
+    <mat-form-field appearance="outline" class="large">
+      <mat-label>Numéro, client, compte, carte</mat-label>
+      <input matInput name="recherche" [(ngModel)]="recherche" />
+    </mat-form-field>
+    <button mat-stroked-button type="submit"><mat-icon>search</mat-icon> Filtrer</button>
+  </form>
+
+  <div class="tableau">
+    <table class="liste">
+      <tr><th>Numéro</th><th>Ouverte le</th><th>Client</th><th>Carte</th><th>Compte</th><th>Objet</th>
+        <th class="nombre">Montant contesté</th><th>Statut</th><th>Échéance</th></tr>
+      @for (x of liste(); track x.id) {
+        <tr class="cliquable" [class.choisi]="fiche()?.id === x.id" (click)="ouvrir(x.id)">
+          <td><strong>{{ x.numero }}</strong></td>
+          <td>{{ x.creeLe | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ x.client }}</td>
+          <td class="mono">{{ x.carte }}</td>
+          <td class="mono">{{ x.compte }}</td>
+          <td>{{ x.libelleObjet }}</td>
+          <td class="nombre">{{ x.montantConteste | number }}</td>
+          <td><span class="etiquette" [class.vert]="x.statut === 'FONDEE' || x.statut === 'NON_FONDEE'" [class.orange]="x.statut === 'OUVERTE' || x.statut === 'EN_COURS'">{{ x.libelleStatut }}</span></td>
+          <td [class.erreur]="x.enRetard">{{ x.echeance | date: 'dd/MM/yyyy' }} @if (x.enRetard) { · en retard }</td>
+        </tr>
+      }
+    </table>
+    @if (liste().length === 0) { <p class="discret">Aucune réclamation.</p> }
+  </div>
+</div>
+
+@if (fiche(); as r) {
+  <div class="fiche" id="fiche">
+    <div class="entete">
+      <div>
+        <h2>Réclamation {{ r.numero }}</h2>
+        <span class="etiquette" [class.vert]="close(r)" [class.orange]="!close(r)">{{ r.libelleStatut }}</span>
+        @if (r.enRetard) { <span class="etiquette rouge">Échéance dépassée</span> }
+      </div>
+      <button mat-stroked-button class="non-imprimable" (click)="imprimer()"><mat-icon>print</mat-icon> Imprimer la fiche</button>
+    </div>
+    <dl>
+      <dt>Client</dt><dd>{{ r.client }} @if (r.contact) { · {{ r.contact }} }</dd>
+      <dt>Carte</dt><dd class="mono">{{ r.carte ?? '—' }}</dd>
+      <dt>Compte</dt><dd class="mono">{{ r.compte ?? '—' }}</dd>
+      <dt>Reçue par</dt><dd>{{ r.libelleCanal }}, le {{ r.creeLe | date: 'dd/MM/yyyy HH:mm' }} ({{ r.creePar ?? '—' }})</dd>
+      <dt>Objet</dt><dd>{{ r.libelleObjet }}</dd>
+      <dt>Montant contesté</dt><dd>{{ r.montantConteste !== null ? (r.montantConteste | number) + ' XOF' : '—' }}</dd>
+      <dt>Description</dt><dd>{{ r.description }}</dd>
+      <dt>Échéance de réponse</dt><dd>{{ r.echeance | date: 'dd/MM/yyyy' }}</dd>
+      @if (r.conclusion) { <dt>Conclusion</dt><dd><strong>{{ r.conclusion }}</strong> ({{ r.cloturePar }}, {{ r.clotureLe | date: 'dd/MM/yyyy' }})</dd> }
+    </dl>
+
+    <h3>Opérations concernées</h3>
+    @if (r.operations.length === 0) { <p class="discret">Aucune opération rattachée.</p> } @else {
+      <table class="liste">
+        <tr><th>Source</th><th>Date</th><th>Opération</th><th class="nombre">Montant</th></tr>
+        @for (o of r.operations; track $index) {
+          <tr><td>{{ o.type }}</td><td>{{ o.date | date: 'dd/MM/yyyy HH:mm' }}</td><td>{{ o.libelle }}</td><td class="nombre">{{ o.montant | number }}</td></tr>
+        }
+      </table>
+    }
+
+    <h3>Suivi</h3>
+    <ul class="suivi">
+      @for (s of r.suivi; track $index) {
+        <li><strong>{{ s.le | date: 'dd/MM/yyyy HH:mm' }}</strong> · {{ actions[s.action] }} · {{ s.auteur ?? '—' }}
+          @if (s.commentaire) { <div>{{ s.commentaire }}</div> }</li>
+      }
+    </ul>
+
+    <div class="non-imprimable">
+      <mat-form-field appearance="outline" class="pleine" style="width: 100%">
+        <mat-label>{{ close(r) ? 'Motif de la réouverture' : 'Commentaire ou conclusion communiquée au client' }}</mat-label>
+        <textarea matInput rows="2" [(ngModel)]="commentaire" maxlength="2000"></textarea>
+      </mat-form-field>
+      <div class="actions">
+        @if (r.statut === 'OUVERTE') { <button mat-stroked-button (click)="agir('PRISE_EN_CHARGE')"><mat-icon>person_add</mat-icon> Prendre en charge</button> }
+        @if (!close(r)) {
+          <button mat-stroked-button (click)="agir('COMMENTAIRE')" [disabled]="!commentaire.trim()"><mat-icon>comment</mat-icon> Ajouter au suivi</button>
+          <button mat-flat-button (click)="agir('FONDEE')" [disabled]="commentaire.trim().length < 10"><mat-icon>check</mat-icon> Clore : fondée</button>
+          <button mat-flat-button (click)="agir('NON_FONDEE')" [disabled]="commentaire.trim().length < 10"><mat-icon>close</mat-icon> Clore : non fondée</button>
+        } @else {
+          <button mat-stroked-button (click)="agir('REOUVERTURE')" [disabled]="!commentaire.trim()"><mat-icon>replay</mat-icon> Rouvrir</button>
+        }
+      </div>
+    </div>
+    <div class="signature"><span>Le chargé de clientèle</span><span>Le client</span></div>
+    <p class="discret">Fiche éditée le {{ maintenant | date: 'dd/MM/yyyy HH:mm' }} – RAPMONET</p>
+  </div>
+}

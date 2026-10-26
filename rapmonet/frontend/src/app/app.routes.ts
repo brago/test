@@ -8,7 +8,7 @@ const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/securite/utilisateurs', '/securite/profils', '/securite/audit', '/securite/politique',
   '/parametrage/gab', '/parametrage/application', '/gab/activite', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
   '/reporting/kpi', '/reporting/reglementaire', '/compense/traitements', '/compense/commercants', '/compense/validation',
-  '/rapprochement/gab-lis', '/rapprochement/regles'];
+  '/rapprochement/gab-lis', '/rapprochement/regles', '/reclamations/recherche', '/reclamations/registre'];
 
 export const routes: Routes = [
   { path: 'connexion', title: 'Connexion – RAPMONET', loadComponent: () => import('./pages/connexion/connexion').then((m) => m.Connexion) },
@@ -85,6 +85,14 @@ export const routes: Routes = [
       {
         path: 'compense/commercants', title: 'Commerçants – RAPMONET', data: { menu: 'COMPENSE_COMMERCANTS' },
         loadComponent: () => import('./compense/commercants').then((m) => m.Commercants),
+      },
+      {
+        path: 'reclamations/recherche', title: 'Recherche porteur – RAPMONET', data: { menu: 'RECLAMATION_RECHERCHE' },
+        loadComponent: () => import('./reclamation/recherche-porteur').then((m) => m.RecherchePorteur),
+      },
+      {
+        path: 'reclamations/registre', title: 'Réclamations – RAPMONET', data: { menu: 'RECLAMATION_SUIVI' },
+        loadComponent: () => import('./reclamation/registre').then((m) => m.RegistreReclamations),
       },
       {
         path: 'reporting/kpi', title: 'Indicateurs – RAPMONET', data: { menu: 'REPORTING_KPI' },

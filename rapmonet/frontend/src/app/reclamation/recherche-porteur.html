@@ -1,0 +1,182 @@
+<h1>Recherche porteur</h1>
+<p class="aide">
+  Toutes les opérations d'une carte, d'un compte ou d'une référence : retraits et soldes des GAB (avec leur rapprochement
+  GAB ↔ LIS), transactions des fichiers LIS, chargebacks et réclamations déjà ouvertes. Saisissez le numéro complet de
+  la carte pour une correspondance exacte, ou ses 6 premiers et 4 derniers chiffres. Le numéro complet n'est jamais
+  conservé. Cochez les opérations concernées pour ouvrir une réclamation.
+</p>
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+<form class="filtres" (ngSubmit)="rechercher()" autocomplete="off">
+  <mat-form-field appearance="outline" class="large">
+    <mat-label>Carte</mat-label>
+    <input matInput name="carte" [(ngModel)]="carte" placeholder="459847******1234" autocomplete="off" />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Compte</mat-label>
+    <input matInput name="compte" [(ngModel)]="compte" />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Référence</mat-label>
+    <input matInput name="reference" [(ngModel)]="reference" />
+    <mat-hint>ticket, autorisation, RRN, ARN</mat-hint>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+    <mat-hint>par défaut : 1 an</mat-hint>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <button mat-flat-button type="submit" [disabled]="enCours()"><mat-icon>person_search</mat-icon> Rechercher</button>
+</form>
+
+@if (resultat(); as r) {
+  <p>
+    @if (r.carteMasquee) { Carte <strong class="mono">{{ r.carteMasquee }}</strong>
+      <span class="discret">({{ r.exacte ? 'correspondance exacte dans les LIS et chargebacks' : 'correspondance sur les 6 premiers et 4 derniers chiffres' }})</span> }
+    @if (r.compte) { · Compte <strong class="mono">{{ r.compte }}</strong> }
+    @if (r.reference) { · Référence <strong class="mono">{{ r.reference }}</strong> }
+    · du {{ r.du | date: 'dd/MM/yyyy' }} au {{ r.au | date: 'dd/MM/yyyy' }}
+    @if (r.tronque) { · <span class="erreur">300 premières opérations par liste : réduisez la période</span> }
+  </p>
+
+  @if (r.reclamations.length) {
+    <section class="bloc">
+      <h2><mat-icon>assignment</mat-icon> Réclamations déjà enregistrées <span class="compte">{{ r.reclamations.length }}</span></h2>
+      <table class="liste">
+        <tr><th>Numéro</th><th>Ouverte le</th><th>Client</th><th>Objet</th><th>Statut</th><th>Échéance</th></tr>
+        @for (x of r.reclamations; track x.id) {
+          <tr>
+            <td>@if (peutSuivre) { <a [routerLink]="['/reclamations/registre']" [queryParams]="{ id: x.id }">{{ x.numero }}</a> } @else { {{ x.numero }} }</td>
+            <td>{{ x.creeLe | date: 'dd/MM/yyyy' }}</td><td>{{ x.client }}</td><td>{{ x.libelleObjet }}</td>
+            <td><span class="etiquette" [class.vert]="x.statut === 'FONDEE' || x.statut === 'NON_FONDEE'" [class.orange]="x.statut === 'OUVERTE' || x.statut === 'EN_COURS'">{{ x.libelleStatut }}</span></td>
+            <td [class.erreur]="x.enRetard">{{ x.echeance | date: 'dd/MM/yyyy' }}</td>
+          </tr>
+        }
+      </table>
+    </section>
+  }
+
+  <section class="bloc">
+    <h2><mat-icon>local_atm</mat-icon> Opérations GAB (journaux) <span class="compte">{{ r.operationsGab.length }}</span></h2>
+    @if (r.operationsGab.length === 0) { <p class="discret">Aucune opération dans les journaux GAB intégrés.</p> } @else {
+      <div class="tableau">
+        <table class="liste">
+          <tr><th></th><th>Date et heure</th><th>GAB</th><th>Opération</th><th>Statut</th><th class="nombre">Montant</th>
+            <th>Réponse</th><th>Référence</th><th>Carte</th><th>Compte</th><th>Incidents</th><th>Rapprochement GAB ↔ LIS</th></tr>
+          @for (x of r.operationsGab; track x.operation.id) {
+            @let o = x.operation;
+            <tr [class.choisi]="choisi('GAB', o.id)">
+              <td><mat-checkbox [checked]="choisi('GAB', o.id)" (change)="basculer(operationGab(x))" /></td>
+              <td>{{ o.dateHeure | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+              <td class="mono">{{ o.terminal }}</td>
+              <td>{{ o.type === 'RETRAIT' ? 'Retrait' : 'Solde' }}</td>
+              <td>{{ statutsOperation[o.statut] }}
+                @if (o.ecartBillets) { <div class="erreur discret">écart billets {{ o.ecartBillets | number }}</div> }</td>
+              <td class="nombre">{{ o.montant | number }}</td>
+              <td>{{ o.codeReponse }} <span class="discret">{{ o.libelleReponse }}</span></td>
+              <td class="mono">{{ o.reference }}</td>
+              <td class="mono">{{ o.carte }}</td>
+              <td class="mono">{{ o.compte }}</td>
+              <td class="discret">{{ o.incidents.join(', ') }}</td>
+              <td>@if (x.rapprochement; as s) {
+                <span class="etiquette" [class]="classeRapprochement(s.resultat)">{{ s.resultat }}</span>
+                @if (s.traitement) { <div class="discret">Écart : {{ s.traitement }}{{ s.commentaire ? ' – ' + s.commentaire : '' }}</div> }
+              } @else { <span class="discret">—</span> }</td>
+            </tr>
+          }
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="bloc">
+    <h2><mat-icon>description</mat-icon> Transactions LIS <span class="compte">{{ r.transactionsLis.length }}</span></h2>
+    @if (r.transactionsLis.length === 0) { <p class="discret">Aucune transaction dans les fichiers LIS intégrés.</p> } @else {
+      <div class="tableau">
+        <table class="liste">
+          <tr><th></th><th>Journée</th><th>Fichier</th><th>TC</th><th>Date</th><th class="nombre">Montant</th><th>Carte</th>
+            <th>Commerçant / GAB</th><th>Terminal</th><th>Autorisation</th><th>Référence</th></tr>
+          @for (t of r.transactionsLis; track t.id) {
+            <tr [class.choisi]="choisi('LIS', t.id)">
+              <td><mat-checkbox [checked]="choisi('LIS', t.id)" (change)="basculer(operationLis(t))" /></td>
+              <td>{{ t.journee | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ t.typeLis }}</td>
+              <td>{{ t.tc }} <span class="discret">{{ t.libelleTc }}</span></td>
+              <td>{{ t.date | date: 'dd/MM/yyyy' }}</td>
+              <td class="nombre">{{ t.montant | number }}</td>
+              <td class="mono">{{ t.carte }}</td>
+              <td>{{ t.libelle }}</td>
+              <td class="mono">{{ t.terminal }}</td>
+              <td class="mono">{{ t.autorisation }}</td>
+              <td class="mono">{{ t.reference }}</td>
+            </tr>
+          }
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="bloc">
+    <h2><mat-icon>undo</mat-icon> Chargebacks <span class="compte">{{ r.chargebacks.length }}</span></h2>
+    @if (r.chargebacks.length === 0) { <p class="discret">Aucun dossier de chargeback.</p> } @else {
+      <div class="tableau">
+        <table class="liste">
+          <tr><th></th><th>Sens</th><th>ARN</th><th>Transaction</th><th class="nombre">Montant</th><th>Motif</th>
+            <th>Journée du chargeback</th><th>Situation</th><th>Régularisation</th></tr>
+          @for (c of r.chargebacks; track c.id) {
+            <tr [class.choisi]="choisi('CHARGEBACK', c.id)">
+              <td><mat-checkbox [checked]="choisi('CHARGEBACK', c.id)" (change)="basculer(operationChargeback(c))" /></td>
+              <td>{{ c.sens === 'EMISSION' ? 'Émission' : 'Acquisition' }}</td>
+              <td class="mono">{{ c.arn }}</td>
+              <td>{{ c.dateTransaction | date: 'dd/MM/yyyy' }} <span class="discret">{{ c.marchand ?? c.terminal }}</span></td>
+              <td class="nombre">{{ c.montant | number }}</td>
+              <td>{{ c.motif }}</td>
+              <td>{{ c.journeeChargeback | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ c.situation ?? c.etat }}</td>
+              <td>{{ c.regularisation }}</td>
+            </tr>
+          }
+        </table>
+      </div>
+    }
+  </section>
+
+  @if (saisie(); as s) {
+    <mat-card appearance="outlined" class="formulaire" id="saisie-reclamation">
+      <mat-card-header>
+        <mat-card-title>Nouvelle réclamation</mat-card-title>
+        <mat-card-subtitle>{{ nbChoisis() }} opération(s) rattachée(s) · carte {{ r.carteMasquee ?? '—' }} · compte {{ compte || '—' }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="grille">
+        <mat-form-field appearance="outline"><mat-label>Client</mat-label><input matInput [(ngModel)]="s.client" maxlength="200" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Contact (téléphone, e-mail)</mat-label><input matInput [(ngModel)]="s.contact" maxlength="200" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Canal</mat-label>
+          <mat-select [(ngModel)]="s.canal">@for (c of canaux(); track c[0]) { <mat-option [value]="c[0]">{{ c[1] }}</mat-option> }</mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Objet</mat-label>
+          <mat-select [(ngModel)]="s.objet">@for (o of objets(); track o[0]) { <mat-option [value]="o[0]">{{ o[1] }}</mat-option> }</mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Montant contesté (XOF)</mat-label><input matInput type="number" [(ngModel)]="s.montant" min="0" /></mat-form-field>
+        <mat-form-field appearance="outline" class="pleine"><mat-label>Description de la réclamation</mat-label>
+          <textarea matInput rows="3" [(ngModel)]="s.description" maxlength="2000"></textarea></mat-form-field>
+        <div class="actions pleine">
+          <button mat-button (click)="saisie.set(null)">Annuler</button>
+          <button mat-flat-button (click)="enregistrer()" [disabled]="!s.client.trim() || !s.description.trim()"><mat-icon>save</mat-icon> Ouvrir la réclamation</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="barre-actions">
+      <span>{{ nbChoisis() }} opération(s) choisie(s) @if (montantChoisi()) { · {{ montantChoisi() | number }} XOF }</span>
+      <button mat-flat-button (click)="ouvrirSaisie()" [disabled]="!r.carteMasquee && !r.compte"><mat-icon>assignment_add</mat-icon> Ouvrir une réclamation</button>
+    </div>
+  }
+}

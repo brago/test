@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 @Transactional(readOnly = true)
 class ConsultationJournauxService implements ConsultationJournaux {
 
-    private static final String SELECT = """
+    static final String SELECT = """
             select o.*, c.libelle as libelle_reponse, s.billets_presentes, s.billets_pris, s.incidents
             from ej_operation o
             join ej_session s on s.id = o.session_id
@@ -111,7 +111,7 @@ class ConsultationJournauxService implements ConsultationJournaux {
         }
     }
 
-    private Operation operation(ResultSet rs) throws SQLException {
+    Operation operation(ResultSet rs) throws SQLException {
         Timestamp t = rs.getTimestamp("date_heure");
         String billets = rs.getString("billets_presentes");
         return new Operation(rs.getLong("id"), rs.getLong("session_id"), rs.getString("terminal_id"), rs.getString("type"),

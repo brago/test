@@ -46,6 +46,8 @@ public final class ActionsAudit {
     public static final String RAPPROCHEMENT_ECART = "RAPPROCHEMENT_ECART";
     public static final String RAPPROCHEMENT_REGLES = "RAPPROCHEMENT_REGLES";
     public static final String EXPORT = "EXPORT";
+    public static final String RECHERCHE_PORTEUR = "RECHERCHE_PORTEUR";
+    public static final String RECLAMATION = "RECLAMATION";
 
     private ActionsAudit() {
     }

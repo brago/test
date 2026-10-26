@@ -16,3 +16,11 @@ body {
   background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
 }
+
+/* Impression d'une fiche : seul le contenu de l'écran est imprimé. */
+@media print {
+  mat-toolbar, mat-sidenav, .mat-drawer { display: none !important; }
+  .mat-drawer-content, .mat-sidenav-content { margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+  .mat-drawer-container, .mat-sidenav-container { overflow: visible !important; }
+  body { background: #fff; }
+}

@@ -81,6 +81,13 @@ export const MENU: EntreeMenu[] = [
     ],
   },
   {
+    code: 'RECLAMATIONS', libelle: 'Réclamations porteurs', icone: 'support_agent', lot: 9,
+    enfants: [
+      { code: 'RECLAMATION_RECHERCHE', libelle: 'Recherche porteur', icone: 'person_search', chemin: '/reclamations/recherche', lot: 9 },
+      { code: 'RECLAMATION_SUIVI', libelle: 'Registre des réclamations', icone: 'assignment', chemin: '/reclamations/registre', lot: 9 },
+    ],
+  },
+  {
     code: 'REPORTING', libelle: 'Pilotage & réglementaire', icone: 'insights', lot: 8,
     enfants: [
       { code: 'REPORTING_KPI', libelle: 'Indicateurs (KPI)', icone: 'bar_chart', chemin: '/reporting/kpi', lot: 8 },

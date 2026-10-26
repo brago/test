@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 @Transactional(readOnly = true)
 class ConsultationLisService implements ConsultationLis {
 
-    private static final String SELECT = """
+    static final String SELECT = """
             select t.id, f.journee, f.type_lis, f.nom, t.sous_fichier, t.tc, t.sequence, t.nb_tcr, t.attributs,
                    t.fichier_id, t.numero
             from lis_transaction t join lis_fichier f on f.id = t.fichier_id
@@ -140,7 +140,7 @@ class ConsultationLisService implements ConsultationLis {
         }
     }
 
-    private TransactionLis transaction(ResultSet rs, Map<String, TcFormat> tcs) throws SQLException {
+    TransactionLis transaction(ResultSet rs, Map<String, TcFormat> tcs) throws SQLException {
         String tc = rs.getString("tc");
         Map<String, Object> attributs = json.readValue(rs.getString("attributs"), new TypeReference<Map<String, Object>>() { });
         return new TransactionLis(rs.getLong("id"), rs.getObject("journee", LocalDate.class),
@@ -183,7 +183,7 @@ class ConsultationLisService implements ConsultationLis {
         return v == null ? null : v.toString();
     }
 
-    private FormatFichier format() {
+    FormatFichier format() {
         return formats.trouver(IntegrationLisService.FORMAT_LIS)
                 .orElseThrow(() -> new IllegalStateException("Format LIS absent du paramétrage"));
     }

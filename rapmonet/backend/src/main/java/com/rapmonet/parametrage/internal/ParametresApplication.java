@@ -80,6 +80,8 @@ public class ParametresApplication {
                 "Taux de refus qui signale un GAB (%)", Type.ENTIER, 1, 100, null));
         DEFINITIONS.put("gab.activite.tentatives_min", new Definition("Activité des GAB",
                 "Tentatives minimales pour calculer le taux de refus", Type.ENTIER, 1, 1000, null));
+        DEFINITIONS.put("reclamation.delai_jours", new Definition("Réclamations porteurs", "Délai de traitement (jours)",
+                Type.ENTIER, 1, 120, null));
         DEFINITIONS.put("chargeback.delai_jours", new Definition("Chargebacks", "Délai de représentation (jours)",
                 Type.ENTIER, 1, 365, null));
     }
