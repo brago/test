@@ -63,7 +63,7 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 | 2 | Moteur de lecture générique + paramétrage et chargement LIS | ✅ Fait (voir `docs/specs/lis.md`), chargement automatique quotidien ✅, modification du paramétrage à l'écran ✅ |
 | 3 | Rapports VSS de VISA (fichiers VX / EP-747) : chargement, consultation, export, paramétrage | ✅ Fait (voir `docs/specs/vss.md`) |
 | 4 | E-journaux NCR ✅, intégration automatique quotidienne à 04:00 ✅ (voir `docs/specs/ejournal.md`) · Amplitude (BKHIS, MOHISDET) + ACD | Amplitude et ACD : attente d'exemples |
-| 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |
+| 5 | GAB : paramétrage (GAB, profils, BIN), appros, arrêtés, validation à quatre yeux, rapports, activité des GAB | ✅ Fait (voir `docs/specs/gab.md`) ; arrêté périodique, analyse compte et encaisse : attente de description |
 | 6 | Rapprochements + gestion des écarts : GAB ↔ LIS (retraits confrères) ✅ (voir `docs/specs/rapprochement-gab-lis.md`) · E-journal / Amplitude | Amplitude : attente des données |
 | 7 | Chargebacks GIM émission / acquisition : cycle de vie par ARN, délai, régularisation, journal GAB | ✅ Fait (voir `docs/specs/chargeback.md`) ; libellés des motifs à fournir |
 | 8 | KPI GAB / TPE / cartes (graphiques, tableau croisé), base trimestrielle réglementaire | ✅ Fait (voir `docs/specs/reporting.md`) ; formats BCEAO BP4 / VISA et PNB : attente des modèles |

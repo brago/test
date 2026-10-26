@@ -51,6 +51,7 @@ export const MENU: EntreeMenu[] = [
   {
     code: 'GAB', libelle: 'GAB : appros & arrêtés', icone: 'atm', lot: 5,
     enfants: [
+      { code: 'GAB_ACTIVITE', libelle: 'Activité des GAB', icone: 'insights', chemin: '/gab/activite', lot: 5 },
       { code: 'GAB_APPRO', libelle: 'Approvisionnements', icone: 'add_card', chemin: '/gab/appros', lot: 5 },
       { code: 'GAB_ARRETE', libelle: 'Arrêtés', icone: 'point_of_sale', chemin: '/gab/arretes', lot: 5 },
       { code: 'GAB_VALIDATION', libelle: 'Validation (4 yeux)', icone: 'verified_user', chemin: '/gab/validation', lot: 5 },

@@ -1,0 +1,151 @@
+<div class="entete">
+  <h1>Activité des GAB</h1>
+  @if (resultat(); as r) {
+    <div class="boutons"><button mat-stroked-button (click)="exporter()" [disabled]="!r.gabs.length"><mat-icon>grid_on</mat-icon> Excel</button></div>
+  }
+</div>
+<p class="aide">
+  Calculée sur les journaux GAB intégrés : retraits distribués, refus, billets non pris, cartes capturées et inactivité
+  (plus long intervalle sans passage de carte dans la plage surveillée). Les GAB signalés apparaissent en premier ;
+  cliquez sur un GAB pour son détail jour par jour.
+</p>
+@if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+<form class="filtres" (ngSubmit)="charger()">
+  <mat-form-field appearance="outline">
+    <mat-label>Du</mat-label>
+    <input matInput [matDatepicker]="pDu" [(ngModel)]="du" name="du" required />
+    <mat-datepicker-toggle matIconSuffix [for]="pDu" />
+    <mat-datepicker #pDu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Au</mat-label>
+    <input matInput [matDatepicker]="pAu" [(ngModel)]="au" name="au" required />
+    <mat-datepicker-toggle matIconSuffix [for]="pAu" />
+    <mat-datepicker #pAu />
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>GAB (terminal)</mat-label>
+    <input matInput [(ngModel)]="terminal" name="terminal" placeholder="Tous" />
+  </mat-form-field>
+  <button mat-flat-button type="submit" [disabled]="enCours()"><mat-icon>insights</mat-icon> Afficher</button>
+</form>
+
+@if (resultat(); as r) {
+  @let s = r.synthese;
+  <div class="tuiles">
+    <div class="tuile"><span>GAB</span><strong>{{ s.gabs }}</strong><em>{{ s.gabsAvecActivite }} avec activité</em></div>
+    <div class="tuile" [class.signal]="s.gabsSignales > 0" [class.ok-fond]="s.gabsSignales === 0"><span>GAB signalés</span><strong>{{ s.gabsSignales }}</strong><em>voir le tableau</em></div>
+    <div class="tuile"><span>Retraits distribués</span><strong>{{ s.retraits | number }}</strong><em>{{ s.montant | number }} XOF</em></div>
+    <div class="tuile" [class.signal]="s.tauxRefus >= r.seuils.tauxRefus"><span>Retraits refusés</span><strong>{{ s.refuses | number }}</strong><em>{{ s.tauxRefus | number: '1.0-1' }} % des tentatives</em></div>
+    <div class="tuile"><span>Billets non pris</span><strong>{{ s.nonPris | number }}</strong><em>retirés par le GAB</em></div>
+    <div class="tuile" [class.signal]="s.cartesCapturees > 0"><span>Cartes capturées</span><strong>{{ s.cartesCapturees | number }}</strong><em>à restituer ou détruire</em></div>
+  </div>
+
+  <div class="graphiques">
+    <section>
+      <h3>Retraits distribués par jour
+        <span class="bascule">
+          <button mat-button type="button" [class.actif]="mesure() === 'montant'" (click)="mesure.set('montant')">Montant</button>
+          <button mat-button type="button" [class.actif]="mesure() === 'nombre'" (click)="mesure.set('nombre')">Nombre</button>
+        </span>
+      </h3>
+      <app-graphique-barres [points]="parJour()" orientation="colonnes" [unite]="mesure() === 'montant' ? 'XOF' : 'retrait(s)'"
+                            titre="Retraits distribués par jour" />
+    </section>
+    <section>
+      <h3>Motifs de refus</h3>
+      @if (r.refus.length === 0) { <p class="discret">Aucun refus.</p> }
+      <ul class="motifs">
+        @for (m of r.refus.slice(0, 8); track m.code) { <li><span>{{ m.code }} – {{ m.libelle }}</span><strong>{{ m.nombre }}</strong></li> }
+      </ul>
+    </section>
+  </div>
+
+  <div class="tableau">
+    <table class="activite">
+      <tr>
+        <th>GAB</th><th class="nombre">Jours avec journal</th><th class="nombre">Retraits</th><th class="nombre">Montant</th>
+        <th class="nombre">Moyenne / jour</th><th class="nombre">Refus</th><th>Motif principal</th><th class="nombre">Non pris</th>
+        <th class="nombre">Captures</th><th>Plus longue inactivité</th><th>Dernier journal</th><th>Signalements</th>
+      </tr>
+      @for (l of r.gabs; track l.terminal) {
+        <tr class="cliquable" [class.selection]="detail()?.gab?.terminal === l.terminal" (click)="ouvrir(l)">
+          <td><strong class="mono">{{ l.terminal }}</strong><br /><span class="discret">{{ l.libelle ?? 'non paramétré' }}{{ l.agence ? ' · ' + l.agence : '' }}</span></td>
+          <td class="nombre">{{ l.joursCouverts }} / {{ l.joursPeriode }}</td>
+          <td class="nombre">{{ l.retraits | number }}</td>
+          <td class="nombre">{{ l.montant | number }}</td>
+          <td class="nombre">{{ l.montantMoyenJour | number }}</td>
+          <td class="nombre">{{ l.refuses | number }}<br /><span class="discret">{{ l.tauxRefus | number: '1.0-1' }} %</span></td>
+          <td class="discret">{{ l.motifPrincipal ?? '—' }}</td>
+          <td class="nombre">{{ l.nonPris }}</td>
+          <td class="nombre">{{ l.cartesCapturees }}</td>
+          <td>@if (l.dateInactivite) { {{ duree(l.plusLongueInactivite) }}<br /><span class="discret">le {{ l.dateInactivite | date: 'dd/MM' }} dès {{ l.debutInactivite?.slice(0, 5) }}</span> } @else { — }</td>
+          <td>{{ l.dernierJournal ? (l.dernierJournal | date: 'dd/MM/yyyy') : 'aucun' }}</td>
+          <td>
+            <div class="signalements">
+              @for (x of l.signalements; track x.code) { <span class="signalement"><mat-icon>{{ icones[x.code] }}</mat-icon> {{ x.libelle }}</span> }
+              @if (!l.signalements.length) { <span class="rien"><mat-icon>check_circle</mat-icon> RAS</span> }
+            </div>
+          </td>
+        </tr>
+      }
+    </table>
+    @if (r.gabs.length === 0) { <p class="aide">Aucun GAB paramétré ni journal sur la période.</p> }
+  </div>
+  <p class="discret">
+    Seuils : refus ≥ {{ r.seuils.tauxRefus }} % (à partir de {{ r.seuils.tentativesMin }} tentatives dans la journée) ;
+    inactivité ≥ {{ duree(r.seuils.inactiviteMinutes) }} entre {{ r.seuils.debutPlage.slice(0, 5) }} et {{ r.seuils.finPlage.slice(0, 5) }} ;
+    toute carte capturée ; jours sans journal pour un GAB actif. Paramètres <code>gab.activite.*</code>.
+  </p>
+}
+
+@if (detail(); as d) {
+  <h2 id="detail-gab">GAB {{ d.gab.terminal }} {{ d.gab.libelle ? '– ' + d.gab.libelle : '' }}</h2>
+  <div class="graphiques">
+    <section>
+      <h3>Retraits distribués par heure (période)</h3>
+      <app-graphique-barres [points]="parHeure()" orientation="colonnes" unite="retrait(s)" titre="Retraits par heure" />
+    </section>
+    <section>
+      <h3>Motifs de refus</h3>
+      @if (d.refus.length === 0) { <p class="discret">Aucun refus.</p> }
+      <ul class="motifs">@for (m of d.refus; track m.code) { <li><span>{{ m.code }} – {{ m.libelle }}</span><strong>{{ m.nombre }}</strong></li> }</ul>
+      @if (d.joursSansJournal.length) {
+        <p class="discret">Jours sans journal : {{ d.joursSansJournal.length }}
+          ({{ jjmm(d.joursSansJournal.slice(0, 6)) }}{{ d.joursSansJournal.length > 6 ? '…' : '' }})</p>
+      }
+    </section>
+  </div>
+  <div class="tableau">
+    <table class="activite">
+      <tr>
+        <th>Date</th><th class="nombre">Passages</th><th class="nombre">Retraits</th><th class="nombre">Montant</th>
+        <th class="nombre">Refus</th><th>Codes</th><th class="nombre">Soldes</th><th class="nombre">Non pris</th>
+        <th class="nombre">Captures</th><th class="nombre">Annulations</th><th>Premier / dernier passage</th>
+        <th>Plus longue inactivité</th><th>Gabiste</th><th>Signalements</th>
+      </tr>
+      @for (x of d.jours; track x.jour.date) {
+        <tr>
+          <td>{{ x.jour.date | date: 'EEE dd/MM' }}</td>
+          <td class="nombre">{{ x.jour.sessions }}</td>
+          <td class="nombre">{{ x.jour.retraitsDistribues }}</td>
+          <td class="nombre">{{ x.jour.montantDistribue | number }}</td>
+          <td class="nombre">{{ x.jour.retraitsRefuses }}<br /><span class="discret">{{ x.tauxRefus | number: '1.0-1' }} %</span></td>
+          <td class="discret">{{ refusDuJour(x.jour.refusParCode) }}</td>
+          <td class="nombre">{{ x.jour.soldes }}</td>
+          <td class="nombre">{{ x.jour.billetsNonPris }}</td>
+          <td class="nombre">{{ x.jour.cartesCapturees }}</td>
+          <td class="nombre">{{ x.jour.annulations }}</td>
+          <td>{{ x.jour.premierPassage?.slice(0, 5) ?? '—' }} / {{ x.jour.dernierPassage?.slice(0, 5) ?? '—' }}</td>
+          <td>{{ duree(x.jour.plusLongueInactivite) }} <span class="discret">dès {{ x.jour.debutInactivite?.slice(0, 5) }}</span></td>
+          <td class="discret">
+            @if (x.jour.arretes) { {{ x.jour.arretes }} arrêté(s) }
+            @if (x.jour.ajoutsEspeces) { · {{ x.jour.ajoutsEspeces }} ajout(s) d'espèces }
+          </td>
+          <td><div class="signalements">@for (s of x.signalements; track s.code) { <span class="signalement"><mat-icon>{{ icones[s.code] }}</mat-icon> {{ s.libelle }}</span> }</div></td>
+        </tr>
+      }
+    </table>
+  </div>
+}

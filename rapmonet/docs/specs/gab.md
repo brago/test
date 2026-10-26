@@ -101,3 +101,23 @@ le solde théorique n'est fiable que si tous les journaux de la période sont in
 - Le solde du compte caisse (8) sera lu dans Amplitude dès réception des extractions.
 - Écrans MONETICA V2 non repris à ce stade : « Arrêté GAB périodique », « Analyse compte GAB »,
   « Consultation encaisse GAB » (attente de leur description).
+
+## Activité des GAB
+
+Écran *GAB › Activité des GAB* (menu `GAB_ACTIVITE`), classe `gab.internal.ActiviteGab`, sur les agrégats quotidiens
+`ingestion.ActiviteJournaux` (sessions, opérations et passages en mode superviseur des journaux intégrés) :
+
+- **Synthèse de la période** : GAB, GAB signalés, retraits distribués (nombre, montant), refus et taux de refus
+  (refusés / tentés), billets non pris, cartes capturées ; retraits par jour et motifs de refus (codes réponse).
+- **Tableau par GAB** (GAB signalés en premier) : jours avec journal, retraits, montant, moyenne par jour, refus et
+  motif principal, non pris, captures, plus longue inactivité, dernier journal, signalements. Export Excel.
+- **Détail d'un GAB** : retraits par heure, motifs de refus, jours sans journal, et jour par jour : passages, retraits,
+  refus par code, soldes, non pris, captures, annulations, premier et dernier passage, plus longue inactivité,
+  passages du gabiste (arrêtés, ajouts d'espèces).
+
+Inactivité : plus long intervalle sans passage de carte dans la plage surveillée, bornes comprises (un GAB arrêté
+toute la matinée compte depuis le début de la plage).
+
+Signalements (paramètres `gab.activite.*`) : taux de refus ≥ 25 % sur une journée d'au moins 10 tentatives ;
+inactivité ≥ 180 min entre 07:00 et 21:00 ; toute carte capturée ; jours sans journal pour un GAB actif. Les
+signalements de la veille alimentent l'alerte `GAB_ACTIVITE_ANORMALE` de l'accueil.

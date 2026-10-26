@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Appros et arrêtés à valider ; GAB actifs sans journal la veille. */
+/** Appros et arrêtés à valider ; GAB actifs sans journal la veille ; GAB à l'activité anormale la veille. */
 @Component
 class AlertesGab implements SourceAlertes {
 
@@ -21,10 +21,12 @@ class AlertesGab implements SourceAlertes {
 
     private final JdbcClient jdbc;
     private final ConsultationJournaux journaux;
+    private final ActiviteGab activite;
 
-    AlertesGab(JdbcClient jdbc, ConsultationJournaux journaux) {
+    AlertesGab(JdbcClient jdbc, ConsultationJournaux journaux, ActiviteGab activite) {
         this.jdbc = jdbc;
         this.journaux = journaux;
+        this.activite = activite;
     }
 
     @Override
@@ -40,6 +42,14 @@ class AlertesGab implements SourceAlertes {
         l.add(new Alerte("GAB_SANS_JOURNAL", Niveau.ATTENTION, "GAB sans journal pour le " + JJ.format(hier),
                 "Journal non intégré : " + liste + ". Vérifier le dépôt et le dossier de rejet du batch.",
                 sansJournal.size(), null, "CHARGEMENT_EJOURNAL", "/ingestion/ejournal"));
+        // Activité anormale la veille : refus élevés, inactivité, cartes capturées.
+        var signales = activite.signalementsDuJour(hier);
+        String detail = signales.entrySet().stream().limit(4)
+                .map(e -> e.getKey() + " : " + e.getValue().stream().map(ActiviteGab.Signalement::libelle)
+                        .collect(java.util.stream.Collectors.joining(", ")))
+                .collect(java.util.stream.Collectors.joining(" ; ")) + (signales.size() > 4 ? "…" : "");
+        l.add(new Alerte("GAB_ACTIVITE_ANORMALE", Niveau.ATTENTION, "GAB à l'activité anormale le " + JJ.format(hier),
+                detail, signales.size(), null, "GAB_ACTIVITE", "/gab/activite"));
         return l;
     }
 

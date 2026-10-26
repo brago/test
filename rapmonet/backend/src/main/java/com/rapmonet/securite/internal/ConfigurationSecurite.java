@@ -60,6 +60,7 @@ class ConfigurationSecurite {
                         .requestMatchers("/api/exploration/vss/**").hasAuthority(menu("EXPLORATION_VSS"))
                         .requestMatchers("/api/ingestion/ejournal/**").hasAuthority(menu("CHARGEMENT_EJOURNAL"))
                         .requestMatchers("/api/exploration/ejournal/**").hasAuthority(menu("EXPLORATION_EJOURNAL"))
+                        .requestMatchers("/api/gab/activite", "/api/gab/activite/**").hasAuthority(menu("GAB_ACTIVITE"))
                         .requestMatchers(HttpMethod.POST, "/api/gab/*/*/validation", "/api/gab/*/*/annulation")
                         .hasAuthority(menu("GAB_VALIDATION"))
                         .requestMatchers(HttpMethod.POST, "/api/gab/appros").hasAuthority(menu("GAB_APPRO"))
