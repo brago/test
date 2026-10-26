@@ -30,6 +30,7 @@ export const MENU: EntreeMenu[] = [
       { code: 'PARAMETRAGE_LIS', libelle: 'Format LIS', icone: 'description', chemin: '/parametrage', lot: 2 },
       { code: 'PARAMETRAGE_VSS', libelle: 'Rapports VSS', icone: 'fact_check', chemin: '/parametrage/vss', lot: 3 },
       { code: 'PARAMETRAGE_GAB', libelle: 'GAB, profils et BIN', icone: 'atm', chemin: '/parametrage/gab', lot: 5 },
+      { code: 'PARAMETRAGE_CONSERVATION', libelle: 'Conservation des données', icone: 'inventory_2', chemin: '/parametrage/conservation', lot: 2 },
       { code: 'PARAMETRAGE_APPLICATION', libelle: 'Paramètres de l\'application', icone: 'settings', chemin: '/parametrage/application', lot: 2 },
     ],
   },

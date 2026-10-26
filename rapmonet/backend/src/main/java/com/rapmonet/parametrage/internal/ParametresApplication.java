@@ -60,6 +60,7 @@ public class ParametresApplication {
             new Gestion("rapprochement.gab_lis.", "Rapprochement GAB ↔ LIS", "Règles de rapprochement", "/rapprochement/regles"),
             new Gestion("ejournal.batch.", "Traitements automatiques", "Chargement des journaux GAB", "/ingestion/ejournal"),
             new Gestion("lis.batch.", "Traitements automatiques", "Chargement des fichiers LIS", "/ingestion"),
+            new Gestion("conservation.", "Conservation des données", "Conservation des données", "/parametrage/conservation"),
             new Gestion("compense.", "Compense TPE", "Commerçants et comptes de la compense", "/compense/commercants"));
 
     static {

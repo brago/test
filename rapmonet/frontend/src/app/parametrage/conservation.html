@@ -1,0 +1,106 @@
+<h1>Conservation des données</h1>
+<p class="aide">
+  Durée de conservation de chaque catégorie de données ; au-delà, les données peuvent être purgées (suppression
+  définitive de la base). Chaque catégorie a une durée minimale : 10 ans pour les opérations (obligation de conservation
+  des enregistrements de transactions, à confirmer avec la conformité). Les dossiers en cours (chargebacks non archivés,
+  réclamations non closes) ne sont jamais purgés. Les fichiers d'origine archivés par les traitements automatiques ne
+  sont pas concernés : ils suivent la politique de sauvegarde de la banque.
+</p>
+@if (message(); as m) { <p class="ok"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+@if (erreur(); as e) { <p class="ko"><mat-icon>error</mat-icon> {{ e }}</p> }
+
+@if (etat(); as e) {
+  <mat-card appearance="outlined" class="formulaire groupe-parametres">
+    <mat-card-content>
+      <table class="structure parametres">
+        <tr><th>Catégorie</th><th>Conservation</th><th>Données</th><th>À purger</th><th></th></tr>
+        @for (c of e.categories; track c.code) {
+          <tr>
+            <td class="libelle"><strong>{{ c.libelle }}</strong><div class="discret">{{ c.description }}</div></td>
+            <td>
+              @if (duree()?.code === c.code) {
+                @let d = duree()!;
+                <div class="edition-parametre">
+                  <mat-form-field appearance="outline"><mat-label>Durée (mois)</mat-label>
+                    <input matInput type="number" [(ngModel)]="d.mois" [min]="c.dureeMinimaleMois" max="600" />
+                    <mat-hint>minimum {{ c.dureeMinimaleMois }} ({{ annees(c.dureeMinimaleMois) }})</mat-hint></mat-form-field>
+                  <mat-form-field appearance="outline" class="motif"><mat-label>Motif</mat-label><input matInput [(ngModel)]="d.motif" maxlength="500" /></mat-form-field>
+                  <button mat-button (click)="duree.set(null)">Annuler</button>
+                  <button mat-flat-button (click)="enregistrerDuree()" [disabled]="d.motif.trim().length < 5">Enregistrer</button>
+                </div>
+              } @else {
+                <strong>{{ annees(c.dureeMois) }}</strong>
+                <div class="discret">conservées depuis le {{ c.limite | date: 'dd/MM/yyyy' }}</div>
+              }
+            </td>
+            <td>{{ c.total | number }}<div class="discret">@if (c.plusAncienne) { depuis le {{ c.plusAncienne | date: 'dd/MM/yyyy' }} } @else { aucune }</div></td>
+            <td><strong [class.ko]="c.aPurger > 0">{{ c.aPurger | number }}</strong></td>
+            <td class="bouton">@if (duree()?.code !== c.code) {
+              <button mat-icon-button (click)="duree.set({ code: c.code, mois: c.dureeMois, motif: '' })" matTooltip="Modifier la durée"><mat-icon>edit</mat-icon></button> }</td>
+          </tr>
+        }
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="formulaire groupe-parametres">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>delete_sweep</mat-icon>
+      <mat-card-title>Purge</mat-card-title>
+      <mat-card-subtitle>
+        @if (e.planification.planifiee) { Automatique le {{ e.planification.jour }} de chaque mois à 02:30. }
+        @else { Purge automatique désactivée : purge sur demande uniquement. }
+        {{ totalAPurger() | number }} élément(s) à purger aujourd'hui.
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      @if (planif(); as p) {
+        <div class="edition-parametre">
+          <mat-slide-toggle [(ngModel)]="p.planifiee">Purge automatique mensuelle</mat-slide-toggle>
+          <mat-form-field appearance="outline"><mat-label>Jour du mois</mat-label><input matInput type="number" [(ngModel)]="p.jour" min="1" max="28" /></mat-form-field>
+          <mat-form-field appearance="outline" class="motif"><mat-label>Motif</mat-label><input matInput [(ngModel)]="p.motif" maxlength="500" /></mat-form-field>
+          <button mat-button (click)="planif.set(null)">Annuler</button>
+          <button mat-flat-button (click)="enregistrerPlanification()" [disabled]="p.motif.trim().length < 5">Enregistrer</button>
+        </div>
+      }
+      @if (purge(); as p) {
+        <p class="ko"><mat-icon>warning</mat-icon> Suppression définitive de {{ totalAPurger() | number }} élément(s). Vérifiez qu'une sauvegarde récente de la base existe.</p>
+        <div class="edition-parametre">
+          <mat-form-field appearance="outline" class="motif"><mat-label>Motif</mat-label><input matInput [(ngModel)]="p.motif" maxlength="500" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Saisir PURGER</mat-label><input matInput [(ngModel)]="p.confirmation" autocomplete="off" /></mat-form-field>
+          <button mat-button (click)="purge.set(null)">Annuler</button>
+          <button mat-flat-button color="warn" (click)="purger()" [disabled]="enCours() || p.confirmation !== 'PURGER' || p.motif.trim().length < 5">
+            <mat-icon>delete_forever</mat-icon> Purger maintenant</button>
+        </div>
+      }
+    </mat-card-content>
+    @if (!planif() && !purge()) {
+      <mat-card-actions>
+        <button mat-stroked-button (click)="purge.set({ motif: '', confirmation: '' })" [disabled]="totalAPurger() === 0"><mat-icon>delete_sweep</mat-icon> Lancer une purge</button>
+        <button mat-button (click)="modifierPlanification()"><mat-icon>schedule</mat-icon> Purge automatique</button>
+      </mat-card-actions>
+    }
+  </mat-card>
+
+  <h2>Dernières purges</h2>
+  @if (e.dernieresExecutions.length === 0) { <p class="aide">Aucune purge.</p> }
+  @for (x of e.dernieresExecutions; track x.id) {
+    <div class="historique">
+      <div>
+        <button mat-icon-button (click)="ouverte.set(ouverte() === x.id ? null : x.id)"><mat-icon>{{ ouverte() === x.id ? 'expand_less' : 'expand_more' }}</mat-icon></button>
+        <strong>{{ x.debut | date: 'dd/MM/yyyy HH:mm' }}</strong> · {{ x.declencheur === 'PLANIFIE' ? 'Automatique' : 'Manuelle – ' + (x.lancePar ?? '') }}
+        · <span [class.ko]="x.statut !== 'TERMINE'">{{ x.statut === 'TERMINE' ? 'Terminée' : x.statut === 'ERREUR' ? 'Erreur' : 'En cours' }}</span>
+        · {{ totalSupprime(x) | number }} élément(s) supprimé(s) · {{ x.motif }}
+      </div>
+      @if (ouverte() === x.id) {
+        <table class="structure">
+          <tr><th>Catégorie</th><th>Durée</th><th>Avant le</th><th>Supprimés</th><th></th></tr>
+          @for (l of x.detail; track l.code) {
+            <tr><td>{{ l.libelle }}</td><td>{{ annees(l.dureeMois) }}</td><td>{{ l.limite | date: 'dd/MM/yyyy' }}</td><td>{{ l.supprimes | number }}</td>
+              <td class="ko">{{ l.erreur }}</td></tr>
+          }
+        </table>
+      }
+    </div>
+  }
+}

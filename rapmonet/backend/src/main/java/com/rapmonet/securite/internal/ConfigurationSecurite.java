@@ -92,6 +92,8 @@ class ConfigurationSecurite {
                         .requestMatchers("/api/rapprochement/regles/**").hasAuthority(menu("RAPPROCHEMENT_REGLES"))
                         .requestMatchers("/api/rapprochement/gab-lis", "/api/rapprochement/gab-lis/**")
                         .hasAuthority(menu("RAPPROCHEMENT_GAB_LIS"))
+                        .requestMatchers("/api/parametrage/conservation", "/api/parametrage/conservation/**")
+                        .hasAuthority(menu("PARAMETRAGE_CONSERVATION"))
                         .requestMatchers("/api/parametrage/application", "/api/parametrage/application/**")
                         .hasAuthority(menu("PARAMETRAGE_APPLICATION"))
                         .requestMatchers(HttpMethod.POST, "/api/reclamations/recherche").hasAuthority(menu("RECLAMATION_RECHERCHE"))
