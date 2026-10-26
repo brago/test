@@ -7,6 +7,10 @@ public final class ActionsAudit {
     public static final String DECONNEXION = "DECONNEXION";
     public static final String VERROUILLAGE = "VERROUILLAGE";
     public static final String CHANGEMENT_MOT_DE_PASSE = "CHANGEMENT_MOT_DE_PASSE";
+    public static final String DEUX_FACTEURS_ACTIVATION = "DEUX_FACTEURS_ACTIVATION";
+    public static final String DEUX_FACTEURS_DESACTIVATION = "DEUX_FACTEURS_DESACTIVATION";
+    public static final String DEUX_FACTEURS_REINITIALISATION = "DEUX_FACTEURS_REINITIALISATION";
+    public static final String POLITIQUE_SECURITE = "POLITIQUE_SECURITE";
     public static final String UTILISATEUR_CREATION = "UTILISATEUR_CREATION";
     public static final String UTILISATEUR_MODIFICATION = "UTILISATEUR_MODIFICATION";
     public static final String UTILISATEUR_DEVERROUILLAGE = "UTILISATEUR_DEVERROUILLAGE";

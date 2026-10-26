@@ -20,6 +20,7 @@ export const MENU: EntreeMenu[] = [
     enfants: [
       { code: 'SECURITE_UTILISATEURS', libelle: 'Utilisateurs', icone: 'group', chemin: '/securite/utilisateurs', lot: 1 },
       { code: 'SECURITE_PROFILS', libelle: 'Profils', icone: 'badge', chemin: '/securite/profils', lot: 1 },
+      { code: 'SECURITE_POLITIQUE', libelle: 'Politique de sécurité', icone: 'security', chemin: '/securite/politique', lot: 1 },
       { code: 'SECURITE_AUDIT', libelle: 'Piste d\'audit', icone: 'policy', chemin: '/securite/audit', lot: 1 },
     ],
   },

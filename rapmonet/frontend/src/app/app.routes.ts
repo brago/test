@@ -5,7 +5,7 @@ import { sessionOuverte, sessionRequise } from './core/auth.guard';
 /** Écrans réalisés ; les autres entrées du menu affichent la page « À venir ». */
 const REALISES = ['/accueil', '/ingestion', '/exploration', '/parametrage',
   '/ingestion/vss', '/exploration/vss', '/parametrage/vss', '/ingestion/ejournal', '/exploration/ejournal',
-  '/securite/utilisateurs', '/securite/profils', '/securite/audit',
+  '/securite/utilisateurs', '/securite/profils', '/securite/audit', '/securite/politique',
   '/parametrage/gab', '/gab/appros', '/gab/arretes', '/gab/validation', '/chargeback/emission', '/chargeback/acquisition',
   '/reporting/kpi', '/reporting/reglementaire', '/compense/traitements', '/compense/commercants', '/compense/validation',
   '/rapprochement/gab-lis'];
@@ -17,6 +17,12 @@ export const routes: Routes = [
     title: 'Mot de passe – RAPMONET',
     canActivate: [sessionOuverte],
     loadComponent: () => import('./pages/mot-de-passe/mot-de-passe').then((m) => m.MotDePasse),
+  },
+  {
+    path: 'deux-facteurs',
+    title: 'Double authentification – RAPMONET',
+    canActivate: [sessionOuverte],
+    loadComponent: () => import('./pages/deux-facteurs/deux-facteurs').then((m) => m.DeuxFacteurs),
   },
   {
     path: '',
@@ -31,6 +37,10 @@ export const routes: Routes = [
       {
         path: 'securite/profils', title: 'Profils – RAPMONET', data: { menu: 'SECURITE_PROFILS' },
         loadComponent: () => import('./securite/profils').then((m) => m.Profils),
+      },
+      {
+        path: 'securite/politique', title: 'Politique de sécurité – RAPMONET', data: { menu: 'SECURITE_POLITIQUE' },
+        loadComponent: () => import('./securite/politique').then((m) => m.Politique),
       },
       {
         path: 'securite/audit', title: 'Piste d\'audit – RAPMONET', data: { menu: 'SECURITE_AUDIT' },

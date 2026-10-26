@@ -19,3 +19,6 @@ table { width: 100%; }
 .filtres { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
 .filtres mat-form-field { width: 180px; }
 .discret { color: var(--mat-sys-on-surface-variant); }
+.mini { font-size: 14px; width: 14px; height: 14px; vertical-align: -2px; }
+.politique .formulaire { margin: 0 0 16px; }
+.cases { display: flex; flex-wrap: wrap; gap: 4px 24px; }

@@ -3,6 +3,8 @@ rapmonet:
   securite:
     # Clé de l'empreinte des numéros de carte. À DÉFINIR en production (variable RAPMONET_CLE_EMPREINTE_CARTE).
     cle-empreinte-carte: ${RAPMONET_CLE_EMPREINTE_CARTE:cle-de-developpement-a-changer}
+    # Clé de chiffrement des secrets de double authentification. À DÉFINIR en production (variable RAPMONET_CLE_CHIFFREMENT).
+    cle-chiffrement: ${RAPMONET_CLE_CHIFFREMENT:cle-de-chiffrement-de-developpement}
     admin:
       # Mot de passe du compte « admin » créé au premier démarrage ; à changer à la première connexion.
       mot-de-passe-initial: ${RAPMONET_ADMIN_MOT_DE_PASSE:admin}

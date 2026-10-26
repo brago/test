@@ -19,7 +19,8 @@ public class UtilisateursService {
 
     public record Utilisateur(String login, String nom, String agence, String email, String profilCode,
                               String libelleProfil, boolean actif, boolean verrouille, boolean doitChangerMdp,
-                              OffsetDateTime derniereConnexion, OffsetDateTime creeLe) {
+                              OffsetDateTime derniereConnexion, OffsetDateTime creeLe, boolean deuxFacteurs,
+                              OffsetDateTime mdpModifieLe) {
     }
 
     public record Creation(String login, String nom, String agence, String email, String profilCode,
@@ -34,16 +35,24 @@ public class UtilisateursService {
     private final JdbcClient jdbc;
     private final PasswordEncoder encodeur;
     private final AuditService audit;
+    private final PolitiqueSecurite politique;
+    private final MotsDePasse motsDePasse;
+    private final AuthentificationService authentification;
 
-    UtilisateursService(JdbcClient jdbc, PasswordEncoder encodeur, AuditService audit) {
+    UtilisateursService(JdbcClient jdbc, PasswordEncoder encodeur, AuditService audit, PolitiqueSecurite politique,
+                        MotsDePasse motsDePasse, AuthentificationService authentification) {
         this.jdbc = jdbc;
         this.encodeur = encodeur;
         this.audit = audit;
+        this.politique = politique;
+        this.motsDePasse = motsDePasse;
+        this.authentification = authentification;
     }
 
     private static final String SELECT = """
             select u.login, u.nom, u.agence, u.email, u.profil_code, p.libelle as libelle_profil, u.actif,
-                   u.verrouille, u.doit_changer_mdp, u.derniere_connexion, u.cree_le
+                   u.verrouille, u.doit_changer_mdp, u.derniere_connexion, u.cree_le,
+                   (u.totp_secret is not null) as deux_facteurs, u.mdp_modifie_le
             from securite_utilisateur u join securite_profil p on p.code = u.profil_code""";
 
     @Transactional(readOnly = true)
@@ -68,7 +77,7 @@ public class UtilisateursService {
                 .query(Integer.class).single() > 0) {
             throw new RegleMetierException("L'identifiant « " + c.login() + " » existe déjà.");
         }
-        PolitiqueMotDePasse.verifier(c.login(), c.motDePasseTemporaire());
+        politique.verifierComposition(c.login(), c.motDePasseTemporaire());
         jdbc.sql("""
                         insert into securite_utilisateur (login, nom, agence, email, profil_code, mot_de_passe, doit_changer_mdp)
                         values (?, ?, ?, ?, ?, ?, true)""")
@@ -116,13 +125,22 @@ public class UtilisateursService {
     @Transactional
     public Utilisateur reinitialiserMotDePasse(String login, String nouveau, boolean doitChanger) {
         trouver(login);
-        PolitiqueMotDePasse.verifier(login, nouveau);
-        jdbc.sql("""
-                        update securite_utilisateur set mot_de_passe = ?, doit_changer_mdp = ?, verrouille = false,
-                            nb_echecs = 0, modifie_le = now() where login = ?""")
-                .params(encodeur.encode(nouveau), doitChanger, login).update();
+        motsDePasse.changer(login, nouveau, false, doitChanger);
+        jdbc.sql("update securite_utilisateur set verrouille = false, nb_echecs = 0 where login = ?").param(login).update();
         audit.enregistrer(ActionsAudit.UTILISATEUR_REINITIALISATION_MDP, login,
                 doitChanger ? "À modifier à la prochaine connexion" : null);
+        return trouver(login);
+    }
+
+    /** Téléphone perdu ou changé : l'utilisateur devra réactiver la double authentification. */
+    @Transactional
+    public Utilisateur reinitialiserDeuxFacteurs(String login) {
+        Utilisateur u = trouver(login);
+        if (!u.deuxFacteurs()) {
+            throw new RegleMetierException("La double authentification n'est pas activée sur ce compte.");
+        }
+        authentification.effacerDeuxFacteurs(login);
+        audit.enregistrer(ActionsAudit.DEUX_FACTEURS_REINITIALISATION, login, null);
         return trouver(login);
     }
 

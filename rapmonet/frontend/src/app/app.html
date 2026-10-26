@@ -7,18 +7,23 @@
     <span class="sous-titre">Back-office monétique</span>
     <span class="espace"></span>
     @if (auth.utilisateur(); as u) {
-      @if (!u.doitChangerMotDePasse) {
-        <a mat-icon-button routerLink="/accueil" aria-label="Alertes à traiter"
-           [matTooltip]="alertes.aTraiter() ? alertes.aTraiter() + ' alerte(s) à traiter' : 'Aucune alerte à traiter'">
-          <mat-icon [matBadge]="alertes.aTraiter() || null" matBadgeColor="warn" matBadgeSize="small"
-                    aria-hidden="false">notifications</mat-icon>
+      @if (joursAvantExpiration() !== null) {
+        <a mat-button routerLink="/mot-de-passe" class="expiration" matTooltip="Changez votre mot de passe avant son expiration">
+          <mat-icon>schedule</mat-icon> Mot de passe : {{ joursAvantExpiration() }} j
         </a>
       }
+      <a mat-icon-button routerLink="/accueil" aria-label="Alertes à traiter"
+         [matTooltip]="alertes.aTraiter() ? alertes.aTraiter() + ' alerte(s) à traiter' : 'Aucune alerte à traiter'">
+        <mat-icon [matBadge]="alertes.aTraiter() || null" matBadgeColor="warn" matBadgeSize="small"
+                  aria-hidden="false">notifications</mat-icon>
+      </a>
       <button mat-button class="utilisateur" [matMenuTriggerFor]="menuUtilisateur">
         <mat-icon>account_circle</mat-icon> {{ u.nom }} <span class="profil">· {{ u.libelleProfil }}</span>
       </button>
       <mat-menu #menuUtilisateur="matMenu">
         <a mat-menu-item routerLink="/mot-de-passe"><mat-icon>key</mat-icon> Changer mon mot de passe</a>
+        <a mat-menu-item routerLink="/deux-facteurs"><mat-icon>phonelink_lock</mat-icon> Double authentification
+          @if (u.deuxFacteurs) { <span class="actif">· activée</span> }</a>
         <button mat-menu-item (click)="deconnecter()"><mat-icon>logout</mat-icon> Se déconnecter</button>
       </mat-menu>
     }

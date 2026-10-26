@@ -48,6 +48,11 @@ class UtilisateursController {
         return service.deverrouiller(login);
     }
 
+    @PostMapping("/{login}/deux-facteurs/reinitialisation")
+    Utilisateur reinitialiserDeuxFacteurs(@PathVariable String login) {
+        return service.reinitialiserDeuxFacteurs(login);
+    }
+
     @PostMapping("/{login}/mot-de-passe")
     Utilisateur reinitialiser(@PathVariable String login, @RequestBody Reinitialisation r) {
         return service.reinitialiserMotDePasse(login, r.nouveau(), r.doitChanger());

@@ -14,3 +14,11 @@ form { display: flex; flex-direction: column; }
 .regles mat-icon { font-size: 18px; width: 18px; height: 18px; }
 .regles li.ok { color: #1b7f3b; }
 .actions { display: flex; justify-content: flex-end; gap: 8px; }
+.discret { font-size: 12px; color: var(--mat-sys-on-surface-variant); margin: -8px 0 12px; }
+.carte.large { max-width: 520px; }
+.succes { display: flex; gap: 8px; align-items: center; color: #1b7f3b; }
+.etapes { padding-left: 20px; margin: 0 0 12px; line-height: 1.5; }
+.qr { width: 200px; height: 200px; margin: 0 auto 8px; }
+.qr ::ng-deep svg { width: 100%; height: 100%; }
+.centre { text-align: center; margin: 0 0 16px; }
+.secret { font-size: 14px; letter-spacing: 1px; user-select: all; }

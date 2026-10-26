@@ -31,6 +31,7 @@ Back-office monétique web (remplace MONETICA V2). Lire `docs/architecture.md` a
 - Rapports VSS (VX / EP-747) : lecteur générique `ingestion.vss.LecteurRapportsVss` (colonnes déduites des titres, hiérarchie par indentation) ; voir `docs/specs/vss.md`.
 - Frontend : composants autonomes (standalone), signaux, Angular Material ; un dossier par module sous `src/app/<module>/`, chargé en différé depuis `app.routes.ts`. Retirer l'entrée « À venir » du module quand il est réalisé.
 - Sécurité : toute nouvelle API doit être déclarée dans `securite/internal/ConfigurationSecurite` avec le menu qui l'autorise (sinon refusée). Nouveau menu = migration `securite_menu` + entrée dans `frontend/src/app/core/menu.ts` + route avec `data.menu`. Tests : `@WithMockUser(authorities = ...)` et `.with(csrf())` sur les requêtes POST/PUT/DELETE.
+- Politique de mot de passe (`securite.internal.PolitiqueSecurite`, paramètres `securite.*`) et double authentification TOTP (`Totp`, secret chiffré par `ChiffrementSecrets`) : voir `docs/specs/securite-renforcee.md`. Tout nouveau changement de mot de passe passe par `MotsDePasse` (historique, date de modification). Les tests qui rendent la double authentification obligatoire doivent la remettre à `false`.
 - Tracer les actions significatives avec `JournalAudit` (module sécurité).
 - Exports de listes : `commun.export` (`Tableau` + `ReponseExport`) ; le frontend télécharge via `core/telechargement.ts`.
 - Mettre à jour le tableau « Feuille de route » de `docs/architecture.md` à la fin de chaque lot.

@@ -1,0 +1,49 @@
+<div class="fond" [class.plein]="obligatoire()">
+  <mat-card class="carte large">
+    <h1>Double authentification</h1>
+    @if (message(); as m) { <p class="succes"><mat-icon>check_circle</mat-icon> {{ m }}</p> }
+
+    @if (active()) {
+      <p class="info"><mat-icon>verified_user</mat-icon>
+        Activée : à chaque connexion, après le mot de passe, saisissez le code à 6 chiffres de votre application.</p>
+      <p class="discret">Téléphone perdu ou changé : demandez à l'administrateur de réinitialiser votre double authentification.</p>
+      <form (ngSubmit)="desactiver()">
+        <mat-form-field appearance="outline">
+          <mat-label>Mot de passe (pour désactiver)</mat-label>
+          <input matInput type="password" name="motDePasse" [(ngModel)]="motDePasse" autocomplete="current-password" />
+        </mat-form-field>
+        @if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+        <div class="actions">
+          <button mat-button type="button" (click)="quitter()">Fermer</button>
+          <button mat-stroked-button type="submit" [disabled]="enCours() || !motDePasse">Désactiver</button>
+        </div>
+      </form>
+    } @else {
+      @if (obligatoire()) {
+        <p class="info"><mat-icon>info</mat-icon>
+          La double authentification est obligatoire : activez-la pour accéder à l'application.</p>
+      }
+      <ol class="etapes">
+        <li>Installez une application d'authentification sur votre téléphone (Google Authenticator, Microsoft Authenticator, FreeOTP…).</li>
+        <li>Dans l'application, ajoutez un compte en scannant ce QR code.</li>
+        <li>Saisissez le code à 6 chiffres affiché par l'application.</li>
+      </ol>
+      @if (enrolement(); as e) {
+        <div class="qr" [innerHTML]="qr()"></div>
+        <p class="discret centre">QR code illisible ? Saisissez cette clé dans l'application :<br />
+          <code class="secret">{{ e.secret }}</code></p>
+      }
+      <form (ngSubmit)="activer()">
+        <mat-form-field appearance="outline">
+          <mat-label>Code à 6 chiffres</mat-label>
+          <input matInput name="code" [(ngModel)]="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required />
+        </mat-form-field>
+        @if (erreur(); as e) { <p class="erreur"><mat-icon>error</mat-icon> {{ e }}</p> }
+        <div class="actions">
+          <button mat-button type="button" (click)="quitter()">{{ obligatoire() ? 'Se déconnecter' : 'Annuler' }}</button>
+          <button mat-flat-button type="submit" [disabled]="enCours() || !codeComplet() || !enrolement()">Activer</button>
+        </div>
+      </form>
+    }
+  </mat-card>
+</div>

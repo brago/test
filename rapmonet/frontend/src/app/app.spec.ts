@@ -6,7 +6,7 @@ import { App } from './app';
 import { AuthService, UtilisateurConnecte } from './core/auth.service';
 
 const utilisateur = (menus: string[], doitChangerMotDePasse = false): UtilisateurConnecte => ({
-  login: 'agent', nom: 'Agent Test', agence: null, profil: 'P', libelleProfil: 'Profil test', menus, doitChangerMotDePasse,
+  login: 'agent', nom: 'Agent Test', agence: null, profil: 'P', libelleProfil: 'Profil test', menus, doitChangerMotDePasse, deuxFacteurs: false, doitActiverDeuxFacteurs: false, expirationMotDePasse: null,
 });
 
 describe('App', () => {

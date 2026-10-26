@@ -15,6 +15,12 @@ export interface Utilisateur {
   doitChangerMdp: boolean;
   derniereConnexion: string | null;
   creeLe: string;
+  deuxFacteurs: boolean;
+  mdpModifieLe: string;
+}
+export interface PolitiqueSecurite {
+  longueurMin: number; majuscule: boolean; minuscule: boolean; chiffre: boolean; special: boolean;
+  expirationJours: number; historique: number; echecsMax: number; deuxFacteursObligatoire: boolean;
 }
 export interface Menu { code: string; libelle: string; parentCode: string | null; rang: number }
 export interface Profil { code: string; libelle: string; description: string | null; systeme: boolean; menus: string[]; nbUtilisateurs: number }
@@ -46,6 +52,18 @@ export class SecuriteService {
 
   reinitialiser(login: string, nouveau: string, doitChanger: boolean) {
     return this.http.post<Utilisateur>(`/api/securite/utilisateurs/${encodeURIComponent(login)}/mot-de-passe`, { nouveau, doitChanger });
+  }
+
+  reinitialiserDeuxFacteurs(login: string) {
+    return this.http.post<Utilisateur>(`/api/securite/utilisateurs/${encodeURIComponent(login)}/deux-facteurs/reinitialisation`, {});
+  }
+
+  politique(): Observable<PolitiqueSecurite> {
+    return this.http.get<PolitiqueSecurite>('/api/securite/politique');
+  }
+
+  modifierPolitique(p: PolitiqueSecurite): Observable<PolitiqueSecurite> {
+    return this.http.put<PolitiqueSecurite>('/api/securite/politique', p);
   }
 
   menus(): Observable<Menu[]> {

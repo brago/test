@@ -63,7 +63,7 @@ class SecuriteIntegrationTest {
     private void creerUtilisateur(MockHttpSession admin, String login, String profil) throws Exception {
         mvc.perform(post("/api/securite/utilisateurs").session(admin).with(csrf()).contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"login":"%s","nom":"Agent %s","agence":"Plateau","profilCode":"%s","motDePasseTemporaire":"Temp2026x"}"""
+                                {"login":"%s","nom":"Agent %s","agence":"Plateau","profilCode":"%s","motDePasseTemporaire":"Temporaire26"}"""
                                 .formatted(login, login, profil)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.doitChangerMdp").value(true));
@@ -103,12 +103,12 @@ class SecuriteIntegrationTest {
         connexion("agent1", "faux3", new MockHttpSession()).andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail", containsString("verrouillé")));
         // Même le bon mot de passe est refusé.
-        connexion("agent1", "Temp2026x", new MockHttpSession()).andExpect(status().isUnauthorized())
+        connexion("agent1", "Temporaire26", new MockHttpSession()).andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail", containsString("verrouillé")));
 
         mvc.perform(post("/api/securite/utilisateurs/agent1/deverrouiller").session(admin).with(csrf()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.verrouille").value(false));
-        connexion("agent1", "Temp2026x", new MockHttpSession()).andExpect(status().isOk());
+        connexion("agent1", "Temporaire26", new MockHttpSession()).andExpect(status().isOk());
 
         assertThat(jdbc.queryForObject("select count(*) from audit_evenement where action = 'VERROUILLAGE' and login = 'agent1'",
                 Integer.class)).isEqualTo(1);
@@ -120,15 +120,15 @@ class SecuriteIntegrationTest {
         creerUtilisateur(admin, "agent2", "CONSULTATION");
 
         MockHttpSession session = new MockHttpSession();
-        connexion("agent2", "Temp2026x", session).andExpect(status().isOk())
+        connexion("agent2", "Temporaire26", session).andExpect(status().isOk())
                 .andExpect(jsonPath("$.doitChangerMotDePasse").value(true));
         mvc.perform(get("/api/exploration/lis/transactions").session(session)).andExpect(status().isForbidden());
 
         mvc.perform(post("/api/auth/mot-de-passe").session(session).with(csrf()).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"actuel\":\"Temp2026x\",\"nouveau\":\"court\"}"))
+                        .content("{\"actuel\":\"Temporaire26\",\"nouveau\":\"court\"}"))
                 .andExpect(status().isUnprocessableContent());
         mvc.perform(post("/api/auth/mot-de-passe").session(session).with(csrf()).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"actuel\":\"Temp2026x\",\"nouveau\":\"Nouveau2026\"}"))
+                        .content("{\"actuel\":\"Temporaire26\",\"nouveau\":\"Nouveau2026\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.doitChangerMotDePasse").value(false));
         mvc.perform(get("/api/exploration/lis/transactions").session(session)).andExpect(status().isOk());
     }
@@ -138,7 +138,7 @@ class SecuriteIntegrationTest {
         MockHttpSession admin = connecter("admin", "Admin2026");
         creerUtilisateur(admin, "agent3", "CONSULTATION");
         jdbc.update("update securite_utilisateur set doit_changer_mdp = false where login = 'agent3'");
-        MockHttpSession agent = connecter("agent3", "Temp2026x");
+        MockHttpSession agent = connecter("agent3", "Temporaire26");
 
         mvc.perform(get("/api/exploration/lis/transactions").session(agent)).andExpect(status().isOk());
         mvc.perform(get("/api/securite/utilisateurs").session(agent)).andExpect(status().isForbidden());
@@ -164,7 +164,7 @@ class SecuriteIntegrationTest {
                         .content("{\"nom\":\"Agent 3\",\"profilCode\":\"CHARGEUR\",\"actif\":false}"))
                 .andExpect(status().isOk());
         mvc.perform(get("/api/ingestion/lis").session(agent)).andExpect(status().isUnauthorized());
-        connexion("agent3", "Temp2026x", new MockHttpSession()).andExpect(status().isUnauthorized())
+        connexion("agent3", "Temporaire26", new MockHttpSession()).andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail", containsString("désactivé")));
     }
 

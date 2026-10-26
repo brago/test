@@ -77,6 +77,6 @@ Angular (SPA) ──REST/JSON──> Spring Boot ──> PostgreSQL
 4. Gestion des écarts : statut, responsable, commentaires, justificatifs (✅ GAB ↔ LIS).
 5. Validation à quatre yeux généralisée (✅ appros et arrêtés GAB).
 6. Prise en charge de Mastercard et d'autres marques de GAB que NCR.
-7. Double authentification, politique de mot de passe, masquage des numéros de carte.
+7. Double authentification ✅, politique de mot de passe paramétrable ✅ (voir `docs/specs/securite-renforcee.md`), masquage des numéros de carte ✅.
 8. PDF générés dans le navigateur, plus de gestion d'imprimante.
 9. Tableau de bord en temps réel et alertes (✅ indicateurs mensuels ; ✅ alertes à l'accueil, voir `docs/specs/alertes.md` ; e-mail à venir).

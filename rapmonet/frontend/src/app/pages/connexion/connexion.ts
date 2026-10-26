@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { AuthService } from '../../core/auth.service';
+import { AuthService, UtilisateurConnecte, etapeRequise } from '../../core/auth.service';
 import { messageErreur } from '../../core/erreurs';
 
 @Component({
@@ -25,12 +25,15 @@ export class Connexion {
   protected readonly masque = signal(true);
   protected readonly enCours = signal(false);
   protected readonly erreur = signal<string | null>(null);
+  /** Mot de passe accepté : saisie du code de l'application d'authentification. */
+  protected readonly etapeCode = signal(false);
+  protected code = '';
   protected readonly expiree = !!this.route.snapshot.queryParamMap.get('expiree');
 
   constructor() {
     // Initialise le cookie anti-CSRF et redirige si une session existe déjà.
     this.auth.charger(true).subscribe((u) => {
-      if (u) this.suivant(u.doitChangerMotDePasse);
+      if (u) this.suivant(u);
     });
   }
 
@@ -39,7 +42,16 @@ export class Connexion {
     this.enCours.set(true);
     this.erreur.set(null);
     this.auth.connecter(this.login, this.motDePasse).subscribe({
-      next: (u) => this.suivant(u.doitChangerMotDePasse),
+      next: (r) => {
+        if ('codeRequis' in r) {
+          this.motDePasse = '';
+          this.code = '';
+          this.etapeCode.set(true);
+          this.enCours.set(false);
+        } else {
+          this.suivant(r);
+        }
+      },
       error: (e) => {
         this.erreur.set(messageErreur(e, 'Connexion impossible.'));
         this.motDePasse = '';
@@ -48,8 +60,35 @@ export class Connexion {
     });
   }
 
-  private suivant(doitChanger: boolean): void {
+  protected valider(): void {
+    const code = this.code.replace(/\s/g, '');
+    if (!/^\d{6}$/.test(code)) return;
+    this.enCours.set(true);
+    this.erreur.set(null);
+    this.auth.verifierCode(code).subscribe({
+      next: (u) => this.suivant(u),
+      error: (e) => {
+        const message = messageErreur(e, 'Code refusé.');
+        this.erreur.set(message);
+        this.code = '';
+        this.enCours.set(false);
+        // Compte verrouillé ou délai dépassé : retour à la saisie du mot de passe.
+        if (/verrouillé|mot de passe/i.test(message)) this.etapeCode.set(false);
+      },
+    });
+  }
+
+  protected codeComplet(): boolean {
+    return /^\d{6}$/.test(this.code.replace(/\s/g, ''));
+  }
+
+  protected retour(): void {
+    this.etapeCode.set(false);
+    this.erreur.set(null);
+  }
+
+  private suivant(u: UtilisateurConnecte): void {
     const retour = this.route.snapshot.queryParamMap.get('retour') || '/accueil';
-    this.router.navigateByUrl(doitChanger ? '/mot-de-passe' : retour);
+    this.router.navigateByUrl(etapeRequise(u) ?? retour);
   }
 }

@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { AuthService } from '../../core/auth.service';
+import { AuthService, RegleMotDePasse, etapeRequise } from '../../core/auth.service';
 import { messageErreur } from '../../core/erreurs';
 
 /** Changement du mot de passe : obligatoire à la première connexion ou après réinitialisation. */
@@ -27,15 +27,26 @@ export class MotDePasse {
   protected readonly erreur = signal<string | null>(null);
   protected readonly obligatoire = computed(() => !!this.auth.utilisateur()?.doitChangerMotDePasse);
 
+  /** Règles de la politique en vigueur, lues sur le serveur. */
+  private readonly politique = signal<RegleMotDePasse[]>([]);
+  protected readonly expire = computed(() => {
+    const e = this.auth.utilisateur()?.expirationMotDePasse;
+    return !!e && new Date(e + 'T00:00:00').getTime() <= Date.now();
+  });
+
   protected readonly regles = computed(() => {
     const n = this.nouveau();
+    const login = this.auth.utilisateur()?.login.toLowerCase() ?? '';
     return [
-      { libelle: 'Au moins 8 caractères', ok: n.length >= 8 },
-      { libelle: 'Au moins une lettre', ok: /\p{L}/u.test(n) },
-      { libelle: 'Au moins un chiffre', ok: /\d/.test(n) },
+      ...this.politique().map((r) => ({ libelle: r.libelle, ok: new RegExp(r.motif, 'u').test(n) })),
+      { libelle: 'Sans votre identifiant', ok: n.length > 0 && (!login || !n.toLowerCase().includes(login)) },
       { libelle: 'Confirmation identique', ok: n.length > 0 && n === this.confirmation() },
     ];
   });
+
+  constructor() {
+    this.auth.reglesMotDePasse().subscribe((r) => this.politique.set(r));
+  }
   protected readonly valide = computed(() => this.regles().every((r) => r.ok));
 
   protected enregistrer(): void {
@@ -43,7 +54,7 @@ export class MotDePasse {
     this.enCours.set(true);
     this.erreur.set(null);
     this.auth.changerMotDePasse(this.actuel, this.nouveau()).subscribe({
-      next: () => this.router.navigate(['/accueil']),
+      next: (u) => this.router.navigateByUrl(etapeRequise(u) ?? '/accueil'),
       error: (e) => {
         this.erreur.set(messageErreur(e));
         this.enCours.set(false);

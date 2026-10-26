@@ -59,6 +59,14 @@ export class Utilisateurs {
     this.ouvrir({ mode: 'reinitialisation', login: u.login, motDePasse: '', doitChanger: true });
   }
 
+  protected reinitialiserDeuxFacteurs(u: Utilisateur): void {
+    if (!confirm(`Réinitialiser la double authentification de ${u.login} ? Il devra la réactiver avec son nouveau téléphone.`)) return;
+    this.service.reinitialiserDeuxFacteurs(u.login).subscribe({
+      next: () => this.terminer(`Double authentification de ${u.login} réinitialisée.`),
+      error: (e) => this.erreur.set(messageErreur(e)),
+    });
+  }
+
   protected deverrouiller(u: Utilisateur): void {
     this.service.deverrouiller(u.login).subscribe({
       next: () => this.terminer(`Compte ${u.login} déverrouillé.`),
